@@ -234,3 +234,51 @@ class MyDatabase:
             return d[0].name
         else:
             return None
+        
+    def createNewCounter(self, pid : str, did : str, price : float):
+        self.connect()
+        sql = "SELECT MAX(id) FROM COUNTER"
+        self.cursor.execute(sql)
+        result = self.cursor.fetchall()
+        self.close()
+        id = str(int(result[0]['MAX(id)']) + 1)
+        from models import Counter
+        if price == None:
+            Counter.objects.create(id=id, pid=pid, did=did, price=0, ispaid=0)
+        else:
+            Counter.objects.create(id=id, pid=pid, did=did, price=price, ispaid=0)
+        return id
+
+    def PrescribeMedication(self, nameList : list(str), amount : list(float), pid : str, did : str):
+        self.connect()
+        idList = []
+        for i in nameList:
+            sql = "SELECT id FROM DRUG WHERE name = %s"
+            self.cursor.execute(sql, i)
+            result = self.cursor.fetchall()
+            if len(result) == 0:
+                return False, 404
+            idList.append(result[0]['id'])
+
+        id = self.createNewCounter(pid, did)
+        from models import Medicinepurchase, Counter, Drug
+        for i in range(len(idList)):
+            Medicinepurchase.objects.create(id=id, drugid=idList[i], amount=amount[i], time=datetime.now())
+            Counter.objects.filter(id=id).update(price=Counter.objects.get(id=id).price + amount[i] * Drug.objects.get(id=idList[i]).price)
+            Drug.objects.filter(id=idList[i]).update(Storage=Drug.objects.get(id=idList[i]).Storage - amount[i])
+        self.connection.commit()
+        self.close()
+        return True, 0
+        
+    def showAllDrug(self):
+        self.connect()
+        sql = "SELECT * FROM DRUG WHERE ISBANNED = 0"
+        self.cursor.execute(sql)
+        res = self.cursor.fetchall()
+        return res
+    
+    def PayAll(self, Pid):
+        from models import Counter
+        l = Counter.objects.filter(pid=Pid).iterator
+        for i in l:
+            i.ispaid = 1
