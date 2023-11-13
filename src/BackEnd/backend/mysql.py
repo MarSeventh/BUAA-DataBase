@@ -19,73 +19,37 @@ class MyDatabase:
     def close(self):
         self.connection.close()
 
-    def login(self, username: str, password: str):
-        if username == 'admin':
-            success, status, t = self.admin_login(username, password)
-            return success, status, t
-        else:
-            success, status, t = self.patient_login(username, password)
-            if success:
-                return success, status, t
-            else:
-                success, status, t = self.doctor_login(username, password)
-                return success, status, t
-
-    def patient_login(self, name: str, password: str):
+    def queryidbyusername(self, username: str):
         self.connect()
-        sql = "SELECT * FROM patient WHERE name = %s"
-        self.cursor.execute(sql, name)
+        sql = "SELECT id FROM User WHERE name = %s"
+        self.cursor.execute(sql, username)
         result = self.cursor.fetchall()
         self.close()
-        if len(result) == 0:
-            return False, ERROR_CODE, 'error'
-        if result[0]['password'] == password:
-            return True, 0, 'patient'
-        else:
-            return False, 404, 'error'
-
-    def doctor_login(self, name: str, password: str):
+        return result[0]['id']
+    """
+    """
+    def SignUpByPatient(self, name: str, iscommem: bool, password: str, idcard: str):
         self.connect()
-        sql = "SELECT * FROM doctor WHERE name = %s"
+        sql0 = "SELECT id FROM User WHERE name = %s"
         self.cursor.execute(sql, name)
-        result = self.cursor.fetchall()
-        self.close()
-        if len(result) == 0:
-            return False, 404, 'error'
-        if result[0]['password'] == password:
-            return True, 0, 'doctor'
-        else:
-            return False, 404, 'error'
-
-    def admin_login(self, id: str, password: str):
-        self.connect()
-        sql = "SELECT * FROM admin WHERE id = %s"
+        r = self.cursor.fetchall()
+        id = r[0]['id']
+        if len(id) != 0:
+            return False, 404
+        sql = "SELECT * FROM patient WHERE id = %s"
         self.cursor.execute(sql, id)
-        result = self.cursor.fetchall()
-        self.close()
-        if len(result) == 0:
-            return False, 404, 'error'
-        if result[0]['password'] == password:
-            return True, 0, 'admin'
-        else:
-            return False, 404, 'error'
-
-    def patient_register(self, name: str, iscommem: bool, password: str, idcard: str):
-        self.connect()
-        sql = "SELECT * FROM patient WHERE name = %s"
-        self.cursor.execute(sql, name)
         result = self.cursor.fetchall()
         if len(result) != 0:
             return False, 404
         if len(idcard) != 18:
             return False, 404
-        sql0 = "SELECT MAX(id) FROM patient"
-        self.cursor.execute(sql0)
+        sql1 = "SELECT MAX(id) FROM patient"
+        self.cursor.execute(sql1)
         result = self.cursor.fetchall()
         id = str(int(result[0]['MAX(id)']) + 1)
         iscommem = 1 if iscommem else 0
-        sql = "INSERT INTO patient (id, name, iscommem, password, idcard, active) VALUES (%s, %s, %s, %s, %s, 1)"
-        self.cursor.execute(sql, (id, name, iscommem, password, idcard))
+        sql = "INSERT INTO patient (id, iscommem, idcard, active) VALUES (%s, %s, %s, 1)"
+        self.cursor.execute(sql, (id, iscommem, idcard))
         self.connection.commit()
         self.close()
         return True, 0
@@ -187,7 +151,7 @@ class MyDatabase:
         self.close()
         return l
 
-    def registByPatient(self, patientid: str, doctorid: str):
+    def PatientRegistration(self, patientid: str, doctorid: str):
         self.connect()
         timePeriod = self.get_time_period()
         sql = "SELECT * FROM Dispatcher WHERE doctorId = %s AND TimePeriod = %s"
@@ -205,6 +169,7 @@ class MyDatabase:
             sql2 = "INSERT INTO RegistRelation (id, ROOMID) VALUES (%s, %s)"
             self.cursor.execute(sql2, (self.genCounterId(), r[0]['ROOMID']))
             self.connection.commit()
+            models.Room.objects.filter(id=r[0]['ROOMID']).update(queueLen=models.Room.objects.get(id=r[0]['ROOMID']).queueLen + 1)
             self.close()
             return True, 0
         else:
@@ -225,3 +190,47 @@ class MyDatabase:
         self.cursor.execute(sql)
         res = self.cursor.fetchall()
         return res
+
+    def PayCounter(self, id: str):
+        self.connect()
+        sql = "UPDATE COUNTER SET isPaid = 1 WHERE id = %s"
+        self.cursor.execute(sql, id)
+        self.connection.commit()
+        self.close()
+
+    def showAllinCounter(self):
+        self.connect()
+        sql = "SELECT * FROM COUNTER"
+        self.cursor.execute(sql)
+        res = self.cursor.fetchall()
+        return res
+
+    def showAllinCounterByPid(self, pid : str):
+        self.connect()
+        sql = "SELECT * FROM COUNTER WHERE Pid = %s"
+        self.cursor.execute(sql, pid)
+        res = self.cursor.fetchall()
+        return res
+
+    def showAllDiagnosisByPid(self, id : str):
+        models.Diagnosis.objects.filter(patientid=id)
+        l = []
+        for i in models.Diagnosis.objects.filter(patientid=id):
+            dname = self.getNameById(i.doctorid)
+            l.append({'doctor': dname, 'time': i.time, 'diagnosis': i.diagnosis})
+        return l
+
+    def getIdByUsername(self, name : str):
+        d = models.User.objects.filter(name=name)
+        if len(d) != 0:
+            return d[0].id
+        else:
+            return None
+        
+
+    def getNameById(self, id : str):
+        d = models.User.objects.filter(id=id)
+        if len(d) != 0:
+            return d[0].name
+        else:
+            return None
