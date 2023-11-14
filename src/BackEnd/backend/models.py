@@ -36,6 +36,7 @@ class Counter(models.Model):
     did = models.ForeignKey('Doctor', models.DO_NOTHING, db_column='Did')  # Field name made lowercase.
     ispaid = models.IntegerField(db_column='isPaid')  # Field name made lowercase.
     price = models.FloatField(blank=True, null=True)
+    type = models.CharField(max_length=25)
 
     class Meta:
         managed = False

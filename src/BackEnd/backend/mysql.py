@@ -163,7 +163,7 @@ class MyDatabase:
         self.cursor.execute(sql, (doctorid, timePeriod))
         r = self.cursor.fetchall()
         if len(r) == 0:
-            sql = "INSERT INTO COUNTER (id, Pid, Did, isPaid, price) VALUES (%s, %s, %s, 1, 1)"
+            sql = "INSERT INTO COUNTER (id, Pid, Did, isPaid, price, type) VALUES (%s, %s, %s, 1, 1, 'Registration')"
             self.cursor.execute(sql, (self.genCounterId(), patientid, doctorid))
             self.connection.commit()
             sql2 = "INSERT INTO RegistRelation (id, ROOMID) VALUES (%s, %s)"
@@ -235,7 +235,7 @@ class MyDatabase:
         else:
             return None
         
-    def createNewCounter(self, pid : str, did : str, price : float):
+    def createNewCounter(self, pid : str, did : str, price : float, type : str):
         self.connect()
         sql = "SELECT MAX(id) FROM COUNTER"
         self.cursor.execute(sql)
@@ -244,9 +244,9 @@ class MyDatabase:
         id = str(int(result[0]['MAX(id)']) + 1)
         from models import Counter
         if price == None:
-            Counter.objects.create(id=id, pid=pid, did=did, price=0, ispaid=0)
+            Counter.objects.create(id=id, pid=pid, did=did, price=0, ispaid=0, type=type)
         else:
-            Counter.objects.create(id=id, pid=pid, did=did, price=price, ispaid=0)
+            Counter.objects.create(id=id, pid=pid, did=did, price=price, ispaid=0, type=type)
         return id
 
     def PrescribeMedication(self, nameList : list(str), amount : list(float), pid : str, did : str):
@@ -260,7 +260,7 @@ class MyDatabase:
                 return False, 404
             idList.append(result[0]['id'])
 
-        id = self.createNewCounter(pid, did)
+        id = self.createNewCounter(pid=pid, did=did, type='Medicine')
         from models import Medicinepurchase, Counter, Drug
         for i in range(len(idList)):
             Medicinepurchase.objects.create(id=id, drugid=idList[i], amount=amount[i], time=datetime.now())
@@ -282,3 +282,17 @@ class MyDatabase:
         l = Counter.objects.filter(pid=Pid).iterator
         for i in l:
             i.ispaid = 1
+
+    def MedicalDiagnosisStatement(self, Did : str, Pid : str, Statement : str):
+        from models import Diagnosis
+        id = str(int(Diagnosis.objects.all().order_by('-id')[0].id) + 1)
+        Diagnosis.objects.create(id=id, doctorid=Did, patientid=Pid, time=datetime.now(), diagnosis=Statement)
+        return True, 0
+    
+    def getDiagnosisByPid(self, Pid : str):
+        from models import Diagnosis
+        l = Diagnosis.objects.filter(patientid=Pid).iterator
+        res = []
+        for i in l:
+            res.append({'doctor': self.getNameById(i.doctorid), 'time': i.time, 'statement': i.diagnosis})
+        return res

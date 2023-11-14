@@ -20,6 +20,6 @@ from src.BackEnd.backend import views
 urlpatterns = [
     # path('admin/', admin.site.urls),
     path('api/Login/', views.LogIn),
-    path('api/Register/', views.Register),
+    path('api/SignUp/', views.SignUpByPatient),
     path('api/')
 ]
