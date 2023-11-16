@@ -296,3 +296,47 @@ class MyDatabase:
         for i in l:
             res.append({'doctor': self.getNameById(i.doctorid), 'time': i.time, 'statement': i.diagnosis})
         return res
+    
+    def conductAlaboratoryAnalysis(self, Pid : str ,Did : str, checkItemIds : list(str), checkName : str):
+        from models import Checkcombine
+        m = Checkcombine.objects.filter(checkname=checkName)
+        if m == None:
+            assert len(checkItemIds) != 0
+            from models import Laboratorysheet, Counter
+            id = str(int(Counter.objects.all().order_by('-id')[0].id) + 1)
+            Counter.objects.create(id=id, pid=Pid, did=Did, price=0, ispaid=0, type='Laboratory')
+            for i in checkItemIds:
+                from models import Checkitems
+                Laboratorysheet.objects.create(id=id, itemid=i, time=datetime.now(), checkName=checkName)
+                Counter.objects.filter(id=id).update(price=Counter.objects.get(id=id).price + Checkitems.objects.get(itemid=i).price)
+            return True
+        else:
+            r = Checkcombine.objects.filter(checkName=checkName).get('itemid')
+            from models import Laboratorysheet, Counter
+            id = str(int(Counter.objects.all().order_by('-id')[0].id) + 1)
+            Counter.objects.create(id=id, pid=Pid, did=Did, price=0, ispaid=0, type='Laboratory')
+            for i in r:
+                from models import Checkitems
+                Laboratorysheet.objects.create(id=id, itemid=i, time=datetime.now(), checkName=checkName)
+                Counter.objects.filter(id=id).update(price=Counter.objects.get(id=id).price + Checkitems.objects.get(itemid=i).price)
+            return True
+        
+    def getLaboratorySheet(self, id : str):
+        from models import Laboratorysheet
+        l = Laboratorysheet.objects.filter(id=id).iterator
+        if l[0]['outputtime'] == None:
+            return False, 404
+        else:
+            res = []
+            for i in l:
+                from models import Checkitems
+                res.append({'id': i.itemid, 'name': i.checkName, 'result': i.result, 'minresult': Checkitems.objects.get(itemid=i.itemid).minresult, 'maxresult': Checkitems.objects.get(itemid=i.itemid).maxresult, 'outputtime': i.outputtime})
+            return True, 0
+        
+    def showAllLaboratorySheetIds(self, Pid : str):
+        from models import Laboratorysheet
+        l = Laboratorysheet.objects.filter(id=Pid).iterator
+        res = []
+        for i in l:
+            res.append({'id': i.id, 'time': i.time, 'name': i.checkName})
+        return res

@@ -202,3 +202,40 @@ def getDiagnosisByPid(request):
         return JsonResponse({'Info': list})
     else:
         return HttpResponse("Not a POST request")
+    
+@login_required
+def getLaboratorySheetids(request):
+    assert request.type == 'patient'
+    if request.method == 'POST':
+        Pid = request.session['id']
+        db = MySQLdb.MyDatabase()
+        ans = db.showAllLaboratorySheetIds(Pid=Pid)
+        return JsonResponse({'Info': ans})
+    else:
+        return HttpResponse("Not a POST request")
+
+@login_required
+def getLaboratorySheet(request):
+    assert request.type == 'patient'
+    if request.method == 'POST':
+        Pid = request.session['id']
+        Sheetid = request.POST.get('Sheetid')
+        db = MySQLdb.MyDatabase()
+        ans = db.getLaboratorySheet(id=Sheetid)
+        return JsonResponse({'Info': ans})
+    else:
+        return HttpResponse("Not a POST request")
+    
+@login_required
+def conductLaboratorySheet(request):
+    assert request.type == 'doctor'
+    if request.method == 'POST':
+        Did = request.session['id']
+        Pid = request.POST.get('Pid')
+        checkName = request.POST.get('checkName')
+        checkItemIds = request.POST.get('checkItemIds')
+        db = MySQLdb.MyDatabase()
+        success, status = db.conductAlaboratoryAnalysis(checkName=checkName, checkItemIds=checkItemIds, did=Did, pid=Pid)
+        return JsonResponse({'success' : success, 'code' : status})
+    else:
+        return HttpResponse("Not a POST request")
