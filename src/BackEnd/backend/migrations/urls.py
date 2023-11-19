@@ -15,11 +15,28 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.urls import path
-from src.BackEnd.backend import views
-
+from . import views
 urlpatterns = [
     # path('admin/', admin.site.urls),
     path('api/Login/', views.LogIn),
     path('api/SignUp/', views.SignUpByPatient),
-    path('api/')
+    path('api/DepartmentList/', views.GetDepartmentList),
+    path('api/DepartmentInfo/', views.GetInfoListByDepartment),
+    path('api/Registration/', views.PatientRegistration),
+    path('api/CounterToPay/', views.showAllNeedtoPay),
+    path('api/Counters/', views.showAllinCounter),
+    path('api/PrescribeMedication/', views.PrescribeMedication),
+    path('api/PayAllCounter/', views.PayAll),
+    path('api/showAllDrug/', views.showAllDrug),
+    path('api/showAllDrugName/', views.showAllDrugName),
+    path('api/MedicalDiagnosisStatement/', views.MedicalDiagnosisStatement),
+    path('api/getDiagnosisByPid/', views.getDiagnosisByPid),
+    path('api/getLaboratorySheetids/', views.getLaboratorySheetids),
+    path('api/getLaboratorySheet/', views.getLaboratorySheet),
+    path('api/conductLaboratorySheet/', views.conductLaboratorySheet),
+    path('api/deletePatient/', views.deletePatient),
+    path('api/checkThePosInQueueu/', views.checkThePosInQueueu),
+    path('api/showCounterById/', views.showCounterById),
+    path('api/getDoctorDispatch/', views.getDoctorDispatch),
+    path('api/hardDeleteDrug/', views.hardDeleteDrug),
 ]

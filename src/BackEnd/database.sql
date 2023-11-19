@@ -27,6 +27,8 @@ CREATE TABLE IF NOT EXISTS `USER` (
     PRIMARY KEY(`id`)
 );
 
+CREATE INDEX `index_id` ON `USER` (`id`)
+
 CREATE TABLE IF NOT EXISTS `Patient` (
     `id` VarCHAR(25) NOT NULL,
     `isComMem` BOOLEAN NOT NULL,
@@ -35,11 +37,15 @@ CREATE TABLE IF NOT EXISTS `Patient` (
     PRIMARY KEY (`id`)
 );
 
+CREATE INDEX `index_id` ON `Patient` (`id`)
+
 CREATE TABLE IF NOT EXISTS `Titles` (
     `id` VARCHAR(25) NOT NULL,
     `name` VARCHAR(25) NOT NULL,
     PRIMARY KEY (`id`)
 );
+
+CREATE INDEX `index_id` ON `Titles` (`id`)
 
 CREATE TABLE IF NOT EXISTS `Doctor` (
     `id` VarCHAR(25) NOT NULL,
@@ -49,10 +55,7 @@ CREATE TABLE IF NOT EXISTS `Doctor` (
     PRIMARY KEY (`id`)
 );
 
-CREATE TABLE IF  NOT EXISTS `Admin` (
-    `id` VARCHAR(25) NOT NULL,
-    PRIMARY KEY (`id`)
-);
+CREATE INDEX `index_id` ON `Doctor` (`id`)
 
 CREATE TABLE IF NOT EXISTS `Drug`(
     `id` VARCHAR(25) NOT NULL,
@@ -64,7 +67,7 @@ CREATE TABLE IF NOT EXISTS `Drug`(
     PRIMARY KEY (`id`)
 );
 
-ALTER TABLE `Drug` RENAME COLUMN `amount` TO `Storage`
+CREATE INDEX `index_id` ON `Drug` (`id`)
 
 CREATE TABLE IF NOT EXISTS `Counter` (
     `id` VARCHAR(25) NOT NULL,
@@ -79,6 +82,8 @@ CREATE TABLE IF NOT EXISTS `Counter` (
     PRIMARY KEY (`id`)
 );
 
+CREATE INDEX `index_id` ON `Counter` (`id`)
+
 CREATE TABLE IF NOT EXISTS `RegistRelation` (
     `id` VARCHAR(25) NOT NULL,
     `ROOMID` VARCHAR(25) NOT NULL,
@@ -86,6 +91,8 @@ CREATE TABLE IF NOT EXISTS `RegistRelation` (
     FOREIGN KEY (`id`) REFERENCES `Counter`(`id`),
     PRIMARY KEY (`id`)
 );
+
+CREATE INDEX `index_id` ON `RegistRelation` (`id`)
 
 CREATE TABLE IF NOT EXISTS `MedicinePurchase` (
     `id` VARCHAR(25) NOT NULL,
@@ -96,6 +103,8 @@ CREATE TABLE IF NOT EXISTS `MedicinePurchase` (
     PRIMARY KEY (`id`, `drugId`)
 );
 
+CREATE INDEX `index_id` ON `MedicinePurchase` (`id`)
+
 
 CREATE TABLE IF NOT EXISTS `checkItems` (
     `id` VARCHAR(25) NOT NULL,
@@ -105,6 +114,9 @@ CREATE TABLE IF NOT EXISTS `checkItems` (
     `MaxResult` FLOAT NOT NULL,
     PRIMARY KEY (`id`)
 );
+
+CREATE INDEX `index_id` ON `checkItems` (`id`)
+
 CREATE TABLE IF NOT EXISTS `LaboratorySheet`(
     `id` VARCHAR(25) NOT NULL,
     `checkName` VARCHAR(255) NOT NULL,
@@ -117,12 +129,16 @@ CREATE TABLE IF NOT EXISTS `LaboratorySheet`(
     PRIMARY KEY (`id`, `itemID`)
 );
 
+CREATE INDEX `index_id` ON `LaboratorySheet` (`id`)
+
 CREATE TABLE IF NOT EXISTS `ROOM` (
     `id` VARCHAR(25) NOT NULL,
     `isOccupied` BOOLEAN NOT NULL,
     `QueueLen` int NOT NULL,
     PRIMARY KEY (`id`)
 );
+
+CREATE INDEX `index_id` ON `ROOM` (`id`)
 
 CREATE TABLE IF NOT EXISTS `Dispatcher` (
     `TimePeriod` VARCHAR(25) NOT NULL,
@@ -135,6 +151,8 @@ CREATE TABLE IF NOT EXISTS `Dispatcher` (
     FOREIGN KEY (`ROOMID`) REFERENCES `Room`(`id`)
 );
 
+CREATE INDEX `index_TimePeriod` ON `Dispatcher` (`TimePeriod`)
+
 CREATE TABLE IF NOT EXISTS `diagnosis`(
     `id` VARCHAR(25) NOT NULL,
     `patientId` VARCHAR(25) NOT NULL,
@@ -146,6 +164,8 @@ CREATE TABLE IF NOT EXISTS `diagnosis`(
     PRIMARY KEY (`id`)
 );
 
+CREATE INDEX `index_id` ON `diagnosis` (`id`)
+
 CREATE TABLE IF NOT EXISTS `CheckCombine`(
     `id` VARCHAR(25) NOT NULL,
     `itemId` VARCHAR(25) NOT NULL,
@@ -154,4 +174,7 @@ CREATE TABLE IF NOT EXISTS `CheckCombine`(
     FOREIGN KEY (`itemId`) REFERENCES `checkItems`(`id`)
 );
 
-SELECT * FROM `Patient`;
+CREATE INDEX `index_id` ON `CheckCombine` (`id`)
+
+
+
