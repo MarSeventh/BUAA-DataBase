@@ -396,10 +396,25 @@ class MyDatabase:
             return True, ans, l[0]['id']
         
     def getDoctorDispatcher(self, Did : str):
-        from src.BackEnd.backend.migrations.models import Dispatcher
+        from models import Dispatcher
         r = Dispatcher.objects.filter(doctorid=Did)
         res = []
         for i in r:
             res.append({'timeperiod' : i.timeperiod, 'RoomId' : i.roomid})
         return res
+    
+    def getCheckItemsList(self):
+        from models import Checkitems
+        r = Checkitems.objects.all().iterator
+        res = []
+        for i in r:
+            res.append({'id' : i.itemid, 'name' : i.name, 'price' : i.price})
+        return res
         
+    def getCheckCombineList(self):
+        from models import Checkcombine
+        r = Checkcombine.objects.all().get('checkname')
+        res = []
+        for i in r:
+            res.append({'name' : i.checkname})
+        return res

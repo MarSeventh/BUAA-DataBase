@@ -43,7 +43,7 @@ def SignUpByPatient(request):
 @login_required
 def GetDepartmentList(request):
     assert request.type == 'patient'
-    if (request.method == 'POST'):
+    if (request.method == 'GET'):
         db = MySQLdb.MyDatabase()
         info = db.GetDepartmentList()
         list = []
@@ -51,7 +51,7 @@ def GetDepartmentList(request):
             list.append(i['name'])
         return JsonResponse({'info': list})
     else:
-        return HttpResponse("Not a POST request")
+        return HttpResponse("Not a GET request")
 
 @login_required
 def GetInfoListByDepartment(request):
@@ -179,7 +179,7 @@ def MedicalDiagnosisStatement(request):
 @login_required
 def getDiagnosisByPid(request):
     assert request.type == 'patient'
-    if request.method == 'POST':
+    if request.method == 'GET':
         Pid = request.session['id']
         db = MySQLdb.MyDatabase()
         ans = db.getDiagnosisByPid(pid=Pid)
@@ -189,30 +189,30 @@ def getDiagnosisByPid(request):
             l.append(jsonObj)
         return JsonResponse({'Info': list})
     else:
-        return HttpResponse("Not a POST request")
+        return HttpResponse("Not a GET request")
     
 @login_required
 def getLaboratorySheetids(request):
     assert request.type == 'patient'
-    if request.method == 'POST':
+    if request.method == 'GET':
         Pid = request.session['id']
         db = MySQLdb.MyDatabase()
         ans = db.showAllLaboratorySheetIds(Pid=Pid)
         return JsonResponse({'Info': ans})
     else:
-        return HttpResponse("Not a POST request")
+        return HttpResponse("Not a GET request")
 
 @login_required
 def getLaboratorySheet(request):
     assert request.type == 'patient'
-    if request.method == 'POST':
+    if request.method == 'GET':
         Pid = request.session['id']
         Sheetid = request.POST.get('Sheetid')
         db = MySQLdb.MyDatabase()
         ans = db.getLaboratorySheet(id=Sheetid)
         return JsonResponse({'Info': ans})
     else:
-        return HttpResponse("Not a POST request")
+        return HttpResponse("Not a GET request")
     
 @login_required
 def conductLaboratorySheet(request):
@@ -242,7 +242,7 @@ def deletePatient(request):
 @login_required
 def checkThePosInQueueu(request):
     assert request.type == 'patient'
-    if request.method == 'POST':
+    if request.method == 'GET':
         Pid = request.session['id']
         db = MySQLdb.MyDatabase()
         success, ans, id = db.getRegisterRelationInfo(Pid=Pid)
@@ -250,7 +250,8 @@ def checkThePosInQueueu(request):
             return JsonResponse({'success' : success, 'queueNum' : ans, 'code' : 0, 'id' : id, 'msg' : format("您前面还有%d,您的号码为%d" % ans % id)})
         else:
             return JsonResponse({'success' : False, 'queueNum' : -1, 'code' : 404, 'id' : -1 ,"msg" : '尚未挂号'})
-        
+    else:
+        return HttpResponse("Not a GET request")
 @login_required
 def showCounterById(request) :
     assert request.type == 'patient'
@@ -262,17 +263,22 @@ def showCounterById(request) :
             return JsonResponse({'code' : 404, 'msg' : '没有该id的订单'})
         else :
             return JsonResponse(res)
-        
+    else:
+        return HttpResponse("Not a POST request")
+
 @login_required
 def getDoctorDispatch(request):
     assert request.type == 'doctor'
-    if request.method == 'POST':
-        Did = request.get('id')
+    if request.method == 'GET':
+        Did = request.session['id']
         db = MySQLdb.MyDatabase()
         res = db.getDoctorDispatcher(Did=Did)
         if len(res) != 0:
             return JsonResponse(res)
-    return 
+        else:
+            return JsonResponse({'code' : 404, 'msg' : '没有该医生的挂号信息'})
+    else:
+        return HttpResponse("Not a GET request")
 
 @login_required
 def hardDeleteDrug(request):
@@ -282,3 +288,25 @@ def hardDeleteDrug(request):
         db = MySQLdb.MyDatabase()
         db.HardDeleteDrug(name=name)
         return JsonResponse({'success' : True, 'code' : 0})
+    else:
+        return HttpResponse("Not a POST request")
+    
+@login_required
+def getCheckItemsList(request):
+    assert request.type == 'doctor'
+    if request.method == 'GET':
+        db = MySQLdb.MyDatabase()
+        res = db.getCheckItemsList()
+        return JsonResponse(res)
+    else:
+        return HttpResponse("Not a GET request")
+    
+@login_required
+def getCheckCombineList(request):
+    assert request.type == 'doctor'
+    if request.method == 'GET':
+        db = MySQLdb.MyDatabase()
+        res = db.getCheckCombineList()
+        return JsonResponse(res)
+    else:
+        return HttpResponse("Not a GET request")
