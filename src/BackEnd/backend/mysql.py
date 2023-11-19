@@ -54,14 +54,14 @@ class MyDatabase:
         self.close()
         return True, 0
 
-    def SoftDeletePatient(self, name: str):  # 软删除
+    def SoftDeletePatient(self, id: str):  # 软删除
         self.connect()
-        sql0 = "SELECT isComMem FROM patient WHERE name = %s"
-        self.cursor.execute(sql0, name)
+        sql0 = "SELECT isComMem FROM patient WHERE id = %s"
+        self.cursor.execute(sql0, id)
         result = self.cursor.fetchall()
         if (result[0]['isComMem'] == 0):
-            sql1 = "UPDATE patient SET active = 0 WHERE name = %s"
-            self.cursor.execute(sql1, name)
+            sql1 = "UPDATE patient SET active = 0 WHERE id = %s"
+            self.cursor.execute(sql1, id)
             self.connection.commit()
             self.close()
             return True
@@ -150,6 +150,18 @@ class MyDatabase:
             l.append({'doctor': doctor.name, 'room': room.name, 'queueLen': room.queueLen})
         self.close()
         return l
+    
+    def NextPatient(self, Did : str, RoomId : str):
+        from models import Room, Registrelation
+        assert Room.objects.get(id=RoomId) > 0
+        r = self.getCurrentPatient(RoomId)
+        Registrelation.objects.filter(id=r.id).update(isfinished=True)
+        Room.objects.filter(id=RoomId).update(queuelen=Room.objects.get(id=RoomId).queuelen - 1)
+
+    def getCurrentPatient(self, RoomId : str):
+        from models import Registrelation
+        max_id = Registrelation.objects.filter(roomid=RoomId, isFinished=False).aggregate(Max('id'))['id__max']
+        return Registrelation.objects.get(id=max_id)
 
     def PatientRegistration(self, patientid: str, doctorid: str):
         self.connect()
@@ -163,10 +175,10 @@ class MyDatabase:
         self.cursor.execute(sql, (doctorid, timePeriod))
         r = self.cursor.fetchall()
         if len(r) == 0:
-            sql = "INSERT INTO COUNTER (id, Pid, Did, isPaid, price, type) VALUES (%s, %s, %s, 1, 1, 'Registration')"
-            self.cursor.execute(sql, (self.genCounterId(), patientid, doctorid))
+            sql = "INSERT INTO COUNTER (id, Pid, Did, isPaid, price, type, date) VALUES (%s, %s, %s, 1, 1, 'Registration', %s)"
+            self.cursor.execute(sql, (self.genCounterId(), patientid, doctorid, datetime.now()))
             self.connection.commit()
-            sql2 = "INSERT INTO RegistRelation (id, ROOMID) VALUES (%s, %s)"
+            sql2 = "INSERT INTO RegistRelation (id, ROOMID, isFinished) VALUES (%s, %s, False)"
             self.cursor.execute(sql2, (self.genCounterId(), r[0]['ROOMID']))
             self.connection.commit()
             models.Room.objects.filter(id=r[0]['ROOMID']).update(queueLen=models.Room.objects.get(id=r[0]['ROOMID']).queueLen + 1)
@@ -189,6 +201,34 @@ class MyDatabase:
         sql = "SELECT ID, PRICE FROM COUNTER WHERE ISPAID IS 0"
         self.cursor.execute(sql)
         res = self.cursor.fetchall()
+        return res
+    
+    def showCounterById(self, id : str):
+        from models import Counter, Laboratorysheet, Registrelation, Medicinepurchase
+        assert len(Counter.objects.filter(id=id)) != 0
+        l1 = len(Laboratorysheet.objects.filter(id=id))
+        l2 = len(Registrelation.objects.filter(id=id))
+        l3 = len(Medicinepurchase.objects.filter(id=id))
+        if l1 != 0:
+            l = Laboratorysheet.objects.get(id=id)
+            return {'type' : "化验订单", 'name' : l.checkname, 'price' : Counter.objects.get(id=id).price}
+        elif l2 != 0:
+            l = Registrelation.objects.get(id=id)
+            Did = Counter.objects.get(id=id).did
+            Dname = models.User.objects.get(id=Did).username
+            return {'type' : "挂号订单", 'name' : format("您对%s医生的挂号" % Dname), 'price' : Counter.objects.get(id=id).price}
+        elif l3 != 0:
+            l = Medicinepurchase.objects.filter(id=id)
+            return {'type' : "购药订单", 'name' : '购药订单', 'price' : Counter.objects.get(id=id).price}
+        else:
+            return False
+        
+    def showMedicinePurchase(self, id : str):
+        from models import Medicinepurchase, Drug
+        l = Medicinepurchase.objects.filter(id=id)
+        res = []
+        for i in l:
+            res.append({'name': Drug.objects.get(id=i.drugid).name, 'amount': i.amount, 'signalPrice' : Drug.objects.get(id=i.drugid).price, 'price' : i.amount * Drug.objects.get(id=i.drugid).price})
         return res
 
     def PayCounter(self, id: str):
@@ -244,9 +284,9 @@ class MyDatabase:
         id = str(int(result[0]['MAX(id)']) + 1)
         from models import Counter
         if price == None:
-            Counter.objects.create(id=id, pid=pid, did=did, price=0, ispaid=0, type=type)
+            Counter.objects.create(id=id, pid=pid, did=did, price=0, ispaid=0, type=type, date=datetime.now())
         else:
-            Counter.objects.create(id=id, pid=pid, did=did, price=price, ispaid=0, type=type)
+            Counter.objects.create(id=id, pid=pid, did=did, price=price, ispaid=0, type=type, date=datetime.noew())
         return id
 
     def PrescribeMedication(self, nameList : list(str), amount : list(float), pid : str, did : str):
@@ -263,7 +303,7 @@ class MyDatabase:
         id = self.createNewCounter(pid=pid, did=did, type='Medicine')
         from models import Medicinepurchase, Counter, Drug
         for i in range(len(idList)):
-            Medicinepurchase.objects.create(id=id, drugid=idList[i], amount=amount[i], time=datetime.now())
+            Medicinepurchase.objects.create(id=id, drugid=idList[i], amount=amount[i])
             Counter.objects.filter(id=id).update(price=Counter.objects.get(id=id).price + amount[i] * Drug.objects.get(id=idList[i]).price)
             Drug.objects.filter(id=idList[i]).update(Storage=Drug.objects.get(id=idList[i]).Storage - amount[i])
         self.connection.commit()
@@ -304,7 +344,7 @@ class MyDatabase:
             assert len(checkItemIds) != 0
             from models import Laboratorysheet, Counter
             id = str(int(Counter.objects.all().order_by('-id')[0].id) + 1)
-            Counter.objects.create(id=id, pid=Pid, did=Did, price=0, ispaid=0, type='Laboratory')
+            Counter.objects.create(id=id, pid=Pid, did=Did, price=0, ispaid=0, type='Laboratory', date=datetime.now())
             for i in checkItemIds:
                 from models import Checkitems
                 Laboratorysheet.objects.create(id=id, itemid=i, time=datetime.now(), checkName=checkName)
@@ -314,7 +354,7 @@ class MyDatabase:
             r = Checkcombine.objects.filter(checkName=checkName).get('itemid')
             from models import Laboratorysheet, Counter
             id = str(int(Counter.objects.all().order_by('-id')[0].id) + 1)
-            Counter.objects.create(id=id, pid=Pid, did=Did, price=0, ispaid=0, type='Laboratory')
+            Counter.objects.create(id=id, pid=Pid, did=Did, price=0, ispaid=0, type='Laboratory', date=datetime.now())
             for i in r:
                 from models import Checkitems
                 Laboratorysheet.objects.create(id=id, itemid=i, time=datetime.now(), checkName=checkName)
@@ -325,13 +365,13 @@ class MyDatabase:
         from models import Laboratorysheet
         l = Laboratorysheet.objects.filter(id=id).iterator
         if l[0]['outputtime'] == None:
-            return False, 404
+            return False
         else:
             res = []
             for i in l:
                 from models import Checkitems
                 res.append({'id': i.itemid, 'name': i.checkName, 'result': i.result, 'minresult': Checkitems.objects.get(itemid=i.itemid).minresult, 'maxresult': Checkitems.objects.get(itemid=i.itemid).maxresult, 'outputtime': i.outputtime})
-            return True, 0
+            return res
         
     def showAllLaboratorySheetIds(self, Pid : str):
         from models import Laboratorysheet
@@ -340,3 +380,25 @@ class MyDatabase:
         for i in l:
             res.append({'id': i.id, 'time': i.time, 'name': i.checkName})
         return res
+    
+    def getRegisterRelationInfo(self, Pid : str):
+        from models import Registrelation
+        l = Registrelation.objects.filter(id=Pid, isfinished=False).iterator
+        if len(l) == 0:
+            return False, 404, -1
+        else:
+            r = Registrelation.objects.filter(roomid=l[0]['roomid'], isfinished=False).iterator
+            ans = 0
+            for i in r:
+                if i.id < l[0]['id']:
+                    ans += 1
+            return True, ans, l[0]['id']
+        
+    def getDoctorDispatcher(self, Did : str):
+        from models import Dispatcher
+        r = Dispatcher.objects.filter(doctorid=Did)
+        res = []
+        for i in r:
+            res.append({'timeperiod' : i.timeperiod, 'RoomId' : i.roomid})
+        return res
+        

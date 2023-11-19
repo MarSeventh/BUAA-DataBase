@@ -9,6 +9,7 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth import authenticate, login
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+import django.db.transaction as transaction
 
 @csrf_exempt
 def LogIn(request):
@@ -99,8 +100,9 @@ def showAllNeedtoPay(request):
     else:
         return HttpResponse("Not a POST request")
 
-
+@login_required
 def showAllinCounter(request):
+    assert request.type == 'patient'
     if (request.method == 'POST'):
         db = MySQLdb.MyDatabase()
         ans = db.showAllinCounter()
@@ -110,19 +112,8 @@ def showAllinCounter(request):
             l.append(jsonObj)
         return
 
-
-def visitCounterById(request):
-    return
-
-
-def visitLabById():
-    return
-
-
-def visitDiagnosis():
-    return
-
 @login_required
+@transaction.atomic
 def PrescribeMedication(request):
     assert request.type == 'doctor'
     if request.method == 'POST':
@@ -239,3 +230,49 @@ def conductLaboratorySheet(request):
         return JsonResponse({'success' : success, 'code' : status})
     else:
         return HttpResponse("Not a POST request")
+    
+@login_required
+def deletePatient(request):
+    assert request.type == 'patient'
+    if request.method == 'POST':
+        Pid = request.session['id']
+        db = MySQLdb.MyDatabase()
+        db.SoftDeletePatient(id=Pid)
+        return JsonResponse({"success" : True})
+    else:
+        return HttpResponse("Not a POST request")
+
+@login_required
+def checkThePosInQueueu(request):
+    assert request.type == 'patient'
+    if request.method == 'POST':
+        Pid = request.session['id']
+        db = MySQLdb.MyDatabase()
+        success, ans, id = db.getRegisterRelationInfo(Pid=Pid)
+        if success:
+            return JsonResponse({'success' : success, 'queueNum' : ans, 'code' : 0, 'id' : id, 'msg' : format("您前面还有%d,您的号码为%d" % ans % id)})
+        else:
+            return JsonResponse({'success' : False, 'queueNum' : -1, 'code' : 404, 'id' : -1 ,"msg" : '尚未挂号'})
+        
+@login_required
+def showCounterById(request) :
+    assert request.type == 'patient'
+    if request.method == 'POST':
+        id = request.get('id')
+        db = MySQLdb.MyDatabase()
+        res = db.showCounterById(id=id)
+        if res:
+            return JsonResponse({'code' : 404, 'msg' : '没有该id的订单'})
+        else :
+            return JsonResponse(res)
+        
+@login_required
+def getDoctorDispatch(request):
+    assert request.type == 'doctor'
+    if request.method == 'POST':
+        Did = request.get('id')
+        db = MySQLdb.MyDatabase()
+        res = db.getDoctorDispatcher(Did=Did)
+        if len(res) != 0:
+            return JsonResponse(res)
+    return 

@@ -37,6 +37,7 @@ class Counter(models.Model):
     ispaid = models.IntegerField(db_column='isPaid')  # Field name made lowercase.
     price = models.FloatField(blank=True, null=True)
     type = models.CharField(max_length=25)
+    date = models.DateField(db_column='DATE')  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -60,6 +61,7 @@ class Dispatcher(models.Model):
     roomid = models.ForeignKey('Room', models.DO_NOTHING, db_column='ROOMID')  # Field name made lowercase.
     doctorid = models.ForeignKey('Doctor', models.DO_NOTHING, db_column='doctorId', blank=True, null=True)  # Field name made lowercase.
     titleid = models.CharField(db_column='TitleId', max_length=25, blank=True, null=True)  # Field name made lowercase.
+    date = models.DateField(db_column='DATE')  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -108,7 +110,6 @@ class Medicinepurchase(models.Model):
     id = models.OneToOneField(Counter, models.DO_NOTHING, db_column='id', primary_key=True)  # The composite primary key (id, drugId) found, that is not supported. The first column is selected.
     drugid = models.ForeignKey(Drug, models.DO_NOTHING, db_column='drugId')  # Field name made lowercase.
     amount = models.FloatField()
-    time = models.DateTimeField()
 
     class Meta:
         managed = False
@@ -130,6 +131,7 @@ class Patient(models.Model):
 class Registrelation(models.Model):
     id = models.OneToOneField(Counter, models.DO_NOTHING, db_column='id', primary_key=True)
     roomid = models.CharField(db_column='ROOMID', max_length=25)  # Field name made lowercase.
+    isfinished = models.IntegerField(db_column='isFinished')  # Field name made lowercase.
 
     class Meta:
         managed = False
