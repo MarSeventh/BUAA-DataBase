@@ -72,6 +72,7 @@ CREATE TABLE IF NOT EXISTS `Counter` (
     `Did` VARCHAR(25) NOT NULL,
     `isPaid` BOOLEAN NOT NULL,
     `price` FLOAT,
+    `DATE` DATE NOT NULL,
     `type` VARCHAR(25) NOT NULL,
     FOREIGN KEY (`Did`) REFERENCES `Doctor`(`id`),
     FOREIGN KEY (`Pid`) REFERENCES `Patient`(`id`),
@@ -81,6 +82,7 @@ CREATE TABLE IF NOT EXISTS `Counter` (
 CREATE TABLE IF NOT EXISTS `RegistRelation` (
     `id` VARCHAR(25) NOT NULL,
     `ROOMID` VARCHAR(25) NOT NULL,
+    `isFinished` BOOLEAN NOT NULL,
     FOREIGN KEY (`id`) REFERENCES `Counter`(`id`),
     PRIMARY KEY (`id`)
 );
@@ -89,11 +91,11 @@ CREATE TABLE IF NOT EXISTS `MedicinePurchase` (
     `id` VARCHAR(25) NOT NULL,
     `drugId` VARCHAR(25) NOT NULL,
     `amount` FLOAT NOT NULL,
-    `time` DATETIME NOT NULL,
     FOREIGN KEY (`drugId`) REFERENCES `Drug`(`id`),
     Foreign Key (`id`) REFERENCES `Counter`(`id`),
     PRIMARY KEY (`id`, `drugId`)
 );
+
 
 CREATE TABLE IF NOT EXISTS `checkItems` (
     `id` VARCHAR(25) NOT NULL,
@@ -127,6 +129,7 @@ CREATE TABLE IF NOT EXISTS `Dispatcher` (
     `ROOMID` VARCHAR(25) NOT NULL,
     `doctorId` VARCHAR(25) ,
     `TitleId` VARCHAR(25),
+    `DATE` DATE NOT NULL,
     PRIMARY KEY (`TimePeriod`, `ROOMID`),
     FOREIGN KEY (`doctorId`) REFERENCES `Doctor`(`id`),
     FOREIGN KEY (`ROOMID`) REFERENCES `Room`(`id`)
