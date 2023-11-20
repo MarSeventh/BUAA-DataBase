@@ -49,7 +49,7 @@ def GetDepartmentList(request):
         list = []
         for i in info:
             list.append(i['name'])
-        return JsonResponse({'info': list})
+        return JsonResponse({'name': list})
     else:
         return HttpResponse("Not a GET request")
 
