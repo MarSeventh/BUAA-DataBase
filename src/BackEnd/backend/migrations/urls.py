@@ -15,11 +15,29 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.urls import path
-from src.BackEnd.backend import views
-
+from . import views
 urlpatterns = [
-    # path('admin/', admin.site.urls),
-    path('api/Login/', views.LogIn),
-    path('api/Register/', views.Register),
-    path('api/')
+    # Add your code here
+
+    path('api/login/', views.LogIn),
+    path('api/signUp/', views.SignUpByPatient),
+    path('api/departmentList/', views.GetDepartmentList),
+    path('api/departmentInfo/', views.GetInfoListByDepartment),
+    path('api/registration/', views.PatientRegistration),
+    path('api/counterToPay/', views.showAllNeedtoPay),
+    path('api/counters/', views.showAllinCounter),
+    path('api/prescribeMedication/', views.PrescribeMedication),
+    path('api/payAllCounter/', views.PayAll),
+    path('api/showAllDrug/', views.showAllDrug),
+    path('api/showAllDrugName/', views.showAllDrugName),
+    path('api/medicalDiagnosisStatement/', views.MedicalDiagnosisStatement),
+    path('api/getDiagnosisByPid/', views.getDiagnosisByPid),
+    path('api/getLaboratorySheetids/', views.getLaboratorySheetids),
+    path('api/getLaboratorySheet/', views.getLaboratorySheet),
+    path('api/conductLaboratorySheet/', views.conductLaboratorySheet),
+    path('api/deletePatient/', views.deletePatient),
+    path('api/checkThePosInQueueu/', views.checkThePosInQueueu),
+    path('api/showCounterById/', views.showCounterById),
+    path('api/getDoctorDispatch/', views.getDoctorDispatch),
+    path('api/hardDeleteDrug/', views.hardDeleteDrug),
 ]
