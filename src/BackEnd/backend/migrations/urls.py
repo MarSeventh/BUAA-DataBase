@@ -17,19 +17,20 @@ Including another URLconf
 from django.urls import path
 from . import views
 urlpatterns = [
-    # path('admin/', admin.site.urls),
-    path('api/Login/', views.LogIn),
-    path('api/SignUp/', views.SignUpByPatient),
-    path('api/DepartmentList/', views.GetDepartmentList),
-    path('api/DepartmentInfo/', views.GetInfoListByDepartment),
-    path('api/Registration/', views.PatientRegistration),
-    path('api/CounterToPay/', views.showAllNeedtoPay),
-    path('api/Counters/', views.showAllinCounter),
-    path('api/PrescribeMedication/', views.PrescribeMedication),
-    path('api/PayAllCounter/', views.PayAll),
+    # Add your code here
+
+    path('api/login/', views.LogIn),
+    path('api/signUp/', views.SignUpByPatient),
+    path('api/departmentList/', views.GetDepartmentList),
+    path('api/departmentInfo/', views.GetInfoListByDepartment),
+    path('api/registration/', views.PatientRegistration),
+    path('api/counterToPay/', views.showAllNeedtoPay),
+    path('api/counters/', views.showAllinCounter),
+    path('api/prescribeMedication/', views.PrescribeMedication),
+    path('api/payAllCounter/', views.PayAll),
     path('api/showAllDrug/', views.showAllDrug),
     path('api/showAllDrugName/', views.showAllDrugName),
-    path('api/MedicalDiagnosisStatement/', views.MedicalDiagnosisStatement),
+    path('api/medicalDiagnosisStatement/', views.MedicalDiagnosisStatement),
     path('api/getDiagnosisByPid/', views.getDiagnosisByPid),
     path('api/getLaboratorySheetids/', views.getLaboratorySheetids),
     path('api/getLaboratorySheet/', views.getLaboratorySheet),
