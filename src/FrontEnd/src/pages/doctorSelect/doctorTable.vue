@@ -63,8 +63,19 @@ async function addPay() {
         console.error('Error fetching doctors:', error);
     }
 }
+
+async function confirmDoctor(name: String) {
+    try {
+        const response = await axios.post('http://127.0.0.1:4523/m1/3616438-0-default//api/confirmDoctor', {
+            name: name,
+        });
+    } catch (error) {
+        console.error('Error fetching doctors:', error);
+    }
+}
 async function goin(record: Doctor) {
     try {
+        await confirmDoctor(record.name);
         router.push({
             path: '/payPage',
             query: {
