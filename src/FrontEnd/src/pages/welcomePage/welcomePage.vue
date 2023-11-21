@@ -10,11 +10,11 @@ const router = useRouter();
             <div class="home">
                 <div class="transform w-full">
                     <div class="tracking-wide slogan text-[2rem] xl:text-[2.75rem] font-extralight"
-                        style="color: rgb(255, 255, 255);">
+                        style="color: rgb(0, 0, 0);">
                         <span class="font-semibold">欢迎进入智慧医航！</span>
                     </div>
                     <div class="tracking-wide slogan text-[1.5rem] xl:text-[1.75rem] font-extralight"
-                        style="color: rgb(255, 255, 255);">
+                        style="color: rgb(0, 0, 0);">
                         <span class="font-semibold">Welcome to Smart BUAA Hospital!</span>
                     </div>
                 </div>
@@ -30,12 +30,11 @@ const router = useRouter();
     display: flex;
     width: 100%;
     height: 100%;
-    margin-top: -35px;
+    margin-top: 90px;
 }
 
 .container {
     display: flex;
-    align-items: center;
     /* 水平居中 */
     justify-content: center;
     text-align: center;
@@ -44,7 +43,7 @@ const router = useRouter();
 
 .front-view {
 
-    background-image: url('@/assets/background.jpg');
+    background-image: url('@/assets/buaa.jpg');
     background-size: cover;
     /* 根据容器大小调整图片尺寸 */
     background-position: center;

@@ -1,6 +1,6 @@
 <template>
     <div class="container">
-        <h2 style="color: white;margin: 30px">智慧导医台</h2>
+        <h2 style="color: white;margin: 30px">智能导医台</h2>
         <a-textarea style="width: 50vh;" v-model="question" type="textarea" :rows="4"
             placeholder="输入您感觉不舒服的地方"></a-textarea>
         <a-card title="就诊建议" class="mt-4 profile-info rounded-xl shadow-lg" :bordered="false">
