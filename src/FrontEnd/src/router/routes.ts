@@ -12,6 +12,16 @@ const routes: RouteRecordRaw[] = [
     },
   },
   {
+    path: '/welcome',
+    name: '主页',
+    meta: {
+      renderMenu: true,
+      cacheable: false,
+      icon: 'HomeOutlined',
+    },
+    component: () => import('@/pages/welcomePage'),
+  },
+  {
     path: '/doctorSelect',
     name: '医生选择',
     meta: {
