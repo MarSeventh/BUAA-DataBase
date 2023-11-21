@@ -42,61 +42,61 @@
   import { ThemeProvider } from 'stepin';
   import { computed } from 'vue';
 
-  const { logout, profile } = useAccountStore();
+    const { logout, profile } = useAccountStore();
 
-  // 获取个人信息
-  profile().then((response) => {
-    const { account } = response;
-    user.name = account.username;
-    // user.avatar = account.avatar;
-  });
+    // 获取个人信息
+    profile().then((response) => {
+      const { account } = response;
+      user.name = account.username;
+      // user.avatar = account.avatar;
+    });
 
-  const showSetting = ref(false);
-  const router = useRouter();
+    const showSetting = ref(false);
+    const router = useRouter();
 
-  useMenuStore().getMenuList();
+    useMenuStore().getMenuList();
 
-  const { navigation, useTabs, theme, contentClass } = storeToRefs(useSettingStore());
-  const themeConfig = computed(() => themeList.find((item) => item.key === theme.value)?.config ?? {});
+    const { navigation, useTabs, theme, contentClass } = storeToRefs(useSettingStore());
+    const themeConfig = computed(() => themeList.find((item) => item.key === theme.value)?.config ?? {});
 
-  const user = reactive({
-    name: 'admin',
-    avatar: avatar,
-    menuList: [
-      { title: '个人中心', key: 'personal', icon: 'UserOutlined', onClick: () => router.push('/personal') },
-      { title: '设置', key: 'setting', icon: 'SettingOutlined', onClick: () => (showSetting.value = true) },
-      { type: 'divider' },
-      {
-        title: '退出登录',
-        key: 'logout',
-        icon: 'LogoutOutlined',
-        onClick: () => logout().then(() => router.push('/login')),
-      },
-    ],
-  });
+    const user = reactive({
+      name: 'admin',
+      avatar: avatar,
+      menuList: [
+        { title: '个人中心', key: 'personal', icon: 'UserOutlined', onClick: () => router.push('/personal') },
+        { title: '设置', key: 'setting', icon: 'SettingOutlined', onClick: () => (showSetting.value = true) },
+        { type: 'divider' },
+        {
+          title: '退出登录',
+          key: 'logout',
+          icon: 'LogoutOutlined',
+          onClick: () => logout().then(() => router.push('/login')),
+        },
+      ],
+    });
 
-  function getPopupContainer() {
-    return document.querySelector('.stepin-layout');
-  }
-</script>
-
-<style lang="less">
-  .stepin-view {
-    ::-webkit-scrollbar {
-      width: 4px;
-      height: 4px;
-      border-radius: 4px;
-      background-color: theme('colors.primary.500');
+    function getPopupContainer() {
+      return document.querySelector('.stepin-layout');
     }
+  </script>
 
-    ::-webkit-scrollbar-thumb {
-      border-radius: 4px;
-      background-color: theme('colors.primary.400');
-
-      &:hover {
+  <style lang="less">
+    .stepin-view {
+      ::-webkit-scrollbar {
+        width: 4px;
+        height: 4px;
+        border-radius: 4px;
         background-color: theme('colors.primary.500');
       }
-    }
+
+      ::-webkit-scrollbar-thumb {
+        border-radius: 4px;
+        background-color: theme('colors.primary.400');
+
+        &:hover {
+          background-color: theme('colors.primary.500');
+        }
+      }
 
     ::-webkit-scrollbar-track {
       box-shadow: inset 0 0 1px rgba(0, 0, 0, 0);
