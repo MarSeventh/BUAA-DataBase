@@ -13,23 +13,44 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: '/doctorSelect',
-        name: '医生选择',
-        meta: {
-          renderMenu: false,
-          cacheable: false,
-        },
-        component: () => import('@/pages/doctorSelect')
+    name: '医生选择',
+    meta: {
+      renderMenu: false,
+      cacheable: false,
+    },
+    component: () => import('@/pages/doctorSelect')
+  },
+  {
+    path: '/departmentSelect',
+    name: '挂号预约',
+    meta: {
+      icon: 'DashboardOutlined',
+      renderMenu: true,
+      permission: null,
+      cacheable: true,
+    },
+    component: () => import('@/pages/departmentSelect')
   },
   {
     path: '/payPage',
-        name: '付款界面',
-        meta: {
-          view: 'blank',
-          target: '_blank',
-          renderMenu: false,
-          cacheable: false,
-        },
-        component: () => import('@/pages/payPage.vue')
+    name: '付款界面',
+    meta: {
+      view: 'blank',
+      target: '_blank',
+      renderMenu: false,
+      cacheable: false,
+    },
+    component: () => import('@/pages/payPage.vue')
+  },
+  {
+    path: '/payList',
+    name: '费用清单',
+    meta: {
+      icon: 'ProfileOutlined',
+      renderMenu: true,
+      cacheable: false,
+    },
+    component: () => import('@/pages/payList')
   },
   {
     path: '/front',
