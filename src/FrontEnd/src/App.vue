@@ -2,8 +2,8 @@
   <a-config-provider :getPopupContainer="getPopupContainer">
     <ThemeProvider is-root v-bind="themeConfig" :apply-style="false">
       <stepin-view
-        system-name="Stepin"
-        logo-src="@/assets/vite.svg"
+        system-name="BUAA Hospital"
+        logo-src="@/assets/buaalogo.svg"
         :class="`${contentClass}`"
         :user="user"
         :navMode="navigation"
@@ -64,7 +64,6 @@
     avatar: avatar,
     menuList: [
       { title: '个人中心', key: 'personal', icon: 'UserOutlined', onClick: () => router.push('/personal') },
-      { title: '设置', key: 'setting', icon: 'SettingOutlined', onClick: () => (showSetting.value = true) },
       { type: 'divider' },
       {
         title: '退出登录',

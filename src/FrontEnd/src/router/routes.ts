@@ -24,7 +24,7 @@ const routes: RouteRecordRaw[] = [
     path: '/departmentSelect',
     name: '挂号预约',
     meta: {
-      icon: 'DashboardOutlined',
+      icon: 'UsergroupAddOutlined',
       renderMenu: true,
       permission: null,
       cacheable: true,
@@ -46,11 +46,61 @@ const routes: RouteRecordRaw[] = [
     path: '/payList',
     name: '费用清单',
     meta: {
-      icon: 'ProfileOutlined',
+      icon: 'AccountBookOutlined',
       renderMenu: true,
       cacheable: false,
     },
     component: () => import('@/pages/payList')
+  },
+  {
+    path: '/assayList',
+    name: '化验结果查询',
+    meta: {
+      icon: 'BgColorsOutlined',
+      renderMenu: true,
+      cacheable: false,
+    },
+    component: () => import('@/pages/assayList')
+  },
+  {
+    path: '/assayItem',
+    name: '化验详情',
+    meta: {
+      icon: 'ProfileOutlined',
+      renderMenu: false,
+      cacheable: false,
+    },
+    component: () => import('@/pages/assayItem')
+  },
+  {
+    path: '/diagnosisList',
+    name: '诊断结果查询',
+    meta: {
+      icon: 'SnippetsOutlined',
+      renderMenu: true,
+      cacheable: false,
+    },
+    component: () => import('@/pages/diagnosisList')
+  },
+  {
+    path: '/diagnosisItem',
+    name: '诊断详情',
+    meta: {
+      icon: 'ProfileOutlined',
+      renderMenu: false,
+      cacheable: false,
+    },
+    component: () => import('@/pages/diagnosisItem')
+  },
+  {
+    path: '/personal',
+    name: '个人中心',
+    meta: {
+      icon: 'UserOutlined',
+      renderMenu: true,
+      cacheable: false,
+    },
+    component: () => import('@/pages/personal')
   },
   {
     path: '/front',

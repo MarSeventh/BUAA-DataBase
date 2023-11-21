@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import payTable from './payTable.vue';
+import diagnosisTable from './diagnosisTable.vue';
 import { useAccountStore } from '@/store';
 import { computed } from 'vue';
 
@@ -19,13 +19,17 @@ const greeting = computed(
                 <img src="@/assets/avatar/face-1.jpg" class="w-16 h-16 rounded-full" />
                 <div class="ml-base">
                     <div class="text-title font-bold text-lg">{{ greeting }}，{{ accountName }}</div>
-                    <div class="text-subtext font-bold text-sm">请查收您的费用清单！</div>
+                    <div class="text-subtext font-bold text-sm">请查收您的诊断结果清单！</div>
                 </div>
             </div>
         </div>
     </div>
     <div class="table w-full">
-        <payTable />
+        <diagnosisTable />
     </div>
 </template>
 
+
+<style scoped lang="less">
+.welcome {}
+</style>

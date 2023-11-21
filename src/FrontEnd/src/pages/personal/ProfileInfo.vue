@@ -1,55 +1,26 @@
 <script lang="ts" setup>
-import EditableCell from '@/components/editable-cell';
-import {
-  EditFilled,
-  FacebookOutlined,
-  InstagramOutlined,
-  TwitterOutlined,
-} from '@ant-design/icons-vue';
 import { reactive, ref } from 'vue';
+import { useAccountStore } from '@/store/account';
 
-const profiles = reactive([
-  {
-    label: 'Full Name',
-    content: 'Li Zhi',
-  },
-  {
-    label: 'Mobile',
-    content: '13678988900',
-  },
-  {
-    label: 'Email',
-    content: 'lizhi@firfox.com',
-  },
-  {
-    label: 'Location',
-    content: 'shenzheng.CN',
-  },
-]);
+const accountStore = useAccountStore();
+const username = ref(accountStore.account?.username);
+const role = ref(accountStore.role);
 
-const edit = ref(false)
+
 </script>
 <template>
-  <a-card title="Profile Information" class="profile-info rounded-xl shadow-lg" :bordered="false">
-    <template #extra>
-      <EditFilled @click="edit = true" class="text-subtext hover:text-primary cursor-pointer" />
-    </template>
+  <a-card title="账号信息" class="profile-info rounded-xl shadow-lg" :bordered="false">
     <div class="description">
-      <EditableCell :options="{ rows: 4 }" v-model:edit="edit" type="textarea" value="Hi, I’m Alec Thompson, Decisions: If you can’t decide, the answer is no.
-      If two equally difficult paths, choose the one more painful in the short
-      term (pain avoidance is creating an illusion of equality).">
-      </EditableCell>
+      若要修改您的个人信息，请联系管理员。
     </div>
     <a-divider />
-    <div class="text-title font-medium">Oliver Liam</div>
+    <div class="text-title font-medium">个人信息</div>
     <a-descriptions class="profile-list mt-3 font-medium" :column="1">
-      <a-descriptions-item :label="item.label" v-for="item in profiles">
-        {{ item.content }}
+      <a-descriptions-item label="用户名">
+        {{ username }}
       </a-descriptions-item>
-      <a-descriptions-item label="Contact">
-        <TwitterOutlined class="text-blue-400" />
-        <FacebookOutlined class="text-blue-800" />
-        <InstagramOutlined class="text-red-500" />
+      <a-descriptions-item label="角色">
+        {{ role }}
       </a-descriptions-item>
     </a-descriptions>
   </a-card>

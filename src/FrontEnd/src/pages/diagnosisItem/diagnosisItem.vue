@@ -1,7 +1,12 @@
 <script lang="ts" setup>
-import payTable from './payTable.vue';
 import { useAccountStore } from '@/store';
 import { computed } from 'vue';
+import diagnosisInfo from './diagnosisInfo.vue';
+import { useRoute } from "vue-router";
+
+const route = useRoute()
+
+var id = route.query.id
 
 const accountStore = useAccountStore();
 const accountName = computed(() => accountStore.account?.username);
@@ -19,13 +24,17 @@ const greeting = computed(
                 <img src="@/assets/avatar/face-1.jpg" class="w-16 h-16 rounded-full" />
                 <div class="ml-base">
                     <div class="text-title font-bold text-lg">{{ greeting }}，{{ accountName }}</div>
-                    <div class="text-subtext font-bold text-sm">请查收您的费用清单！</div>
+                    <div class="text-subtext font-bold text-sm">这是您编号为{{ id }}的诊断结果</div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="table w-full">
-        <payTable />
+    <div class="mt-15 flex justify-evenly">
+        <diagnosisInfo class="flex-1 mr-lg" />
     </div>
 </template>
 
+
+<style scoped lang="less">
+.welcome {}
+</style>
