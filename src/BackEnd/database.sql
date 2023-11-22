@@ -1,4 +1,4 @@
--- Active: 1698489563240@@127.0.0.1@3306@buaa_db_demo
+-- Active: 1698572182490@@120.46.80.149@3306@db21373405
 -- Date: 2021-06-27 16:52:43
 -- Type: SQL
 
@@ -178,3 +178,4 @@ CREATE INDEX `index_id` ON `CheckCombine` (`id`)
 
 
 
+SELECT * FROM checkcombine;

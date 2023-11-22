@@ -153,7 +153,7 @@ class MyDatabase:
         return l
     
     def NextPatient(self, Did : str, RoomId : str):
-        from src.BackEnd.backend.migrations.models import Room, Registrelation
+        from models import Room, Registrelation
         assert Room.objects.get(id=RoomId) > 0
         r = self.getCurrentPatient(RoomId)
         Registrelation.objects.filter(id=r.id).update(isfinished=True)
