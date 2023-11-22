@@ -105,8 +105,8 @@ class Counter(models.Model):
     did = models.ForeignKey('Doctor', models.DO_NOTHING, db_column='Did')  # Field name made lowercase.
     ispaid = models.IntegerField(db_column='isPaid')  # Field name made lowercase.
     price = models.FloatField(blank=True, null=True)
-    type = models.CharField(max_length=25)
     date = models.DateField(db_column='DATE')  # Field name made lowercase.
+    type = models.CharField(max_length=25)
 
     class Meta:
         managed = False
@@ -212,7 +212,7 @@ class Laboratorysheet(models.Model):
     begintime = models.DateTimeField(db_column='beginTime')  # Field name made lowercase.
     outputtime = models.DateTimeField(db_column='OutputTime', blank=True, null=True)  # Field name made lowercase.
     itemid = models.ForeignKey(Checkitems, models.DO_NOTHING, db_column='itemID')  # Field name made lowercase.
-    result = models.CharField(max_length=255)
+    result = models.FloatField()
 
     class Meta:
         managed = False

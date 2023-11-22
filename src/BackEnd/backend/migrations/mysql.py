@@ -153,7 +153,7 @@ class MyDatabase:
         return l
     
     def NextPatient(self, Did : str, RoomId : str):
-        from src.BackEnd.backend.migrations.models import Room, Registrelation
+        from models import Room, Registrelation
         assert Room.objects.get(id=RoomId) > 0
         r = self.getCurrentPatient(RoomId)
         Registrelation.objects.filter(id=r.id).update(isfinished=True)
@@ -433,3 +433,19 @@ class MyDatabase:
         for i in r:
             res.append[{'id' : i.id, 'time' : i.time, 'doctor' : self.getNameById(id=i.doctorid)}]
         return res
+    
+    def genUserId(self): 
+        from models import User
+        max_id = User.objects.all().aggregate(Max('id'))['id__max']
+        return str(int(max_id) + 1)
+    
+    def getTidByName(self, name : str):
+        from models import Titles
+        return Titles.objects.get(name=name)[0]
+
+
+    def createNewDoctor(self, name : str, tittle : str, password: str):
+        from models import Doctor, User
+        id = self.genUserId()
+        User.objects.create(id=id, username=name, password=password, type='Doctor')
+        Doctor.objects.create(id=id, Tid=self.getTidByName(name=tittle), active=1)

@@ -43,7 +43,7 @@ urlpatterns = [
     path('api/hardDeleteDrug/', views.hardDeleteDrug),
     path('api/doctorList/', views.GetInfoListByDepartment),
     path("api/confirmdoctor/", views.PatientRegistration),
-    path('api/getSuggestion', gptAnswer.answer),
+    path('api/getSuggestion', views.answer),
     path('api/getDiagnosisList/', views.getDiagnosisList),
     path('api/deleteAccount/', views.deletePatient),
 

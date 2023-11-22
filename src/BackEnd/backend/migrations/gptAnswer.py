@@ -9,9 +9,7 @@ from django.contrib.auth import authenticate, login
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import django.db.transaction as transaction
-
-from settings import GPT_API_KEY
-
+GPT_API_KEY = 'fk-t_zzbtzG8ofRfyWO1UqAoT2axNNDQdP9QVtT9a3lnBU'
 
 def answer(request):
     import mysql as DB

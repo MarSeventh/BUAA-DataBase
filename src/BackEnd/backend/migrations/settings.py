@@ -74,16 +74,8 @@ WSGI_APPLICATION = 'migrations.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'buaa_db_demo',
-        'USER': 'root',
-        'PASSWORD': 'zjy815419zjy',
-        'HOST': 'localhost',
-        'PORT': '3306',
-    },
-    'end': {
-        'ENGINE': 'django.db.backends.mysql',
         'NAME': 'db21373405',
-        'USER': 'u21373405',
+        'USER': '21373405',
         'PASSWORD': 'Aa490635',
         'HOST': '120.46.80.149',
         'PORT': '3306',
@@ -131,4 +123,3 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGIN_URL = 'api/login/'
 
-GPT_API_KEY = 'fk-t_zzbtzG8ofRfyWO1UqAoT2axNNDQdP9QVtT9a3lnBU'
