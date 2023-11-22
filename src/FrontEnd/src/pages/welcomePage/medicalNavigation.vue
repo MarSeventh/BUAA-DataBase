@@ -1,16 +1,16 @@
 <template>
     <div class="container">
         <h2 style="color: white;margin: 30px">智能导医台</h2>
-        <a-textarea style="width: 50vh;" v-model="question" type="textarea" :rows="4"
+        <a-textarea style="width: 50vh;opacity: 0.85;" v-model="question" type="textarea" :rows="4"
             placeholder="输入您感觉不舒服的地方"></a-textarea>
-        <a-card title="就诊建议" class="mt-4 profile-info rounded-xl shadow-lg" :bordered="false">
-            <div class="description">
+        <a-card style="opacity: 0.85;" title="就诊建议" class="mt-4 profile-info rounded-xl shadow-lg" :bordered="false">
+            <div class="description font-bold">
                 {{ typedAnswer }}
             </div>
-            <a-divider />
+            <a-divider style="margin-bottom: auto;margin-top: 54%;" />
             <div class="text-title font-medium">AI生成，仅供参考！</div>
         </a-card>
-        <a-button class="mt-5" type="primary" @click="askQuestion">询问</a-button>
+        <a-button class="mt-3" type="primary" @click="askQuestion">询问</a-button>
     </div>
 </template>
   
@@ -65,6 +65,8 @@ function sleep(ms) {
 .profile-info {
     width: 50vh;
     height: 40vh;
+    overflow-y: auto;
+
     :deep(.ant-card) {
         &-head {
             @apply border-none;
