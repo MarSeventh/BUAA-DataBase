@@ -77,11 +77,21 @@ def PatientRegistration(request):
         name = request.session['username']
         id = request.session['id']
         db = MySQLdb.MyDatabase()
-        doctorId = db.getIdByUsername(data['doctor'])
-        success, status = db.PatientRegistration(patientid=id, doctorid=doctorId)
-        return JsonResponse({'success': success, 'code': status})
+        doctorId = db.getIdByUsername(data['name'])
+        Payid, success, status = db.PatientRegistration(patientid=id, doctorid=doctorId)
+        return JsonResponse({'id' : Payid})
     else:
         return HttpResponse("Not a POST request")
+    
+
+@login_required
+def finishPay(request):
+    assert request.type == 'patient'
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        Payid = data['id']
+        db = MySQLdb.MyDatabase()
+        db.finishPay(id=Payid)
 
 @login_required
 def showAllNeedtoPay(request):
@@ -100,12 +110,12 @@ def showAllNeedtoPay(request):
 @login_required
 def showAllinCounter(request):
     assert request.type == 'patient'
-    if (request.method == 'POST'):
+    if (request.method == 'GET'):
         db = MySQLdb.MyDatabase()
         ans = db.showAllinCounter()
         l = []
         for i in ans:
-            jsonObj = {"id": i["id"], "price": i["price"]}
+            jsonObj = {"id": i["id"], "price": i["price"], 'status' : i['ispaid'], 'type' : i['type']}
             l.append(jsonObj)
         return
 
@@ -198,7 +208,7 @@ def getLaboratorySheetids(request):
         Pid = request.session['id']
         db = MySQLdb.MyDatabase()
         ans = db.showAllLaboratorySheetIds(Pid=Pid)
-        return JsonResponse({'Info': ans})
+        return JsonResponse(ans)
     else:
         return HttpResponse("Not a GET request")
 
@@ -310,3 +320,13 @@ def getCheckCombineList(request):
         return JsonResponse(res)
     else:
         return HttpResponse("Not a GET request")
+
+@login_required
+def getDiagnosisList(request):
+    if request.method == 'GET':
+        Pid = request.session['id']
+        db = MySQLdb.MyDatabase()
+        r = db.getDiagnosisList(Pid=Pid)
+        return JsonResponse(r)
+    else:
+        return HttpResponse('NOT A GET REQUEST')

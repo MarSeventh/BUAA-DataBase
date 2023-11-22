@@ -123,7 +123,7 @@ CREATE TABLE IF NOT EXISTS `LaboratorySheet`(
     `beginTime` DATETIME NOT NULL,
     `OutputTime` DATETIME,
     `itemID` VARCHAR(25) NOT NULL,
-    `result` VARCHAR(255) NOT NULL,
+    `result` FLOAT NOT NULL,
     FOREIGN KEY (`itemID`) REFERENCES `checkItems`(`id`),
     FOREIGN KEY (`id`) REFERENCES `Counter`(`id`),
     PRIMARY KEY (`id`, `itemID`)
