@@ -171,23 +171,24 @@ class MyDatabase:
         self.cursor.execute(sql, (doctorid, timePeriod))
         r = self.cursor.fetchall()
         if len(r) == 0:
-            return False, 404
+            return '-1', False, 404
         sql = "SELECT * FROM REGISTRELATION WHERE doctorId = %s AND TimePeriod = %s"
         self.cursor.execute(sql, (doctorid, timePeriod))
         r = self.cursor.fetchall()
         if len(r) == 0:
+            id = self.genCounterId()
             sql = "INSERT INTO COUNTER (id, Pid, Did, isPaid, price, type, date) VALUES (%s, %s, %s, 1, 1, 'Registration', %s)"
-            self.cursor.execute(sql, (self.genCounterId(), patientid, doctorid, datetime.now()))
+            self.cursor.execute(sql, (id, patientid, doctorid, datetime.now()))
             self.connection.commit()
             sql2 = "INSERT INTO RegistRelation (id, ROOMID, isFinished) VALUES (%s, %s, False)"
-            self.cursor.execute(sql2, (self.genCounterId(), r[0]['ROOMID']))
+            self.cursor.execute(sql2, (id, r[0]['ROOMID']))
             self.connection.commit()
             models.Room.objects.filter(id=r[0]['ROOMID']).update(queueLen=models.Room.objects.get(id=r[0]['ROOMID']).queueLen + 1)
             self.close()
-            return True, 0
+            return id, True, 0
         else:
             self.close()
-            return False, 404
+            return '-1' ,False, 404
 
     def genCounterId(self):
         self.connect()
@@ -371,7 +372,9 @@ class MyDatabase:
             res = []
             for i in l:
                 from src.BackEnd.backend.migrations.models import Checkitems
-                res.append({'id': i.itemid, 'name': i.checkName, 'result': i.result, 'minresult': Checkitems.objects.get(itemid=i.itemid).minresult, 'maxresult': Checkitems.objects.get(itemid=i.itemid).maxresult, 'outputtime': i.outputtime})
+                res.append({'id': i.itemid, 'name': i.checkName, 'result': i.result, 
+                            'minresult': Checkitems.objects.get(itemid=i.itemid).minresult, 
+                            'maxresult': Checkitems.objects.get(itemid=i.itemid).maxresult, 'outputtime': i.outputtime})
             return res
         
     def showAllLaboratorySheetIds(self, Pid : str):
@@ -379,7 +382,7 @@ class MyDatabase:
         l = Laboratorysheet.objects.filter(id=Pid).iterator
         res = []
         for i in l:
-            res.append({'id': i.id, 'time': i.time, 'name': i.checkName})
+            res.append({'id': i.id, 'time': i.time, 'chekname': i.checkName})
         return res
     
     def getRegisterRelationInfo(self, Pid : str):
@@ -417,4 +420,16 @@ class MyDatabase:
         res = []
         for i in r:
             res.append({'name' : i.checkname})
+        return res
+    
+    def finishPay(self, id : str):
+        from models import Counter
+        Counter.objects.filter(id=id).update(ispaid=True)
+
+    def getDiagnosisList(self, Pid : str):
+        from models import Diagnosis
+        r = Diagnosis.objects.filter(patientid=Pid)
+        res = []
+        for i in r:
+            res.append[{'id' : i.id, 'time' : i.time, 'doctor' : self.getNameById(id=i.doctorid)}]
         return res
