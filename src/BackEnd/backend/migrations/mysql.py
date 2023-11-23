@@ -8,7 +8,7 @@ ERROR_CODE = 404
 class MyDatabase:
     def connect(self):
         host = '120.46.80.149'
-        user = 'u21373405'
+        user = '21373405'
         password = 'Aa490635'
         db = 'db21373405'
         charset = 'utf8mb4'
@@ -449,3 +449,8 @@ class MyDatabase:
         id = self.genUserId()
         User.objects.create(id=id, username=name, password=password, type='Doctor')
         Doctor.objects.create(id=id, Tid=self.getTidByName(name=tittle), active=1)
+
+    def queryDrugInfo(self, id : str):
+        from models import Drug
+        r = Drug.objects.get(id=id)
+        return r

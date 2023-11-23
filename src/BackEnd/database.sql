@@ -6,7 +6,6 @@ DROP TABLE IF EXISTS `Patient`;
 DROP TABLE IF EXISTS `Doctor`;
 DROP TABLE IF EXISTS `Admin`;
 DROP TABLE IF EXISTS `Drug`;
-DROP TABLE IF EXISTS `Storage`;
 DROP TABLE IF EXISTS `Counter`;
 
 DROP TABLE IF EXISTS `RegistRelation`;
@@ -332,3 +331,7 @@ INSERT INTO `ROOM` (`id`, `isOccupied`, `QueueLen`) VALUES
 ('102', true, 0),
 ('201', true, 0),
 ('202', true, 0);
+
+
+
+SELECT * FROM drug;

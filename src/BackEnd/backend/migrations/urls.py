@@ -46,6 +46,12 @@ urlpatterns = [
     path('api/getSuggestion', views.answer),
     path('api/getDiagnosisList/', views.getDiagnosisList),
     path('api/deleteAccount/', views.deletePatient),
+    path('api/account', views.account),
+    path('api/signin', views.SignUpByPatient),
+    path('api/getCheckCombineList', views.getCheckCombineList),
+    path('api/getcheckItemList', views.getCheckItemsList),
+    path('api/queryDrugInfo', views.queryDrugInfo),
+
 
 
 ]

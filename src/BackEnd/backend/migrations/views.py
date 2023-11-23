@@ -11,6 +11,8 @@ import openai
 
 GPT_API_KEY = 'fk-t_zzbtzG8ofRfyWO1UqAoT2axNNDQdP9QVtT9a3lnBU'
 
+DEFAULT_AVATAR = 'https://imgse.com/i/pidqkX8'
+
 
 @csrf_exempt
 def LogIn(request):
@@ -31,22 +33,45 @@ def LogIn(request):
     else:
         return JsonResponse({'error': 'Not a POST request'})
     
+import json
+from django.http import JsonResponse, HttpResponse
+from django.views.decorators.csrf import csrf_exempt
+
+@csrf_exempt  # 仅用于演示，请谨慎使用
 def SignUpByPatient(request):
     if (request.method == 'POST'):
-        data = json.loads(request.body)
-        username = data.get('username', '')
-        password = data.get('password', '')
-        idcard = data.get('idcard', '')
+        try:
+            data = json.loads(request.body)
+            username = data.get('username', '')
+            password = data.get('password', '')
+            print(username, password)
+            idcard = data.get('idcard', '')
+            db = MySQLdb.MyDatabase()
+            success, status = db.SignUpByPatient(name=username, password=password, iscommem=False, idcard=idcard)
+            print(success, status)
+            return JsonResponse({'success': success, 'code': status})
+        except ValueError as e:
+            return JsonResponse({'success': False, 'error': 'Invalid JSON data'})
+    else:
+        return HttpResponse("Not a POST request")
+    
+def showAllDrug(request):
+    if (request.method == 'GET'):
         db = MySQLdb.MyDatabase()
-        success, status = db.SignUpByPatient(name=username, password=password, iscommem=False, idcard=idcard)
-        return JsonResponse({'success': success, 'code': status})
+        ans = db.showAllDrug()
+        l = []
+        for i in ans:
+            print(i)
+            jsonObj = {"id": i["id"], "name": i["name"], "price": i["price"], "description": i["Description"], "Storage" : i['Storage']}
+            l.append(jsonObj)
+        return JsonResponse({'info' : l})
     else:
         return HttpResponse("Not a POST request")
 
 
-@login_required
+
 def GetDepartmentList(request):
-    assert request.type == 'patient'
+    # assert request.type == 'patient'
     if (request.method == 'GET'):
         db = MySQLdb.MyDatabase()
         info = db.GetDepartmentList()
@@ -146,20 +171,6 @@ def PayAll(request):
         db = MySQLdb.MyDatabase()
         success, status = db.PayAll(pid=Pid)
         return JsonResponse({'success' : success, 'code' : status})
-    else:
-        return HttpResponse("Not a POST request")
-    
-@login_required
-def showAllDrug(request):
-    assert request.type == 'admin'
-    if request.method == 'POST':
-        db = MySQLdb.MyDatabase()
-        ans = db.showAllDrug()
-        l = []
-        for i in ans:
-            jsonObj = {"id": i["id"], "name": i["name"], "price": i["price"], "description": i["description"], "Storage" : i['Storage']}
-            l.append(jsonObj)
-        return JsonResponse({'Info': list})
     else:
         return HttpResponse("Not a POST request")
     
@@ -366,3 +377,34 @@ def answer(request):
             #time.sleep(0.05)
 
     return JsonResponse(result)
+
+
+def account(id : str):
+    db = MySQLdb.MyDatabase()
+    username = db.getNameById(id=id)
+    j = {}
+    j['avavtar'] = DEFAULT_AVATAR
+    j['age'] = 18
+    j['gender'] = 0
+    j['username'] = username
+    return JsonResponse(j)
+
+def conductMedcine(request):
+    assert request.type == 'doctor'
+    if request.method == 'POST':
+        Did = request.session['id']
+        Pid = request.POST.get('Pid')
+        MedcineList = request.POST.get('MedcineList')
+        AmountList = request.POST.get('AmountList')
+        db = MySQLdb.MyDatabase()
+        success, status = db.PrescribeMedication(did=Did, pid=Pid, nameList=MedcineList, amount=AmountList)
+        return JsonResponse({'success' : success, 'code' : status})
+    else:
+        return HttpResponse("Not a POST request")
+    
+
+def queryDrugInfo(request):
+    if request.method == 'POST':
+        DrugId = request.get('id')
+        db = MySQLdb.MyDatabase()
+        return JsonResponse(db.queryDrugInfo)
