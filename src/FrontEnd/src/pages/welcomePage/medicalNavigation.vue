@@ -3,7 +3,8 @@
         <h2 style="color: white;margin: 30px">智能导医台</h2>
         <a-textarea style="width: 50vh;opacity: 0.85;" v-model="question" type="textarea" :rows="4"
             placeholder="输入您感觉不舒服的地方"></a-textarea>
-        <a-card style="opacity: 0.85;" title="就诊建议" class="mt-4 profile-info rounded-xl shadow-lg" :bordered="false">
+        <a-card style="margin-top: 15px;opacity: 0.85;" title="就诊建议" class="mt-4 profile-info rounded-xl shadow-lg"
+            :bordered="false">
             <div class="description font-bold">
                 {{ typedAnswer }}
             </div>
