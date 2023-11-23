@@ -9,7 +9,7 @@ import { useRouter } from 'vue-router';
 
 const router = useRouter();
 function onLoginSuccess() {
-  router.push('/departmentSelect');
+  router.push('/welcome');
 }
 
 
