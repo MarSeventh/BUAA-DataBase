@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'migrations',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
@@ -74,19 +75,14 @@ WSGI_APPLICATION = 'migrations.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'buaa_db_demo',
-        'USER': 'root',
-        'PASSWORD': 'zjy815419zjy',
-        'HOST': 'localhost',
-        'PORT': '3306',
-    },
-    'end': {
-        'ENGINE': 'django.db.backends.mysql',
         'NAME': 'db21373405',
-        'USER': 'u21373405',
+        'USER': '21373405',
         'PASSWORD': 'Aa490635',
         'HOST': '120.46.80.149',
-        'PORT': '3306',
+        'PORT': '3306',        
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+        },
     }
 }
 
@@ -131,4 +127,15 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGIN_URL = 'api/login/'
 
-GPT_API_KEY = 'fk-t_zzbtzG8ofRfyWO1UqAoT2axNNDQdP9QVtT9a3lnBU'
+from datetime import timedelta
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_TOKEN_EXPIRY_TIME': timedelta(days=1)
+}
+    # 其他的DRF设置...

@@ -1,48 +1,93 @@
-from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from . import mysql as MySQLdb
 import json
 
-from django.contrib.auth import authenticate, login
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import django.db.transaction as transaction
+import openai
+
+GPT_API_KEY = 'fk-t_zzbtzG8ofRfyWO1UqAoT2axNNDQdP9QVtT9a3lnBU'
+
+DEFAULT_AVATAR = 'https://imgse.com/i/pidqkX8'
+
+
+from rest_framework.authtoken.models import Token
+from django.utils import timezone
 
 @csrf_exempt
 def LogIn(request):
     if request.method == 'POST':
+        print('Login')
         data = json.loads(request.body)
-        username = data.get('username', '')
-        password = data.get('password', '')
-        request.session['id'] = data.get('id', '')
+        username = data.get('username')
+        password = data.get('password')
 
-        user = authenticate(request, username=username, password=password)
+        db = MySQLdb.MyDatabase()
+        success, code, user = db.Login(username=username, password=password)
 
-        request.session['type'] = user.type
-        if user is not None:
-            login(request, user)
-            return JsonResponse({'success': True, 'code': '0', 'type': user.type})
+
+        token, created = Token.objects.get_or_create(user=user)
+        token_data = {
+            'token': token.key,
+            'expires_at': timezone.now() + token.settings.get("TOKEN_TIMEOUT")
+        }
+
+        if user != None:
+            reponse = JsonResponse({
+                'success': success,
+                'code': code,
+                'type': user.type,
+                'token_data': token_data
+            })
+            request['session']['username'] = username
+            request['session']['id'] = user.id
+            request['session']['type'] = user.type
+            return reponse
         else:
-            return JsonResponse({'success': False, 'code': '404', 'type': ''})
+            return JsonResponse({
+                'success': success,
+                'code': code,
+            })
     else:
-        return JsonResponse({'error': 'Not a POST request'})
+        return HttpResponse("Not a POST request")
     
+
+@csrf_exempt  # 仅用于演示，请谨慎使用
 def SignUpByPatient(request):
     if (request.method == 'POST'):
-        data = json.loads(request.body)
-        username = data.get('username', '')
-        password = data.get('password', '')
-        idcard = data.get('idcard', '')
+        try:
+            data = json.loads(request.body)
+            username = data.get('username', '')
+            password = data.get('password', '')
+            print(username, password)
+            idcard = data.get('idcard', '')
+            db = MySQLdb.MyDatabase()
+            success, status = db.SignUpByPatient(name=username, password=password, iscommem=False, idcard=idcard)
+            print(success, status)
+            return JsonResponse({'success': success, 'code': status})
+        except ValueError as e:
+            return JsonResponse({'success': False, 'error': 'Invalid JSON data'})
+    else:
+        return HttpResponse("Not a POST request")
+    
+def showAllDrug(request):
+    if (request.method == 'GET'):
         db = MySQLdb.MyDatabase()
-        success, status = db.SignUpByPatient(name=username, password=password, iscommem=False, idcard=idcard)
-        return JsonResponse({'success': success, 'code': status})
+        ans = db.showAllDrug()
+        l = []
+        for i in ans:
+            print(i)
+            jsonObj = {"id": i["id"], "name": i["name"], "price": i["price"], "description": i["Description"], "Storage" : i['Storage']}
+            l.append(jsonObj)
+        return JsonResponse({'info' : l})
     else:
         return HttpResponse("Not a POST request")
 
 
-@login_required
+
 def GetDepartmentList(request):
-    assert request.type == 'patient'
+    # assert request.type == 'patient'
     if (request.method == 'GET'):
         db = MySQLdb.MyDatabase()
         info = db.GetDepartmentList()
@@ -53,7 +98,6 @@ def GetDepartmentList(request):
     else:
         return HttpResponse("Not a GET request")
 
-@login_required
 def GetInfoListByDepartment(request):
     assert request.type == 'patient'
     if (request.method == 'POST'):
@@ -69,7 +113,6 @@ def GetInfoListByDepartment(request):
         return HttpResponse("Not a POST request")
 
 
-@login_required
 def PatientRegistration(request):
     assert request.type == 'patient'
     if (request.method == 'POST'):
@@ -84,7 +127,6 @@ def PatientRegistration(request):
         return HttpResponse("Not a POST request")
     
 
-@login_required
 def finishPay(request):
     assert request.type == 'patient'
     if request.method == 'POST':
@@ -93,7 +135,6 @@ def finishPay(request):
         db = MySQLdb.MyDatabase()
         db.finishPay(id=Payid)
 
-@login_required
 def showAllNeedtoPay(request):
     assert request.type == 'patient'
     if (request.method == 'POST'):
@@ -107,7 +148,6 @@ def showAllNeedtoPay(request):
     else:
         return HttpResponse("Not a POST request")
 
-@login_required
 def showAllinCounter(request):
     assert request.type == 'patient'
     if (request.method == 'GET'):
@@ -119,7 +159,6 @@ def showAllinCounter(request):
             l.append(jsonObj)
         return
 
-@login_required
 @transaction.atomic
 def PrescribeMedication(request):
     assert request.type == 'doctor'
@@ -134,7 +173,6 @@ def PrescribeMedication(request):
     else:
         return HttpResponse("Not a POST request")
     
-@login_required
 def PayAll(request):
     assert request.type == 'patient'
     if request.method == 'POST':
@@ -145,21 +183,6 @@ def PayAll(request):
     else:
         return HttpResponse("Not a POST request")
     
-@login_required
-def showAllDrug(request):
-    assert request.type == 'admin'
-    if request.method == 'POST':
-        db = MySQLdb.MyDatabase()
-        ans = db.showAllDrug()
-        l = []
-        for i in ans:
-            jsonObj = {"id": i["id"], "name": i["name"], "price": i["price"], "description": i["description"], "Storage" : i['Storage']}
-            l.append(jsonObj)
-        return JsonResponse({'Info': list})
-    else:
-        return HttpResponse("Not a POST request")
-    
-@login_required
 def showAllDrugName(request):
     assert request.type == 'doctor'
     if request.method == 'POST':
@@ -173,7 +196,6 @@ def showAllDrugName(request):
     else:
         return HttpResponse("Not a POST request")
     
-@login_required
 def MedicalDiagnosisStatement(request):
     assert request.type == 'doctor'
     if request.method == 'POST':
@@ -186,7 +208,6 @@ def MedicalDiagnosisStatement(request):
     else:
         return HttpResponse("Not a POST request")
     
-@login_required
 def getDiagnosisByPid(request):
     assert request.type == 'patient'
     if request.method == 'GET':
@@ -201,7 +222,6 @@ def getDiagnosisByPid(request):
     else:
         return HttpResponse("Not a GET request")
     
-@login_required
 def getLaboratorySheetids(request):
     assert request.type == 'patient'
     if request.method == 'GET':
@@ -212,7 +232,6 @@ def getLaboratorySheetids(request):
     else:
         return HttpResponse("Not a GET request")
 
-@login_required
 def getLaboratorySheet(request):
     assert request.type == 'patient'
     if request.method == 'GET':
@@ -224,7 +243,6 @@ def getLaboratorySheet(request):
     else:
         return HttpResponse("Not a GET request")
     
-@login_required
 def conductLaboratorySheet(request):
     assert request.type == 'doctor'
     if request.method == 'POST':
@@ -238,7 +256,6 @@ def conductLaboratorySheet(request):
     else:
         return HttpResponse("Not a POST request")
     
-@login_required
 def deletePatient(request):
     assert request.type == 'patient'
     if request.method == 'POST':
@@ -249,7 +266,6 @@ def deletePatient(request):
     else:
         return HttpResponse("Not a POST request")
 
-@login_required
 def checkThePosInQueueu(request):
     assert request.type == 'patient'
     if request.method == 'GET':
@@ -262,7 +278,6 @@ def checkThePosInQueueu(request):
             return JsonResponse({'success' : False, 'queueNum' : -1, 'code' : 404, 'id' : -1 ,"msg" : '尚未挂号'})
     else:
         return HttpResponse("Not a GET request")
-@login_required
 def showCounterById(request) :
     assert request.type == 'patient'
     if request.method == 'POST':
@@ -276,7 +291,6 @@ def showCounterById(request) :
     else:
         return HttpResponse("Not a POST request")
 
-@login_required
 def getDoctorDispatch(request):
     assert request.type == 'doctor'
     if request.method == 'GET':
@@ -290,7 +304,6 @@ def getDoctorDispatch(request):
     else:
         return HttpResponse("Not a GET request")
 
-@login_required
 def hardDeleteDrug(request):
     assert request.type == 'admin'
     if request.method == 'POST':
@@ -301,7 +314,6 @@ def hardDeleteDrug(request):
     else:
         return HttpResponse("Not a POST request")
     
-@login_required
 def getCheckItemsList(request):
     assert request.type == 'doctor'
     if request.method == 'GET':
@@ -311,7 +323,6 @@ def getCheckItemsList(request):
     else:
         return HttpResponse("Not a GET request")
     
-@login_required
 def getCheckCombineList(request):
     assert request.type == 'doctor'
     if request.method == 'GET':
@@ -321,7 +332,6 @@ def getCheckCombineList(request):
     else:
         return HttpResponse("Not a GET request")
 
-@login_required
 def getDiagnosisList(request):
     if request.method == 'GET':
         Pid = request.session['id']
@@ -330,3 +340,73 @@ def getDiagnosisList(request):
         return JsonResponse(r)
     else:
         return HttpResponse('NOT A GET REQUEST')
+    
+
+def answer(request):
+    import mysql as DB
+    d = DB.MyDatabase()
+    data = json.loads(request.body)
+    content = data['content']
+    departmentlist = d.GetDepartmentList()
+    sendText = "你好，我是一名病人，我的症状是" + content + "，请问我得了什么病？我应该选择从" + departmentlist + "中的哪个科室就诊？"
+    openai.api_key = GPT_API_KEY
+    openai.api_base = "https://ai.fakeopen.com/v1"
+
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {'role': 'user', 'content': sendText}
+        ],
+        temperature=0.5,
+        max_tokens=20,
+        stream=True
+    )
+
+    result = ""
+
+    for chunk in response:
+        if 'choices' in chunk and 'delta' in chunk['choices'][0]:
+            chunk_msg = chunk['choices'][0]['delta'].get('content', '')
+            result += chunk_msg  # 将输出内容附加到结果字符串上
+            #print(chunk_msg, end='', flush=True)
+            #time.sleep(0.05)
+
+    return JsonResponse(result)
+
+
+def account(id : str):
+    db = MySQLdb.MyDatabase()
+    username = db.getNameById(id=id)
+    j = {}
+    j['avavtar'] = DEFAULT_AVATAR
+    j['age'] = 18
+    j['gender'] = 0
+    j['username'] = username
+    return JsonResponse(j)
+
+def conductMedcine(request):
+    assert request.type == 'doctor'
+    if request.method == 'POST':
+        Did = request.session['id']
+        Pid = request.POST.get('Pid')
+        MedcineList = request.POST.get('MedcineList')
+        AmountList = request.POST.get('AmountList')
+        db = MySQLdb.MyDatabase()
+        success, status = db.PrescribeMedication(did=Did, pid=Pid, nameList=MedcineList, amount=AmountList)
+        return JsonResponse({'success' : success, 'code' : status})
+    else:
+        return HttpResponse("Not a POST request")
+    
+
+def queryDrugInfo(request):
+    if request.method == 'POST':
+        DrugId = request.get('id')
+        db = MySQLdb.MyDatabase()
+        return JsonResponse(db.queryDrugInfo)
+    
+def showAllUser(request):
+    assert request.method == 'GET'
+    db = MySQLdb.MyDatabase()
+    print(db.showAllUser())
+    return HttpResponse('Success')
+

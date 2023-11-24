@@ -16,6 +16,7 @@ Including another URLconf
 """
 from django.urls import path
 from . import views
+from . import testviews
 from . import gptAnswer
 urlpatterns = [
     # Add your code here
@@ -43,9 +44,16 @@ urlpatterns = [
     path('api/hardDeleteDrug/', views.hardDeleteDrug),
     path('api/doctorList/', views.GetInfoListByDepartment),
     path("api/confirmdoctor/", views.PatientRegistration),
-    path('api/getSuggestion', gptAnswer.answer),
+    path('api/getSuggestion', views.answer),
     path('api/getDiagnosisList/', views.getDiagnosisList),
     path('api/deleteAccount/', views.deletePatient),
-
+    path('api/account', views.account),
+    path('api/signin', views.SignUpByPatient),
+    path('api/getCheckCombineList', views.getCheckCombineList),
+    path('api/getcheckItemList', views.getCheckItemsList),
+    path('api/queryDrugInfo', views.queryDrugInfo),
+    path('test/showAlluser', views.showAllUser),
+    path('test/showRequestJson', testviews.showRequestJson),
+    path('test/login', testviews.LogIn),
 
 ]

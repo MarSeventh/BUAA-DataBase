@@ -78,13 +78,15 @@ class AuthUserUserPermissions(models.Model):
 
 
 class Checkcombine(models.Model):
-    id = models.CharField(primary_key=True, max_length=25)
+    id = models.CharField(primary_key=True,
+                          max_length=25)  # The composite primary key (id, itemId) found, that is not supported. The first column is selected.
     itemid = models.ForeignKey('Checkitems', models.DO_NOTHING, db_column='itemId')  # Field name made lowercase.
     checkname = models.CharField(db_column='checkName', max_length=255)  # Field name made lowercase.
 
     class Meta:
         managed = False
         db_table = 'checkcombine'
+        unique_together = (('id', 'itemid'),)
 
 
 class Checkitems(models.Model):
@@ -105,8 +107,8 @@ class Counter(models.Model):
     did = models.ForeignKey('Doctor', models.DO_NOTHING, db_column='Did')  # Field name made lowercase.
     ispaid = models.IntegerField(db_column='isPaid')  # Field name made lowercase.
     price = models.FloatField(blank=True, null=True)
-    type = models.CharField(max_length=25)
     date = models.DateField(db_column='DATE')  # Field name made lowercase.
+    type = models.CharField(max_length=25)
 
     class Meta:
         managed = False
@@ -126,11 +128,13 @@ class Diagnosis(models.Model):
 
 
 class Dispatcher(models.Model):
-    timeperiod = models.CharField(db_column='TimePeriod', primary_key=True, max_length=25)  # Field name made lowercase. The composite primary key (TimePeriod, ROOMID) found, that is not supported. The first column is selected.
+    timeperiod = models.CharField(db_column='TimePeriod', primary_key=True,
+                                  max_length=25)  # Field name made lowercase. The composite primary key (TimePeriod, ROOMID) found, that is not supported. The first column is selected.
     roomid = models.ForeignKey('Room', models.DO_NOTHING, db_column='ROOMID')  # Field name made lowercase.
-    doctorid = models.ForeignKey('Doctor', models.DO_NOTHING, db_column='doctorId', blank=True, null=True)  # Field name made lowercase.
+    doctorid = models.ForeignKey('Doctor', models.DO_NOTHING, db_column='doctorId', blank=True,
+                                 null=True)  # Field name made lowercase.
     titleid = models.CharField(db_column='TitleId', max_length=25, blank=True, null=True)  # Field name made lowercase.
-    date = models.DateField(db_column='DATE')  # Field name made lowercase.
+    date = models.CharField(db_column='DATE', max_length=15)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -207,12 +211,13 @@ class Drug(models.Model):
 
 
 class Laboratorysheet(models.Model):
-    id = models.OneToOneField(Counter, models.DO_NOTHING, db_column='id', primary_key=True)  # The composite primary key (id, itemID) found, that is not supported. The first column is selected.
+    id = models.OneToOneField(Counter, models.DO_NOTHING, db_column='id',
+                              primary_key=True)  # The composite primary key (id, itemID) found, that is not supported. The first column is selected.
     checkname = models.CharField(db_column='checkName', max_length=255)  # Field name made lowercase.
     begintime = models.DateTimeField(db_column='beginTime')  # Field name made lowercase.
     outputtime = models.DateTimeField(db_column='OutputTime', blank=True, null=True)  # Field name made lowercase.
     itemid = models.ForeignKey(Checkitems, models.DO_NOTHING, db_column='itemID')  # Field name made lowercase.
-    result = models.CharField(max_length=255)
+    result = models.FloatField()
 
     class Meta:
         managed = False
@@ -221,7 +226,8 @@ class Laboratorysheet(models.Model):
 
 
 class Medicinepurchase(models.Model):
-    id = models.OneToOneField(Counter, models.DO_NOTHING, db_column='id', primary_key=True)  # The composite primary key (id, drugId) found, that is not supported. The first column is selected.
+    id = models.OneToOneField(Counter, models.DO_NOTHING, db_column='id',
+                              primary_key=True)  # The composite primary key (id, drugId) found, that is not supported. The first column is selected.
     drugid = models.ForeignKey(Drug, models.DO_NOTHING, db_column='drugId')  # Field name made lowercase.
     amount = models.FloatField()
 
@@ -270,10 +276,9 @@ class Titles(models.Model):
         managed = False
         db_table = 'titles'
 
-
 class User(models.Model):
     id = models.CharField(primary_key=True, max_length=25)
-    username = models.CharField(db_column='USERNAME', max_length=25)  # Field name made lowercase.
+    username = models.CharField(db_column='USERNAME', max_length=25, unique=True)  # Field name made lowercase.
     password = models.CharField(max_length=25)
     type = models.CharField(max_length=25)
 
