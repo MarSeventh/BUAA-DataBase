@@ -54,7 +54,7 @@ const showModal = ref(false);
 
 async function fetchAssayItemList() {
     try {
-        const response = await axios.post('http://127.0.0.1:4523/m1/3616438-0-default/api/getLaboratorySheet/', {
+        const response = await axios.post('http://127.0.0.1:4523/m1/3616438-0-default/api/getLaboratorySheet', {
             id: assayItemId,
         });
         assayItems.length = 0; // 清空assayItems数组
