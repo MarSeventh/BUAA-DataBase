@@ -16,11 +16,21 @@ const columns = [
         title: '医生姓名',
         dataIndex: 'name',
     },
+    {
+        title: '诊室编号',
+        dataIndex: 'roomid',
+    },
+    {
+        title: '排队人数',
+        dataIndex: 'quenelen',
+    },
     { title: '确认挂号', dataIndex: 'select', width: 200 },
 ];
 
 type Doctor = {
     name?: string;
+    roomid?: string;
+    quenelen?: string;
     _edit?: boolean;
     _isNew?: boolean;
 };
@@ -39,8 +49,8 @@ async function fetchDoctorList() {
         doctors.length = 0; // 清空doctors数组
 
         // 将获取到的部门数据放入doctors数组中
-        response.data.name.forEach((nameitem) => {
-            doctors.push({ name: nameitem });
+        response.data.doctorList.forEach((item) => {
+            doctors.push({ name: item.name, roomid: item.roomid, quenelen: item.quenelen });
         });
     } catch (error) {
         console.error('Error fetching doctors:', error);
@@ -51,7 +61,7 @@ fetchDoctorList();
 
 const price = accountStore.role === 'communityPatient' ? 1 : 10;
 
-async function addPay() {
+/*async function addPay() {
     try {
         const response = await axios.post('http://127.0.0.1:4523/m1/3616438-0-default/api/addPay', {
             name: '挂号费',
@@ -62,25 +72,26 @@ async function addPay() {
     } catch (error) {
         console.error('Error fetching doctors:', error);
     }
-}
+}*/
 
 async function confirmDoctor(name: String) {
     try {
         const response = await axios.post('http://127.0.0.1:4523/m1/3616438-0-default//api/confirmDoctor', {
             name: name,
         });
+        return response.data.id;
     } catch (error) {
         console.error('Error fetching doctors:', error);
     }
 }
 async function goin(record: Doctor) {
     try {
-        await confirmDoctor(record.name);
+        const id = await confirmDoctor(record.name);
         router.push({
             path: '/payPage',
             query: {
                 price: price,
-                id: await addPay(),
+                id: id,
             },
         });
     } catch (error) {
@@ -102,6 +113,18 @@ async function goin(record: Doctor) {
                     <span class="text-title font-bold">{{ text }}</span>
                 </div>
             </div>
+            <template v-else-if="column.dataIndex === 'quenelen'">
+                <div class="flex-col flex justify-evenly ml-2">
+                    <span>{{ text }}人</span>
+                </div>
+                <a-progress v-if="record.quenelen >= 50" :strokeWidth="4" :percent="record.quenelen * 2" status="exception" />
+                <a-progress v-else :strokeWidth="4" :percent="record.quenelen * 2" status="normal" />
+            </template>
+            <template v-else-if="column.dataIndex === 'roomid'">
+                <div class="flex-col flex justify-evenly ml-2">
+                    <span>{{ text }}</span>
+                </div>
+            </template>
             <template v-else-if="column.dataIndex === 'select'">
                 <a-button :disabled="showModal" type="primary" @click="goin(record)">
                     确认预约

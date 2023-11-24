@@ -46,19 +46,21 @@ const StatusDict = {
     0: '未缴费',
     1: '已缴费',
 };
-
+function getPriceSum() {
+    var priceSum = 0;
+    for (var i = 0; i < payItems.length; i++) {
+        if (payItems[i].status == 0) {
+            priceSum += payItems[i].price;
+        }
+    }
+    return priceSum;
+}
 async function goin() {
     try {
-        var priceSum = 0;
-        for (var i = 0; i < payItems.length; i++) {
-            if (payItems[i].status == 0) {
-                priceSum += payItems[i].price;
-            }
-        }
         router.push({
             path: '/payPage',
             query: {
-                price: priceSum,
+                price: getPriceSum(),
                 id: -1, //-1代表该用户的所有费用
             },
         });
@@ -104,7 +106,7 @@ async function goin() {
     </a-table>
     <div class="mt-4 flex justify-center">
         <a-button class="text-center justify-center" type="primary" @click="goin">
-            立即缴费
+            立即缴费（￥{{ getPriceSum() }}）
         </a-button>
     </div>
 </template>
