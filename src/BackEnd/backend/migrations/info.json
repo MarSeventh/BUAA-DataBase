@@ -1,0 +1,928 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+      "title": "个人项目",
+      "description": "",
+      "version": "1.0.0"
+    },
+    "tags": [],
+    "paths": {
+      "/api/departmentList": {
+        "get": {
+          "summary": "departmentList",
+          "x-apifox-folder": "",
+          "x-apifox-status": "released",
+          "deprecated": false,
+          "description": "",
+          "tags": [],
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "成功",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "uniqueItems": true
+                      }
+                    },
+                    "x-apifox-orders": [
+                      "name",
+                      "01HFJW6APAHJDGWCVQG4098MQC"
+                    ],
+                    "required": [
+                      "name",
+                      "01HFJW6APAHJDGWCVQG4098MQC"
+                    ],
+                    "x-apifox-ignore-properties": []
+                  }
+                }
+              }
+            }
+          },
+          "x-run-in-apifox": "https://apifox.com/web/project/3616438/apis/api-126118359-run",
+          "security": []
+        }
+      },
+      "/api/doctorList": {
+        "post": {
+          "summary": "doctorList",
+          "x-apifox-folder": "",
+          "x-apifox-status": "released",
+          "deprecated": false,
+          "description": "",
+          "tags": [],
+          "parameters": [],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "department": {
+                      "type": "string"
+                    }
+                  },
+                  "x-apifox-orders": [
+                    "department"
+                  ],
+                  "required": [
+                    "department"
+                  ],
+                  "x-apifox-ignore-properties": []
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "成功",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "minItems": 3,
+                        "uniqueItems": true
+                      }
+                    },
+                    "x-apifox-orders": [
+                      "name"
+                    ],
+                    "required": [
+                      "name"
+                    ],
+                    "x-apifox-ignore-properties": []
+                  },
+                  "examples": {
+                    "1": {
+                      "summary": "成功示例",
+                      "value": {
+                        "name": [
+                          "被带格图见表",
+                          "带前交又领",
+                          "门得型需教行二",
+                          "比支事程北响"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "x-run-in-apifox": "https://apifox.com/web/project/3616438/apis/api-126163616-run",
+          "security": []
+        }
+      },
+      "/api/addPay": {
+        "post": {
+          "summary": "addPay",
+          "x-apifox-folder": "",
+          "x-apifox-status": "released",
+          "deprecated": false,
+          "description": "",
+          "tags": [],
+          "parameters": [],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "number": {
+                      "type": "number"
+                    }
+                  },
+                  "x-apifox-orders": [
+                    "name",
+                    "number",
+                    "01HFNGH9QVCV3JZ41G42B8EWJH"
+                  ],
+                  "required": [
+                    "name",
+                    "number",
+                    "01HFNGH9QVCV3JZ41G42B8EWJH"
+                  ],
+                  "x-apifox-ignore-properties": []
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "成功",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer"
+                      }
+                    },
+                    "x-apifox-orders": [
+                      "id",
+                      "01HFNGJ4Z6BHVK2R99CF1JTJPA"
+                    ],
+                    "required": [
+                      "id",
+                      "01HFNGJ4Z6BHVK2R99CF1JTJPA"
+                    ],
+                    "x-apifox-ignore-properties": []
+                  },
+                  "examples": {
+                    "1": {
+                      "summary": "成功示例",
+                      "value": {
+                        "id": "24"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "x-run-in-apifox": "https://apifox.com/web/project/3616438/apis/api-126278111-run",
+          "security": []
+        }
+      },
+      "/api/finishPay": {
+        "post": {
+          "summary": "finishPay",
+          "x-apifox-folder": "",
+          "x-apifox-status": "released",
+          "deprecated": false,
+          "description": "",
+          "tags": [],
+          "parameters": [],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    }
+                  },
+                  "x-apifox-orders": [
+                    "id",
+                    "01HFNKTDV2861PDJFC11PR04N6"
+                  ],
+                  "required": [
+                    "id",
+                    "01HFNKTDV2861PDJFC11PR04N6"
+                  ],
+                  "x-apifox-ignore-properties": []
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "成功",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {},
+                    "x-apifox-ignore-properties": [],
+                    "x-apifox-orders": []
+                  },
+                  "examples": {
+                    "1": {
+                      "summary": "成功示例",
+                      "value": {}
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "x-run-in-apifox": "https://apifox.com/web/project/3616438/apis/api-126295561-run",
+          "security": []
+        }
+      },
+      "/api/confirmDoctor": {
+        "post": {
+          "summary": "confirmDoctor",
+          "x-apifox-folder": "",
+          "x-apifox-status": "released",
+          "deprecated": false,
+          "description": "",
+          "tags": [],
+          "parameters": [],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "x-apifox-orders": [
+                    "name"
+                  ],
+                  "required": [
+                    "name"
+                  ],
+                  "x-apifox-ignore-properties": []
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "成功",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {},
+                    "x-apifox-ignore-properties": [],
+                    "x-apifox-orders": []
+                  }
+                }
+              }
+            }
+          },
+          "x-run-in-apifox": "https://apifox.com/web/project/3616438/apis/api-126511429-run",
+          "security": []
+        }
+      },
+      "/api/fetchPayList": {
+        "get": {
+          "summary": "fetchPayList",
+          "x-apifox-folder": "",
+          "x-apifox-status": "released",
+          "deprecated": false,
+          "description": "",
+          "tags": [],
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "成功",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "params": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "number"
+                            },
+                            "type": {
+                              "type": "string"
+                            },
+                            "status": {
+                              "type": "number",
+                              "enum": [
+                                0,
+                                1
+                              ],
+                              "x-apifox": {
+                                "enumDescriptions": {
+                                  "0": "",
+                                  "1": ""
+                                }
+                              }
+                            },
+                            "price": {
+                              "type": "number"
+                            }
+                          },
+                          "x-apifox-orders": [
+                            "id",
+                            "type",
+                            "status",
+                            "price"
+                          ],
+                          "required": [
+                            "id",
+                            "type",
+                            "status",
+                            "price"
+                          ],
+                          "x-apifox-ignore-properties": []
+                        }
+                      }
+                    },
+                    "x-apifox-orders": [
+                      "params",
+                      "01HFQRXJKSRM29A56WJ3JYQ8HS"
+                    ],
+                    "required": [
+                      "params",
+                      "01HFQRXJKSRM29A56WJ3JYQ8HS"
+                    ],
+                    "x-apifox-ignore-properties": []
+                  },
+                  "examples": {
+                    "1": {
+                      "summary": "成功示例",
+                      "value": {
+                        "params": [
+                          {
+                            "id": 7,
+                            "type": "nisi ipsum tempor",
+                            "status": 39,
+                            "price": "53"
+                          },
+                          {
+                            "id": 83,
+                            "type": "tempor ut",
+                            "status": 34,
+                            "price": "20"
+                          },
+                          {
+                            "id": 59,
+                            "type": "ex sunt enim id",
+                            "status": 73,
+                            "price": "42"
+                          },
+                          {
+                            "id": 45,
+                            "type": "dolore Ut voluptate",
+                            "status": 7,
+                            "price": "91"
+                          },
+                          {
+                            "id": 90,
+                            "type": "in aute labore",
+                            "status": 93,
+                            "price": "77"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "x-run-in-apifox": "https://apifox.com/web/project/3616438/apis/api-126513397-run",
+          "security": []
+        }
+      },
+      "/api/getLaboratorySheetids/": {
+        "get": {
+          "summary": "getLaboratorySheetids",
+          "x-apifox-folder": "",
+          "x-apifox-status": "released",
+          "deprecated": false,
+          "description": "",
+          "tags": [],
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "成功",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "assayList": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "number"
+                            },
+                            "time": {
+                              "type": "string"
+                            },
+                            "checkName": {
+                              "type": "string"
+                            }
+                          },
+                          "x-apifox-orders": [
+                            "id",
+                            "time",
+                            "checkName"
+                          ],
+                          "required": [
+                            "id",
+                            "time",
+                            "checkName"
+                          ],
+                          "x-apifox-ignore-properties": []
+                        }
+                      }
+                    },
+                    "x-apifox-orders": [
+                      "assayList"
+                    ],
+                    "required": [
+                      "assayList"
+                    ],
+                    "x-apifox-ignore-properties": []
+                  },
+                  "examples": {
+                    "1": {
+                      "summary": "成功示例",
+                      "value": {
+                        "assayList": [
+                          {
+                            "id": 27,
+                            "time": "2009-09-01 20:29:28",
+                            "checkName": "做火都候支"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "x-run-in-apifox": "https://apifox.com/web/project/3616438/apis/api-126590700-run",
+          "security": []
+        }
+      },
+      "/api/getLaboratorySheet/": {
+        "post": {
+          "summary": "getLaboratorySheet",
+          "x-apifox-folder": "",
+          "x-apifox-status": "released",
+          "deprecated": false,
+          "description": "",
+          "tags": [],
+          "parameters": [],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number"
+                    }
+                  },
+                  "x-apifox-orders": [
+                    "id"
+                  ],
+                  "required": [
+                    "id"
+                  ],
+                  "x-apifox-ignore-properties": []
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "成功",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "assayItemList": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "itemid": {
+                              "type": "number"
+                            },
+                            "checkName": {
+                              "type": "string"
+                            },
+                            "result": {
+                              "type": "number"
+                            },
+                            "minresult": {
+                              "type": "number"
+                            },
+                            "maxresult": {
+                              "type": "number"
+                            },
+                            "outputtime": {
+                              "type": "string"
+                            }
+                          },
+                          "x-apifox-orders": [
+                            "itemid",
+                            "checkName",
+                            "result",
+                            "minresult",
+                            "maxresult",
+                            "outputtime"
+                          ],
+                          "required": [
+                            "itemid",
+                            "checkName",
+                            "result",
+                            "minresult",
+                            "maxresult",
+                            "outputtime"
+                          ],
+                          "x-apifox-ignore-properties": []
+                        }
+                      }
+                    },
+                    "x-apifox-orders": [
+                      "assayItemList",
+                      "01HFQYQX7JYCVVRTHA3653Q3KX"
+                    ],
+                    "required": [
+                      "assayItemList",
+                      "01HFQYQX7JYCVVRTHA3653Q3KX"
+                    ],
+                    "x-apifox-ignore-properties": []
+                  },
+                  "examples": {
+                    "1": {
+                      "summary": "成功示例",
+                      "value": {
+                        "assayItemList": {
+                          "itemid": 89,
+                          "checkName": "争织组造面矿产",
+                          "result": 7,
+                          "minresult": 18,
+                          "maxresult": 17,
+                          "outputtime": "1970-10-10 18:53:47"
+                        }
+                      }
+                    },
+                    "2": {
+                      "summary": "成功示例",
+                      "value": {
+                        "assayItemList": [
+                          {
+                            "itemid": 99,
+                            "checkName": "别越要速所",
+                            "result": 25,
+                            "minresult": 74,
+                            "maxresult": 92,
+                            "outputtime": "1979-04-03 23:37:07"
+                          },
+                          {
+                            "itemid": 96,
+                            "checkName": "织例至后",
+                            "result": 65,
+                            "minresult": 44,
+                            "maxresult": 90,
+                            "outputtime": "2004-01-12 20:41:25"
+                          },
+                          {
+                            "itemid": 77,
+                            "checkName": "至前取适化",
+                            "result": 6,
+                            "minresult": 96,
+                            "maxresult": 68,
+                            "outputtime": "1988-06-12 03:11:30"
+                          },
+                          {
+                            "itemid": 63,
+                            "checkName": "表候段",
+                            "result": 10,
+                            "minresult": 63,
+                            "maxresult": 11,
+                            "outputtime": "1990-11-16 09:10:54"
+                          },
+                          {
+                            "itemid": 28,
+                            "checkName": "料类制为按议加",
+                            "result": 27,
+                            "minresult": 30,
+                            "maxresult": 73,
+                            "outputtime": "1974-10-29 08:05:14"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "x-run-in-apifox": "https://apifox.com/web/project/3616438/apis/api-126603214-run",
+          "security": []
+        }
+      },
+      "/api/getDiagnosisList/": {
+        "get": {
+          "summary": "getDiagnosisList",
+          "x-apifox-folder": "",
+          "x-apifox-status": "released",
+          "deprecated": false,
+          "description": "",
+          "tags": [],
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "成功",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "diagnosisList": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "number"
+                            },
+                            "doctor": {
+                              "type": "string"
+                            },
+                            "time": {
+                              "type": "string"
+                            }
+                          },
+                          "x-apifox-orders": [
+                            "id",
+                            "doctor",
+                            "time"
+                          ],
+                          "required": [
+                            "id",
+                            "doctor",
+                            "time"
+                          ],
+                          "x-apifox-ignore-properties": []
+                        }
+                      }
+                    },
+                    "x-apifox-orders": [
+                      "diagnosisList"
+                    ],
+                    "required": [
+                      "diagnosisList"
+                    ],
+                    "x-apifox-ignore-properties": []
+                  },
+                  "examples": {
+                    "1": {
+                      "summary": "成功示例",
+                      "value": {
+                        "diagnosisList": [
+                          {
+                            "id": 10,
+                            "doctor": "eu",
+                            "time": "2000-06-07 19:14:48"
+                          },
+                          {
+                            "id": 91,
+                            "doctor": "laboris ut incididunt eiusmod",
+                            "time": "1970-01-08 11:09:07"
+                          },
+                          {
+                            "id": 63,
+                            "doctor": "proident sit non voluptate",
+                            "time": "1974-07-25 19:56:30"
+                          },
+                          {
+                            "id": 96,
+                            "doctor": "non",
+                            "time": "2013-04-15 23:36:36"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "x-run-in-apifox": "https://apifox.com/web/project/3616438/apis/api-126622370-run",
+          "security": []
+        }
+      },
+      "/api/getDiagnosis/": {
+        "post": {
+          "summary": "getDiagnosis",
+          "x-apifox-folder": "",
+          "x-apifox-status": "released",
+          "deprecated": false,
+          "description": "",
+          "tags": [],
+          "parameters": [],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number"
+                    }
+                  },
+                  "x-apifox-orders": [
+                    "id"
+                  ],
+                  "required": [
+                    "id"
+                  ],
+                  "x-apifox-ignore-properties": []
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "成功",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "doctor": {
+                        "type": "string"
+                      },
+                      "time": {
+                        "type": "string"
+                      },
+                      "statement": {
+                        "type": "string"
+                      }
+                    },
+                    "x-apifox-orders": [
+                      "doctor",
+                      "time",
+                      "statement"
+                    ],
+                    "required": [
+                      "doctor",
+                      "time",
+                      "statement"
+                    ],
+                    "x-apifox-ignore-properties": []
+                  }
+                }
+              }
+            }
+          },
+          "x-run-in-apifox": "https://apifox.com/web/project/3616438/apis/api-126634027-run",
+          "security": []
+        }
+      },
+      "/api/deleteAccount": {
+        "post": {
+          "summary": "deleteAccount",
+          "x-apifox-folder": "",
+          "x-apifox-status": "released",
+          "deprecated": false,
+          "description": "",
+          "tags": [],
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "成功",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {},
+                    "x-apifox-ignore-properties": [],
+                    "x-apifox-orders": []
+                  },
+                  "examples": {
+                    "1": {
+                      "summary": "成功示例",
+                      "value": {}
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "x-run-in-apifox": "https://apifox.com/web/project/3616438/apis/api-126733298-run",
+          "security": []
+        }
+      },
+      "/api/getSuggestion": {
+        "post": {
+          "summary": "getSuggestion",
+          "x-apifox-folder": "",
+          "x-apifox-status": "released",
+          "deprecated": false,
+          "description": "",
+          "tags": [],
+          "parameters": [],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "question": {
+                      "type": "string"
+                    }
+                  },
+                  "x-apifox-orders": [
+                    "question"
+                  ],
+                  "required": [
+                    "question"
+                  ],
+                  "x-apifox-ignore-properties": []
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "成功",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "answer": {
+                        "type": "string"
+                      }
+                    },
+                    "x-apifox-orders": [
+                      "answer"
+                    ],
+                    "required": [
+                      "answer"
+                    ],
+                    "x-apifox-ignore-properties": []
+                  }
+                }
+              }
+            }
+          },
+          "x-run-in-apifox": "https://apifox.com/web/project/3616438/apis/api-126869526-run",
+          "security": []
+        }
+      }
+    },
+    "components": {
+      "schemas": {},
+      "securitySchemes": {}
+    },
+    "servers": [
+      {
+        "url": "http://test-cn.your-api-server.com",
+        "description": "测试环境"
+      }
+    ]
+  }
