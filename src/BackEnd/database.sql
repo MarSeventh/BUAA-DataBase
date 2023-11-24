@@ -144,7 +144,7 @@ CREATE TABLE IF NOT EXISTS `Dispatcher` (
     `ROOMID` VARCHAR(25) NOT NULL,
     `doctorId` VARCHAR(25) ,
     `TitleId` VARCHAR(25),
-    `DATE` DATE NOT NULL,
+    `DATE` VARCHAR(15) NOT NULL,
     PRIMARY KEY (`TimePeriod`, `ROOMID`),
     FOREIGN KEY (`doctorId`) REFERENCES `Doctor`(`id`),
     FOREIGN KEY (`ROOMID`) REFERENCES `Room`(`id`)
@@ -335,3 +335,16 @@ INSERT INTO `ROOM` (`id`, `isOccupied`, `QueueLen`) VALUES
 
 
 SELECT * FROM drug;
+
+CREATE TRIGGER `DELETE_DRUG` BEFORE DELETE ON `drug` FOR EACH ROW
+BEGIN
+    DELETE FROM `checkcombine` WHERE `id` = OLD.id;
+END
+
+CREATE TRIGGER `DELETE_PATIENT` BEFORE DELETE ON `patient` FOR EACH ROW
+BEGIN
+    IF `patient`.`isComMem` = 1 THEN
+        DELETE FROM `counter` WHERE `Pid` = OLD.id;
+    END IF;
+END
+

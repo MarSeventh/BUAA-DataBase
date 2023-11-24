@@ -1,9 +1,7 @@
-import pprint, requests
+import pprint, requests, json
 
-response = requests.get('http://127.0.0.1:8000/api/showAllDrug/')
+data = {'username': 'admin', 'password': 'buaadb'}
 
-pprint.pprint(response.json())
-
-response = requests.get('http://127.0.0.1:8000/api/departmentList/')
+response = requests.post('http://127.0.0.1:8000/test/login', json=data)
 
 pprint.pprint(response.json())
