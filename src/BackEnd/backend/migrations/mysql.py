@@ -1,5 +1,8 @@
 import pymysql
 from datetime import datetime
+
+from django.db import transaction
+
 from . import models
 from django.db.models import Max
 
@@ -42,31 +45,23 @@ class MyDatabase:
 
     def SignUpByPatient(self, name: str, iscommem: bool, password: str, idcard: str):
         self.connect()
-        sql0 = "SELECT id FROM User WHERE name = %s"
+        sql0 = "SELECT id FROM User WHERE username = %s"
         self.cursor.execute(sql0, name)
         r = self.cursor.fetchall()
-        id = r[0]['id']
-        if len(id) != 0:
-            return False, 404
-        sql = "SELECT * FROM patient WHERE id = %s"
-        self.cursor.execute(sql, id)
-        result = self.cursor.fetchall()
-        if len(result) != 0:
+        if len(r) != 0:
+            print('用户名重叠')
             return False, 404
         if len(idcard) != 18:
+            print('身份证号不合法')
             return False, 404
         sql1 = "SELECT MAX(id) FROM patient"
         self.cursor.execute(sql1)
         result = self.cursor.fetchall()
         id = str(int(result[0]['MAX(id)']) + 1)
         iscommem = 1 if iscommem else 0
-        sql = "INSERT INTO patient (id, iscommem, idcard, active) VALUES (%s, %s, %s, 1)"
-        try:
-            self.cursor.execute(sql, (id, iscommem, idcard))
-            self.connection.commit()
-        except Exception:
-            self.connection.rollback()
-        self.close()
+        from .models import User, Patient
+        User.objects.create(id=id, username=name, type='patient', password=password)
+        Patient.objects.create(id=id, iscommem=iscommem, idcard=idcard, active=1)
         return True, 0
 
     def SoftDeletePatient(self, id: str):  # 软删除
@@ -114,6 +109,13 @@ class MyDatabase:
         self.close()
         return result
 
+    def getDate(self):
+        today = datetime.now()
+        day_of_week = today.weekday()
+        days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+        day_name = days[day_of_week]
+        return day_name
+
     def QueryPatientAllCounter(self, id: str):
         self.connect()
         sql = "SELECT id FROM COUNTER WHERE id = %s"
@@ -148,7 +150,7 @@ class MyDatabase:
 
         # 设置时间范围
         morning_start = datetime.strptime('08:00', '%H:%M').time()
-        morning_end = datetime.strptime('12:00', '%H:%M').time()
+        morning_end = datetime.strptime('13:00', '%H:%M').time()
 
         afternoon_start = datetime.strptime('14:00', '%H:%M').time()
         afternoon_end = datetime.strptime('18:00', '%H:%M').time()
@@ -164,14 +166,15 @@ class MyDatabase:
     def GetInfoListByDepartment(self, name: str):
         self.connect()
         timePeriod = self.get_time_period()
-        sql = "SELECT doctorId, ROOMid FROM Dispatcher WHERE TitleId = (SELECT id FROM Titles WHERE name = %s) AND TimePeriod = %s"
-        self.cursor.execute(sql, (name, timePeriod))
+        sql = "SELECT doctorId, ROOMid FROM Dispatcher WHERE TitleId = (SELECT id FROM Titles WHERE name = %s) AND TimePeriod = %s AND DATE = %s"
+        self.cursor.execute(sql, (name, timePeriod, self.getDate()))
         r = self.cursor.fetchall()
         l = []
         for i in r:
             doctor = models.Doctor.objects.get(id=i['doctorId'])
+            name = models.User.objects.get(id=doctor.id).username
             room = models.Room.objects.get(id=i['ROOMid'])
-            l.append({'doctor': doctor.name, 'room': room.name, 'queueLen': room.queueLen})
+            l.append({'doctor': name, 'room': room.id, 'queueLen': room.queuelen})
         self.close()
         return l
 
@@ -187,54 +190,45 @@ class MyDatabase:
         max_id = Registrelation.objects.filter(roomid=RoomId, isFinished=False).aggregate(Max('id'))['id__max']
         return Registrelation.objects.get(id=max_id)
 
+    @transaction.atomic
     def PatientRegistration(self, patientid: str, doctorid: str):
-        self.connect()
         timePeriod = self.get_time_period()
-        sql = "SELECT * FROM Dispatcher WHERE doctorId = %s AND TimePeriod = %s"
-        self.cursor.execute(sql, (doctorid, timePeriod))
-        r = self.cursor.fetchall()
-        if len(r) == 0:
+        from .models import Dispatcher, Counter, Registrelation, Patient, Room
+        r0 = Dispatcher.objects.filter(doctorid=doctorid, timeperiod=timePeriod, date=self.getDate()).values_list(
+            'roomid', flat=True).first()
+        if len(r0) == 0:
+            print('NO DOCTOR' + doctorid + 'IN ' + timePeriod)
             return '-1', False, 404
-        sql = "SELECT * FROM REGISTRELATION WHERE doctorId = %s AND TimePeriod = %s"
-        self.cursor.execute(sql, (doctorid, timePeriod))
-        r = self.cursor.fetchall()
+        r = Counter.objects.filter(pid=patientid, did=doctorid, type='Registration', ispaid=False)
         if len(r) == 0:
-            id = self.genCounterId()
-            sql = "INSERT INTO COUNTER (id, Pid, Did, isPaid, price, type, date) VALUES (%s, %s, %s, 1, 1, 'Registration', %s)"
-            try:
-                self.cursor.execute(sql, (id, patientid, doctorid, datetime.now()))
-                self.connection.commit()
-            except Exception:
-                self.connection.rollback()
-            sql2 = "INSERT INTO RegistRelation (id, ROOMID, isFinished) VALUES (%s, %s, False)"
-            try:
-                self.cursor.execute(sql2, (id, r[0]['ROOMID']))
-                self.connection.commit()
-            except Exception:
-                self.connection.rollback()
-            try:
-                models.Room.objects.filter(id=r[0]['ROOMID']).update(
-                    queueLen=models.Room.objects.get(id=r[0]['ROOMID']).queueLen + 1)
-            except Exception as e:
-                print('ERROR in PATIENT Registration' + e)
-            self.close()
+            iscommem = Patient.objects.get(id=patientid).iscommem
+            price = 1 if iscommem else 10
+            id = self.createNewCounter(pid=patientid, did=doctorid, type='Registration', price=price)
+            room = r0
+            Registrelation.objects.create(id=Counter.objects.get(id=id), isfinished=0, roomid=room)
+            print(room)
+            Room.objects.filter(id=room).update(queuelen=Room.objects.get(id=room).queuelen + 1)
             return id, True, 0
         else:
-            self.close()
+            print('ALREADY REGISTERED')
             return '-1', False, 404
 
     def genCounterId(self):
         self.connect()
-        sql = "SELECT MAX(id) FROM COUNTER"
+        sql = "SELECT MAX(CAST(id AS UNSIGNED)) AS max_id FROM COUNTER"
         self.cursor.execute(sql)
-        result = self.cursor.fetchall()
+        result = self.cursor.fetchone()
         self.close()
-        return str(int(result[0]['MAX(id)']) + 1)
+        max_id = result['max_id']
+        if max_id is None:
+            return '1'
+        else:
+            return str(int(max_id) + 1)
 
-    def showAllNeedToPay(self):
+    def showAllNeedToPay(self, Pid : str):
         self.connect()
-        sql = "SELECT ID, PRICE FROM COUNTER WHERE ISPAID IS 0"
-        self.cursor.execute(sql)
+        sql = "SELECT ID, PRICE FROM COUNTER WHERE ISPAID IS 0 AND PID = %s"
+        self.cursor.execute(sql, Pid)
         res = self.cursor.fetchall()
         return res
 
@@ -276,10 +270,10 @@ class MyDatabase:
         self.connection.commit()
         self.close()
 
-    def showAllinCounter(self):
+    def showAllinCounter(self, Pid : str):
         self.connect()
-        sql = "SELECT * FROM COUNTER"
-        self.cursor.execute(sql)
+        sql = "SELECT * FROM COUNTER WHERE PID = %s"
+        self.cursor.execute(sql , Pid)
         res = self.cursor.fetchall()
         return res
 
@@ -313,17 +307,14 @@ class MyDatabase:
             return None
 
     def createNewCounter(self, pid: str, did: str, price: float, type: str):
-        self.connect()
-        sql = "SELECT MAX(id) FROM COUNTER"
-        self.cursor.execute(sql)
-        result = self.cursor.fetchall()
-        self.close()
-        id = str(int(result[0]['MAX(id)']) + 1)
-        from src.BackEnd.backend.migrations.models import Counter
+        id = self.genCounterId()
+        from .models import Counter, Doctor, Patient
+        p = Patient.objects.filter(id=pid)
+        d = Doctor.objects.filter(id=did)
         if price == None:
-            Counter.objects.create(id=id, pid=pid, did=did, price=0, ispaid=0, type=type, date=datetime.now())
+            Counter.objects.create(id=id, pid=p[0], did=d[0], price=0, ispaid=0, type=type, date=datetime.now())
         else:
-            Counter.objects.create(id=id, pid=pid, did=did, price=price, ispaid=0, type=type, date=datetime.noew())
+            Counter.objects.create(id=id, pid=p[0], did=d[0], price=price, ispaid=0, type=type, date=datetime.now())
         return id
 
     def PrescribeMedication(self, nameList, amount, pid: str, did: str):
@@ -504,5 +495,9 @@ class MyDatabase:
         r = User.objects.all()
         a = []
         for i in r:
-            a.append({'id': i.id, 'username': i.username, 'type': i.type, 'password' : i.password})
+            a.append({'id': i.id, 'username': i.username, 'type': i.type, 'password': i.password})
         return a
+
+    def deleteAllCounter(self):
+        from .models import Counter
+        Counter.objects.all().delete()

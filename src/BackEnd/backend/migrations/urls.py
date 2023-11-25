@@ -55,5 +55,7 @@ urlpatterns = [
     path('test/showAlluser', views.showAllUser),
     path('test/showRequestJson', testviews.showRequestJson),
     path('test/login', testviews.LogIn),
+    path('test/Registration', views.testPatientRegistration),
+    path('test/deleteCounter', views.deleteCounter)
 
 ]

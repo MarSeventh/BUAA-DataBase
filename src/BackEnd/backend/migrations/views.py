@@ -53,7 +53,7 @@ def LogIn(request):
         return HttpResponse("Not a POST request")
     
 
-@csrf_exempt  # 仅用于演示，请谨慎使用
+@csrf_exempt
 def SignUpByPatient(request):
     if (request.method == 'POST'):
         try:
@@ -91,27 +91,28 @@ def GetDepartmentList(request):
     if (request.method == 'GET'):
         db = MySQLdb.MyDatabase()
         info = db.GetDepartmentList()
-        list = []
+        l = []
         for i in info:
-            list.append(i['name'])
-        return JsonResponse({'name': list})
+            l.append(i['name'])
+        return JsonResponse({'departments' : l})
     else:
         return HttpResponse("Not a GET request")
 
+@csrf_exempt
 def GetInfoListByDepartment(request):
-    assert request.type == 'patient'
+    # assert request.type == 'patient'
     if (request.method == 'POST'):
         data = json.loads(request.body)
-        department = data['Title']
+        department = data['Tittle']
         db = MySQLdb.MyDatabase()
         info = db.GetInfoListByDepartment(department)
         l = []
         for i in info:
-            l.append({i['name'], i['RoomID'], i['QueueLen']})
-        return JsonResponse({'info': list})
+            l.append({'doctor': i['doctor'], 'room': i['room'], 'queueLen': i['queueLen']})
+        L = list(l)
+        return JsonResponse({'info': L})
     else:
         return HttpResponse("Not a POST request")
-
 
 def PatientRegistration(request):
     assert request.type == 'patient'
@@ -125,6 +126,17 @@ def PatientRegistration(request):
         return JsonResponse({'id' : Payid})
     else:
         return HttpResponse("Not a POST request")
+
+
+@csrf_exempt   
+def testPatientRegistration(request):
+    assert request.method == 'POST'
+    data = json.loads(request.body)
+    Pid = data['Pid']
+    Did = data['Did']
+    db = MySQLdb.MyDatabase()
+    PayId, success, status = db.PatientRegistration(patientid=Pid, doctorid=Did)
+    return JsonResponse({'id' : PayId})
     
 
 def finishPay(request):
@@ -139,7 +151,8 @@ def showAllNeedtoPay(request):
     assert request.type == 'patient'
     if (request.method == 'POST'):
         db = MySQLdb.MyDatabase()
-        ans = db.showAllNeedToPay()
+        Pid = request.session['id']
+        ans = db.showAllNeedToPay(Pid=Pid)
         l = []
         for i in ans:
             jsonObj = {"id": i["id"], "price": i["price"]}
@@ -152,7 +165,8 @@ def showAllinCounter(request):
     assert request.type == 'patient'
     if (request.method == 'GET'):
         db = MySQLdb.MyDatabase()
-        ans = db.showAllinCounter()
+        Pid = request.session['id']
+        ans = db.showAllinCounter(Pid=Pid)
         l = []
         for i in ans:
             jsonObj = {"id": i["id"], "price": i["price"], 'status' : i['ispaid'], 'type' : i['type']}
@@ -408,5 +422,10 @@ def showAllUser(request):
     assert request.method == 'GET'
     db = MySQLdb.MyDatabase()
     print(db.showAllUser())
+    return HttpResponse('Success')
+
+def deleteCounter(request):
+    db = MySQLdb.MyDatabase()
+    db.deleteAllCounter()
     return HttpResponse('Success')
 

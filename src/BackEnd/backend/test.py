@@ -1,7 +1,11 @@
 import pprint, requests, json
 
-data = {'username': 'admin', 'password': 'buaadb'}
+URL_ROOT = 'http://127.0.0.1:8000/'
 
-response = requests.post('http://127.0.0.1:8000/test/login', json=data)
+data = {'Pid' : '6', 'Did' : '5'}
 
-pprint.pprint(response.json())
+r = requests.post(URL_ROOT+'test/Registration', json=data)
+
+pprint.pprint(r.json())
+
+
