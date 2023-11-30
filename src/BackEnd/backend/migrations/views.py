@@ -78,7 +78,7 @@ def showAllDrug(request):
         l = []
         for i in ans:
             print(i)
-            jsonObj = {"id": i["id"], "name": i["name"], "price": i["price"], "description": i["Description"], "Storage" : i['Storage']}
+            jsonObj = {"id": i["id"], "name": i["name"], "price": i["price"], "description": i["description"], "Storage" : i['Storage']}
             l.append(jsonObj)
         return JsonResponse({'info' : l})
     else:
@@ -147,22 +147,24 @@ def finishPay(request):
         db = MySQLdb.MyDatabase()
         db.finishPay(id=Payid)
 
+
 def showAllNeedtoPay(request):
     assert request.type == 'patient'
-    if (request.method == 'POST'):
+    if (request.method == 'GET'):
         db = MySQLdb.MyDatabase()
         Pid = request.session['id']
+        # Pid = '6'
         ans = db.showAllNeedToPay(Pid=Pid)
         l = []
         for i in ans:
             jsonObj = {"id": i["id"], "price": i["price"]}
             l.append(jsonObj)
-        return JsonResponse({'Info': list})
+        return JsonResponse({'Info': l})
     else:
         return HttpResponse("Not a POST request")
 
 def showAllinCounter(request):
-    assert request.type == 'patient'
+    # assert request.type == 'patient'
     if (request.method == 'GET'):
         db = MySQLdb.MyDatabase()
         Pid = request.session['id']
@@ -198,15 +200,14 @@ def PayAll(request):
         return HttpResponse("Not a POST request")
     
 def showAllDrugName(request):
-    assert request.type == 'doctor'
-    if request.method == 'POST':
+    if request.method == 'GET':
         db = MySQLdb.MyDatabase()
         ans = db.showAllDrugName()
         l = []
         for i in ans:
             jsonObj = {"name": i["name"]}
             l.append(jsonObj)
-        return JsonResponse({'Info': list})
+        return JsonResponse({'Info': l})
     else:
         return HttpResponse("Not a POST request")
     

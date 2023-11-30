@@ -25,15 +25,9 @@ class MyDatabase:
         self.connection.close()
 
     def queryidbyusername(self, username: str):
-        self.connect()
-        sql = "SELECT id FROM User WHERE name = %s"
-        self.cursor.execute(sql, username)
-        result = self.cursor.fetchall()
-        self.close()
-        return result[0]['id']
-
-    """
-    """
+        from models import User
+        result = User.objects.filter(username=username)
+        return result[0].id
 
     def Login(self, username: str, password: str):
         from .models import User
@@ -44,20 +38,15 @@ class MyDatabase:
             return True, 0, User.objects.filter(username=username, password=password)[0]
 
     def SignUpByPatient(self, name: str, iscommem: bool, password: str, idcard: str):
-        self.connect()
-        sql0 = "SELECT id FROM User WHERE username = %s"
-        self.cursor.execute(sql0, name)
-        r = self.cursor.fetchall()
+        from .models import User, Patient
+        r = User.objects.filter(username=name)
         if len(r) != 0:
             print('用户名重叠')
             return False, 404
         if len(idcard) != 18:
             print('身份证号不合法')
             return False, 404
-        sql1 = "SELECT MAX(id) FROM patient"
-        self.cursor.execute(sql1)
-        result = self.cursor.fetchall()
-        id = str(int(result[0]['MAX(id)']) + 1)
+        id = str(int(User.objects.all().order_by('-id')[0].id) + 1)
         iscommem = 1 if iscommem else 0
         from .models import User, Patient
         User.objects.create(id=id, username=name, type='patient', password=password)
@@ -65,48 +54,27 @@ class MyDatabase:
         return True, 0
 
     def SoftDeletePatient(self, id: str):  # 软删除
-        self.connect()
-        sql0 = "SELECT isComMem FROM patient WHERE id = %s"
-        self.cursor.execute(sql0, id)
-        result = self.cursor.fetchall()
-        if (result[0]['isComMem'] == 0):
-            sql1 = "UPDATE patient SET active = 0 WHERE id = %s"
-            try:
-                self.cursor.execute(sql1, id)
-                self.connection.commit()
-            except Exception:
-                self.connection.rollback()
-            self.close()
+        from .models import Patient
+        result = Patient.objects.filter(id=id)
+        if (result[0].iscommem == 0):
+            Patient.objects.filter(id=id).update(active=0)
             return True
         else:
             return False
 
     def HardDeleteDrug(self, name: str):
-        self.connect()
-        sql = "DELETE FROM drug WHERE name = %s"
-        try:
-            self.cursor.execute(sql, name)
-            self.connection.commit()
-        except Exception:
-            self.connection.rollback()
-        self.close()
+        from .models import Drug
+        Drug.objects.filter(name=name).delete()
+        return True
 
     def SoftDeleteDrug(self, name: str):
-        self.connect()
-        sql = "UPDATE drug SET active = 0 WHERE name = %s"
-        try:
-            self.cursor.execute(sql, name)
-            self.connection.commit()
-        except Exception:
-            self.connection.rollback()
-        self.close()
+        from .models import Drug
+        Drug.objects.filter(name=name).update(active=0)
+        return True
 
     def QueryPatientCounterToPay(self, id: str):
-        self.connect()
-        sql = "SELECT * FROM COUNTER WHERE id = %s AND isPaid = 0"
-        self.cursor.execute(sql, id)
-        result = self.cursor.fetchall()
-        self.close()
+        from .models import Counter
+        result = Counter.objects.filter(pid=id, ispaid=False)
         return result
 
     def getDate(self):
@@ -117,24 +85,14 @@ class MyDatabase:
         return day_name
 
     def QueryPatientAllCounter(self, id: str):
-        self.connect()
-        sql = "SELECT id FROM COUNTER WHERE id = %s"
-        self.cursor.execute(sql, id)
-        result = self.cursor.fetchall()
-        self.close()
+        from .models import Counter
+        result = Counter.objects.filter(pid=id)
         return result
 
     def QueryCounterById(self, id: str):
-        self.connect()
-        sql = "SELECT * FROM LABORATORYSHEET WHERE id = %s"
-        self.cursor.execute(sql, id)
-        result = self.cursor.fetchall()
-        sql1 = "SELECT * FROM REGISTRELATION WHERE id = %s"
-        self.cursor.execute(sql1, id)
-        result1 = self.cursor.fetchall()
-        sql2 = "SELECT * FROM MEDICINEPURCHASE WHERE id = %s"
-        result2 = self.cursor.fetchall()
-        self.close()
+        from .models import Counter
+        result = Counter.objects.filter(id=id)
+        return result
 
     def GetDepartmentList(self):
         self.connect()
@@ -186,7 +144,7 @@ class MyDatabase:
         Room.objects.filter(id=RoomId).update(queuelen=Room.objects.get(id=RoomId).queuelen - 1)
 
     def getCurrentPatient(self, RoomId: str):
-        from src.BackEnd.backend.migrations.models import Registrelation
+        from .models import Registrelation
         max_id = Registrelation.objects.filter(roomid=RoomId, isFinished=False).aggregate(Max('id'))['id__max']
         return Registrelation.objects.get(id=max_id)
 
@@ -226,14 +184,15 @@ class MyDatabase:
             return str(int(max_id) + 1)
 
     def showAllNeedToPay(self, Pid : str):
-        self.connect()
-        sql = "SELECT ID, PRICE FROM COUNTER WHERE ISPAID IS 0 AND PID = %s"
-        self.cursor.execute(sql, Pid)
-        res = self.cursor.fetchall()
+        from .models import Counter
+        l = Counter.objects.filter(pid=Pid, ispaid=False).iterator()
+        res = []
+        for i in l:
+            res.append({'id': i.id, 'type': i.type, 'price': i.price})
         return res
 
     def showCounterById(self, id: str):
-        from src.BackEnd.backend.migrations.models import Counter, Laboratorysheet, Registrelation, Medicinepurchase
+        from .models import Counter, Laboratorysheet, Registrelation, Medicinepurchase
         assert len(Counter.objects.filter(id=id)) != 0
         l1 = len(Laboratorysheet.objects.filter(id=id))
         l2 = len(Registrelation.objects.filter(id=id))
@@ -254,7 +213,7 @@ class MyDatabase:
             return False
 
     def showMedicinePurchase(self, id: str):
-        from src.BackEnd.backend.migrations.models import Medicinepurchase, Drug
+        from .models import Medicinepurchase, Drug
         l = Medicinepurchase.objects.filter(id=id)
         res = []
         for i in l:
@@ -278,10 +237,11 @@ class MyDatabase:
         return res
 
     def showAllinCounterByPid(self, pid: str):
-        self.connect()
-        sql = "SELECT * FROM COUNTER WHERE Pid = %s"
-        self.cursor.execute(sql, pid)
-        res = self.cursor.fetchall()
+        from .models import Counter
+        l = Counter.objects.filter(pid=pid).iterator()
+        res = []
+        for i in l:
+            res.append({'id': i.id, 'type': i.type, 'price': i.price})
         return res
 
     def showAllDiagnosisByPid(self, id: str):
@@ -318,111 +278,115 @@ class MyDatabase:
         return id
 
     def PrescribeMedication(self, nameList, amount, pid: str, did: str):
-        self.connect()
         idList = []
         for i in nameList:
-            sql = "SELECT id FROM DRUG WHERE name = %s"
-            self.cursor.execute(sql, i)
-            result = self.cursor.fetchall()
+            from models import Drug
+            result = Drug.objects.filter(name=i)
             if len(result) == 0:
                 return False, 404
-            idList.append(result[0]['id'])
+            idList.append(result[0].id)
 
         id = self.createNewCounter(pid=pid, did=did, type='Medicine')
-        from src.BackEnd.backend.migrations.models import Medicinepurchase, Counter, Drug
+        from models import Medicinepurchase, Counter, Drug
         for i in range(len(idList)):
             Medicinepurchase.objects.create(id=id, drugid=idList[i], amount=amount[i])
             Counter.objects.filter(id=id).update(
                 price=Counter.objects.get(id=id).price + amount[i] * Drug.objects.get(id=idList[i]).price)
-            Drug.objects.filter(id=idList[i]).update(Storage=Drug.objects.get(id=idList[i]).Storage - amount[i])
-        self.connection.commit()
-        self.close()
+            Drug.objects.filter(id=idList[i]).update(Storage=Drug.objects.get(id=idList[i]).storage - amount[i])
         return True, 0
 
+
+    def showAllDrugName(self):
+        from .models import Drug
+        l = Drug.objects.all().iterator()
+        res = []
+        for i in l:
+            res.append({'name': i.name})
+        return res
+    
     def showAllDrug(self):
-        self.connect()
-        sql = "SELECT * FROM DRUG WHERE ISBANNED = 0"
-        self.cursor.execute(sql)
-        res = self.cursor.fetchall()
-        if len(res) == 0:
-            print('NO DRUG')
+        from .models import Drug
+        l = Drug.objects.all().iterator()
+        res = []
+        for i in l:
+            res.append({'id': i.id, 'name': i.name, 'price': i.price, 'Storage': i.storage, 'description': i.description})
         return res
 
     def PayAll(self, Pid):
-        from src.BackEnd.backend.migrations.models import Counter
-        l = Counter.objects.filter(pid=Pid).iterator
+        from .models import Counter
+        l = Counter.objects.filter(pid=Pid).iterator()
         for i in l:
             i.ispaid = 1
 
     def MedicalDiagnosisStatement(self, Did: str, Pid: str, Statement: str):
-        from src.BackEnd.backend.migrations.models import Diagnosis
+        from .models import Diagnosis
         id = str(int(Diagnosis.objects.all().order_by('-id')[0].id) + 1)
         Diagnosis.objects.create(id=id, doctorid=Did, patientid=Pid, time=datetime.now(), diagnosis=Statement)
         return True, 0
 
     def getDiagnosisByPid(self, Pid: str):
-        from src.BackEnd.backend.migrations.models import Diagnosis
-        l = Diagnosis.objects.filter(patientid=Pid).iterator
+        from .models import Diagnosis
+        l = Diagnosis.objects.filter(patientid=Pid).iterator()
         res = []
         for i in l:
             res.append({'doctor': self.getNameById(i.doctorid), 'time': i.time, 'statement': i.diagnosis})
         return res
 
     def conductAlaboratoryAnalysis(self, Pid: str, Did: str, checkItemIds, checkName: str):
-        from src.BackEnd.backend.migrations.models import Checkcombine
+        from .models import Checkcombine
         m = Checkcombine.objects.filter(checkname=checkName)
         if m == None:
             assert len(checkItemIds) != 0
-            from src.BackEnd.backend.migrations.models import Laboratorysheet, Counter
+            from .models import Laboratorysheet, Counter
             id = str(int(Counter.objects.all().order_by('-id')[0].id) + 1)
             Counter.objects.create(id=id, pid=Pid, did=Did, price=0, ispaid=0, type='Laboratory', date=datetime.now())
             for i in checkItemIds:
-                from src.BackEnd.backend.migrations.models import Checkitems
+                from .models import Checkitems
                 Laboratorysheet.objects.create(id=id, itemid=i, time=datetime.now(), checkName=checkName)
                 Counter.objects.filter(id=id).update(
                     price=Counter.objects.get(id=id).price + Checkitems.objects.get(itemid=i).price)
             return True
         else:
             r = Checkcombine.objects.filter(checkName=checkName).get('itemid')
-            from src.BackEnd.backend.migrations.models import Laboratorysheet, Counter
+            from .models import Laboratorysheet, Counter
             id = str(int(Counter.objects.all().order_by('-id')[0].id) + 1)
             Counter.objects.create(id=id, pid=Pid, did=Did, price=0, ispaid=0, type='Laboratory', date=datetime.now())
             for i in r:
-                from src.BackEnd.backend.migrations.models import Checkitems
+                from .models import Checkitems
                 Laboratorysheet.objects.create(id=id, itemid=i, time=datetime.now(), checkName=checkName)
                 Counter.objects.filter(id=id).update(
                     price=Counter.objects.get(id=id).price + Checkitems.objects.get(itemid=i).price)
             return True
 
     def getLaboratorySheet(self, id: str):
-        from src.BackEnd.backend.migrations.models import Laboratorysheet
-        l = Laboratorysheet.objects.filter(id=id).iterator
+        from .models import Laboratorysheet
+        l = Laboratorysheet.objects.filter(id=id).iterator()
         if l[0]['outputtime'] == None:
             return False
         else:
             res = []
             for i in l:
-                from src.BackEnd.backend.migrations.models import Checkitems
-                res.append({'id': i.itemid, 'name': i.checkName, 'result': i.result,
+                from .models import Checkitems
+                res.append({'id': i.itemid, 'name': i.checkname, 'result': i.result,
                             'minresult': Checkitems.objects.get(itemid=i.itemid).minresult,
                             'maxresult': Checkitems.objects.get(itemid=i.itemid).maxresult, 'outputtime': i.outputtime})
             return res
 
     def showAllLaboratorySheetIds(self, Pid: str):
-        from src.BackEnd.backend.migrations.models import Laboratorysheet
-        l = Laboratorysheet.objects.filter(id=Pid).iterator
+        from .models import Laboratorysheet
+        l = Laboratorysheet.objects.filter(id=Pid).iterator()
         res = []
         for i in l:
-            res.append({'id': i.id, 'time': i.time, 'chekname': i.checkName})
+            res.append({'id': i.id, 'time': i.begintime, 'chekname': i.checkname})
         return res
 
     def getRegisterRelationInfo(self, Pid: str):
-        from src.BackEnd.backend.migrations.models import Registrelation
-        l = Registrelation.objects.filter(id=Pid, isfinished=False).iterator
+        from .models import Registrelation
+        l = Registrelation.objects.filter(id=Pid, isfinished=False).iterator()
         if len(l) == 0:
             return False, 404, -1
         else:
-            r = Registrelation.objects.filter(roomid=l[0]['roomid'], isfinished=False).iterator
+            r = Registrelation.objects.filter(roomid=l[0]['roomid'], isfinished=False).iterator()
             ans = 0
             for i in r:
                 if i.id < l[0]['id']:
@@ -439,15 +403,15 @@ class MyDatabase:
 
     def getCheckItemsList(self):
         from models import Checkitems
-        r = Checkitems.objects.all().iterator
+        r = Checkitems.objects.all().iterator()
         res = []
         for i in r:
-            res.append({'id': i.itemid, 'name': i.name, 'price': i.price})
+            res.append({'id': i.id, 'name': i.description, 'price': i.price})
         return res
 
     def getCheckCombineList(self):
         from models import Checkcombine
-        r = Checkcombine.objects.all().get('checkname')
+        r = Checkcombine.objects.all().iterator()
         res = []
         for i in r:
             res.append({'name': i.checkname})
@@ -492,7 +456,7 @@ class MyDatabase:
 
     def showAllUser(self):
         from .models import User
-        r = User.objects.all()
+        r = User.objects.all().iterator()
         a = []
         for i in r:
             a.append({'id': i.id, 'username': i.username, 'type': i.type, 'password': i.password})

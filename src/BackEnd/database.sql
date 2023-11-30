@@ -58,7 +58,6 @@ CREATE INDEX `index_id` ON `Doctor` (`id`)
 
 CREATE TABLE IF NOT EXISTS `Drug`(
     `id` VARCHAR(25) NOT NULL,
-    `name` VARCHAR(25) NOT NULL,
     `price` FLOAT NOT NULL,
     `Description` TEXT NOT NULL,
     `isBanned` BOOLEAN NOT NULL,
@@ -382,3 +381,6 @@ INSERT INTO `Dispatcher` (`TimePeriod`,`ROOMID`,`doctorId`,`TitleId`,`DATE`) VAL
 ('afternoon', '201', '5', '2', 'Friday'),
 ('morning', '201', '5', '2', 'Saturday'),
 ('afternoon', '201', '5', '2', 'Sunday');
+
+
+SELECT ID, PRICE FROM COUNTER WHERE ISPAID = 0 AND PID =  '6';
