@@ -21,29 +21,29 @@ from . import gptAnswer
 urlpatterns = [
     # Add your code here
 
-    path('api/login/', views.LogIn),
-    path('api/signUp/', views.SignUpByPatient),
-    path('api/departmentList/', views.GetDepartmentList),
-    path('api/departmentInfo/', views.GetInfoListByDepartment),
-    path('api/registration/', views.PatientRegistration),
-    path('api/counterToPay/', views.showAllNeedtoPay),
-    path('api/fetchPayList/', views.showAllinCounter),
-    path('api/prescribeMedication/', views.PrescribeMedication),
-    path('api/payAllCounter/', views.PayAll),
-    path('api/showAllDrug/', views.showAllDrug),
-    path('api/showAllDrugName/', views.showAllDrugName),
-    path('api/medicalDiagnosisStatement/', views.MedicalDiagnosisStatement),
-    path('api/getDiagnosisByPid/', views.getDiagnosisByPid),
-    path('api/getLaboratorySheetids/', views.getLaboratorySheetids),
-    path('api/getLaboratorySheet/', views.getLaboratorySheet),
-    path('api/conductLaboratorySheet/', views.conductLaboratorySheet),
-    path('api/deletePatient/', views.deletePatient),
-    path('api/checkThePosInQueueu/', views.checkThePosInQueueu),
-    path('api/showCounterById/', views.showCounterById),
-    path('api/getDoctorDispatch/', views.getDoctorDispatch),
-    path('api/hardDeleteDrug/', views.hardDeleteDrug),
-    path('api/doctorList/', views.GetInfoListByDepartment),
-    path("api/confirmdoctor/", views.PatientRegistration),
+    path('api/login/', views.LogIn), # finished
+    path('api/signUp/', views.SignUpByPatient), # finished
+    path('api/departmentList/', views.GetDepartmentList), # finished
+    path('api/departmentInfo/', views.GetInfoListByDepartment), # finished
+    path('api/registration/', views.PatientRegistration), # finished
+    path('api/counterToPay/', views.showAllNeedtoPay), # finished
+    path('api/fetchPayList/', views.showAllinCounter), # finished
+    path('api/prescribeMedication/', views.PrescribeMedication), # finished
+    path('api/payAllCounter/', views.PayAll), # finished
+    path('api/showAllDrug/', views.showAllDrug), # finished
+    path('api/showAllDrugName/', views.showAllDrugName), # finished
+    path('api/medicalDiagnosisStatement/', views.MedicalDiagnosisStatement), # finished
+    path('api/getDiagnosisByPid/', views.getDiagnosisByPid), # finished
+    path('api/getLaboratorySheetids/', views.getLaboratorySheetids), # finished
+    path('api/getLaboratorySheet/', views.getLaboratorySheet), # finished
+    path('api/conductLaboratorySheet/', views.conductLaboratorySheet), # finished
+    path('api/deletePatient/', views.deletePatient), # finished
+    path('api/checkThePosInQueueu/', views.checkThePosInQueueu), # finished
+    path('api/showCounterById/', views.showCounterById), # finished
+    path('api/getDoctorDispatch/', views.getDoctorDispatch), # finished
+    path('api/hardDeleteDrug/', views.hardDeleteDrug), # finished
+    path('api/doctorList/', views.GetInfoListByDepartment), # finished
+    path("api/confirmdoctor/", views.PatientRegistration), # finished
     path('api/getSuggestion', views.answer),
     path('api/getDiagnosisList/', views.getDiagnosisList),
     path('api/deleteAccount/', views.deletePatient),
@@ -52,10 +52,10 @@ urlpatterns = [
     path('api/getCheckCombineList', views.getCheckCombineList),
     path('api/getcheckItemList', views.getCheckItemsList),
     path('api/queryDrugInfo', views.queryDrugInfo),
-    path('test/showAlluser', views.showAllUser),
-    path('test/showRequestJson', testviews.showRequestJson),
-    path('test/login', testviews.LogIn),
-    path('test/Registration', views.testPatientRegistration),
-    path('test/deleteCounter', views.deleteCounter)
+    path('test/showAlluser', views.showAllUser), # finished
+    path('test/showRequestJson', testviews.showRequestJson), # finished
+    path('test/login', testviews.LogIn), # finished
+    path('test/Registration', views.testPatientRegistration), # finished
+    path('test/deleteCounter', views.deleteCounter) # finished
 
 ]

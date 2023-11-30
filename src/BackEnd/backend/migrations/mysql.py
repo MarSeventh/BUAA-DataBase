@@ -192,25 +192,31 @@ class MyDatabase:
         return res
 
     def showCounterById(self, id: str):
-        from .models import Counter, Laboratorysheet, Registrelation, Medicinepurchase
+        from .models import Counter, Laboratorysheet, Registrelation, Medicinepurchase, Doctor
         assert len(Counter.objects.filter(id=id)) != 0
-        l1 = len(Laboratorysheet.objects.filter(id=id))
-        l2 = len(Registrelation.objects.filter(id=id))
-        l3 = len(Medicinepurchase.objects.filter(id=id))
+        c = Counter.objects.get(id=id)
+        l1 = len(Laboratorysheet.objects.filter(id=c))
+        l2 = len(Registrelation.objects.filter(id=c))
+        l3 = len(Medicinepurchase.objects.filter(id=c))
         if l1 != 0:
-            l = Laboratorysheet.objects.get(id=id)
-            return {'type': "化验订单", 'name': l.checkname, 'price': Counter.objects.get(id=id).price}
+            l = Laboratorysheet.objects.filter(id=c)
+            return True , {'type': "化验订单", 'name': l[0].checkname, 'price': c.price}
         elif l2 != 0:
-            l = Registrelation.objects.get(id=id)
+            l = Registrelation.objects.get(id=c)
             Did = Counter.objects.get(id=id).did
-            Dname = models.User.objects.get(id=Did).username
-            return {'type': "挂号订单", 'name': format("您对%s医生的挂号" % Dname),
+            try:
+                Dname = models.User.objects.get(id=Did.id).username
+            except:
+                print(Did.id)
+                print('no such doctor')
+                return False, 404
+            return True, {'type': "挂号订单", 'name': format("您对%s医生的挂号" % Dname),
                     'price': Counter.objects.get(id=id).price}
         elif l3 != 0:
-            l = Medicinepurchase.objects.filter(id=id)
-            return {'type': "购药订单", 'name': '购药订单', 'price': Counter.objects.get(id=id).price}
+            return True, {'type': "购药订单", 'name': '购药订单', 'price': Counter.objects.get(id=id).price}
         else:
-            return False
+            print('no such counter')
+            return False, 404
 
     def showMedicinePurchase(self, id: str):
         from .models import Medicinepurchase, Drug
@@ -230,10 +236,15 @@ class MyDatabase:
         self.close()
 
     def showAllinCounter(self, Pid : str):
-        self.connect()
-        sql = "SELECT * FROM COUNTER WHERE PID = %s"
-        self.cursor.execute(sql , Pid)
-        res = self.cursor.fetchall()
+        from .models import Counter
+        l = Counter.objects.filter(pid=Pid).iterator()
+        res = []
+        for i in l:
+            res.append({'id': i.id, 'type': i.type, 'ispaid': i.ispaid, 'price': i.price})
+            if i.price == None:
+                print('price is None')
+            else:
+                print(i.price)
         return res
 
     def showAllinCounterByPid(self, pid: str):
@@ -271,28 +282,34 @@ class MyDatabase:
         from .models import Counter, Doctor, Patient
         p = Patient.objects.filter(id=pid)
         d = Doctor.objects.filter(id=did)
-        if price == None:
+        if len(p) == 0 or len(d) == 0:
+            return False
+        elif price == None:
             Counter.objects.create(id=id, pid=p[0], did=d[0], price=0, ispaid=0, type=type, date=datetime.now())
         else:
             Counter.objects.create(id=id, pid=p[0], did=d[0], price=price, ispaid=0, type=type, date=datetime.now())
         return id
 
-    def PrescribeMedication(self, nameList, amount, pid: str, did: str):
+    def PrescribeMedication(self, nameList : list, amount : list, pid: str, did: str):
         idList = []
         for i in nameList:
-            from models import Drug
+            from .models import Drug
             result = Drug.objects.filter(name=i)
             if len(result) == 0:
                 return False, 404
             idList.append(result[0].id)
 
-        id = self.createNewCounter(pid=pid, did=did, type='Medicine')
-        from models import Medicinepurchase, Counter, Drug
+        id = self.createNewCounter(pid=pid, did=did, type='Medicine', price=0)
+        if id == False:
+            print(pid)
+            print(did)
+            return False, 404
+        from .models import Medicinepurchase, Counter, Drug
         for i in range(len(idList)):
-            Medicinepurchase.objects.create(id=id, drugid=idList[i], amount=amount[i])
+            Medicinepurchase.objects.create(id=Counter.objects.get(id=id), drugid=Drug.objects.get(id=idList[i]), amount=amount[i])
             Counter.objects.filter(id=id).update(
                 price=Counter.objects.get(id=id).price + amount[i] * Drug.objects.get(id=idList[i]).price)
-            Drug.objects.filter(id=idList[i]).update(Storage=Drug.objects.get(id=idList[i]).storage - amount[i])
+            Drug.objects.filter(id=idList[i]).update(storage=Drug.objects.get(id=idList[i]).storage - amount[i])
         return True, 0
 
 
@@ -312,16 +329,22 @@ class MyDatabase:
             res.append({'id': i.id, 'name': i.name, 'price': i.price, 'Storage': i.storage, 'description': i.description})
         return res
 
-    def PayAll(self, Pid):
+    def PayAll(self, Pid : str):
         from .models import Counter
         l = Counter.objects.filter(pid=Pid).iterator()
         for i in l:
-            i.ispaid = 1
+            Counter.objects.filter(id=i.id).update(ispaid=True)
+            c = Counter.objects.get(id=i.id)
+            print(c.ispaid)
+        return True, 0
 
     def MedicalDiagnosisStatement(self, Did: str, Pid: str, Statement: str):
-        from .models import Diagnosis
-        id = str(int(Diagnosis.objects.all().order_by('-id')[0].id) + 1)
-        Diagnosis.objects.create(id=id, doctorid=Did, patientid=Pid, time=datetime.now(), diagnosis=Statement)
+        from .models import Diagnosis, Patient, Doctor
+        if len(Diagnosis.objects.all()) == 0:
+            id = '1'
+        else:
+            id = str(int(Diagnosis.objects.all().order_by('-id')[0].id) + 1)
+        Diagnosis.objects.create(id=id, doctorid=Doctor.objects.get(id=Did), patientid=Patient.objects.get(id=Pid), time=datetime.now(), diagnosis=Statement)
         return True, 0
 
     def getDiagnosisByPid(self, Pid: str):
@@ -332,7 +355,7 @@ class MyDatabase:
             res.append({'doctor': self.getNameById(i.doctorid), 'time': i.time, 'statement': i.diagnosis})
         return res
 
-    def conductAlaboratoryAnalysis(self, Pid: str, Did: str, checkItemIds, checkName: str):
+    def conductAlaboratoryAnalysis(self, Pid: str, Did: str, checkItemIds : list, checkName: str):
         from .models import Checkcombine
         m = Checkcombine.objects.filter(checkname=checkName)
         if m == None:
@@ -345,60 +368,78 @@ class MyDatabase:
                 Laboratorysheet.objects.create(id=id, itemid=i, time=datetime.now(), checkName=checkName)
                 Counter.objects.filter(id=id).update(
                     price=Counter.objects.get(id=id).price + Checkitems.objects.get(itemid=i).price)
-            return True
+            return True, 0
         else:
-            r = Checkcombine.objects.filter(checkName=checkName).get('itemid')
-            from .models import Laboratorysheet, Counter
+            r = Checkcombine.objects.filter(checkname=checkName).iterator()
+            from .models import Laboratorysheet, Counter, Patient, Doctor
             id = str(int(Counter.objects.all().order_by('-id')[0].id) + 1)
-            Counter.objects.create(id=id, pid=Pid, did=Did, price=0, ispaid=0, type='Laboratory', date=datetime.now())
+            Counter.objects.create(id=id, pid=Patient.objects.get(id=Pid), did=Doctor.objects.get(id=Did), price=0, ispaid=0, type='Laboratory', date=datetime.now())
             for i in r:
                 from .models import Checkitems
-                Laboratorysheet.objects.create(id=id, itemid=i, time=datetime.now(), checkName=checkName)
-                Counter.objects.filter(id=id).update(
-                    price=Counter.objects.get(id=id).price + Checkitems.objects.get(itemid=i).price)
-            return True
+                try:
+                    Laboratorysheet.objects.create(id=Counter.objects.get(id=id), itemid=i.itemid, begintime=datetime.now(), checkname=checkName, result=-1)
+                    Counter.objects.filter(id=id).update(price=Counter.objects.get(id=id).price + Checkitems.objects.get(id=i.itemid.id).price)
+                except:
+                    print(i.itemid)
+                    return False, 404
+            return True, 0
 
     def getLaboratorySheet(self, id: str):
         from .models import Laboratorysheet
         l = Laboratorysheet.objects.filter(id=id).iterator()
-        if l[0]['outputtime'] == None:
+        if l == None:
             return False
         else:
             res = []
             for i in l:
                 from .models import Checkitems
-                res.append({'id': i.itemid, 'name': i.checkname, 'result': i.result,
-                            'minresult': Checkitems.objects.get(itemid=i.itemid).minresult,
-                            'maxresult': Checkitems.objects.get(itemid=i.itemid).maxresult, 'outputtime': i.outputtime})
+                try:
+                    res.append({'id': id, 'name': i.checkname, 'result': i.result,
+                            'minresult': Checkitems.objects.get(id=i.itemid.id).minresult,
+                            'maxresult': Checkitems.objects.get(id=i.itemid.id).maxresult, 'outputtime': datetime.now() if i.outputtime == None else i.outputtime 
+                            , 'name' : Checkitems.objects.get(id=i.itemid.id).description})
+                except:
+                    print(i.itemid)
+                    return {}
+            print(res)
             return res
 
     def showAllLaboratorySheetIds(self, Pid: str):
-        from .models import Laboratorysheet
-        l = Laboratorysheet.objects.filter(id=Pid).iterator()
+        from .models import Laboratorysheet, Counter, Checkitems
+        id = Counter.objects.filter(pid=Pid, type='Laboratory').iterator()
         res = []
-        for i in l:
-            res.append({'id': i.id, 'time': i.begintime, 'chekname': i.checkname})
+        for i in id:
+            res.append({'id': i.id})
         return res
 
     def getRegisterRelationInfo(self, Pid: str):
-        from .models import Registrelation
-        l = Registrelation.objects.filter(id=Pid, isfinished=False).iterator()
-        if len(l) == 0:
+        from .models import Registrelation, Counter
+        id = Counter.objects.filter(pid=Pid, type='Registration').iterator()
+        res = []
+        for i in id:
+            if Registrelation.objects.get(id=i.id).isfinished == False:
+                res.append({'id': i.id})
+        if len(res) == 0:
+            return False, 404
+        Rid = res[0]['id']
+        l = Registrelation.objects.get(id=Rid, isfinished=0)
+        if l == None:
             return False, 404, -1
         else:
-            r = Registrelation.objects.filter(roomid=l[0]['roomid'], isfinished=False).iterator()
+            roomid = l.roomid
+            o = Registrelation.objects.filter(isfinished=False, roomid=roomid).order_by(('id_id')).iterator()
             ans = 0
-            for i in r:
-                if i.id < l[0]['id']:
+            for i in o:
+                if int(i.id.id) < int(l.id.id):
                     ans += 1
-            return True, ans, l[0]['id']
+            return True, ans, l.id.id
 
     def getDoctorDispatcher(self, Did: str):
-        from models import Dispatcher
-        r = Dispatcher.objects.filter(doctorid=Did)
+        from .models import Dispatcher, Doctor
+        r = Dispatcher.objects.filter(doctorid=Doctor.objects.get(id=Did))
         res = []
         for i in r:
-            res.append({'timeperiod': i.timeperiod, 'RoomId': i.roomid})
+            res.append({'timeperiod': i.timeperiod, 'RoomId': i.roomid.id, 'date': i.date})
         return res
 
     def getCheckItemsList(self):

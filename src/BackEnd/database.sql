@@ -383,4 +383,13 @@ INSERT INTO `Dispatcher` (`TimePeriod`,`ROOMID`,`doctorId`,`TitleId`,`DATE`) VAL
 ('afternoon', '201', '5', '2', 'Sunday');
 
 
-SELECT ID, PRICE FROM COUNTER WHERE ISPAID = 0 AND PID =  '6';
+SELECT * FROM COUNTER ;
+
+SELECT * FROM diagnosis;
+
+SELECT * FROM checkcombine;
+
+
+SELECT * FROM laboratorysheet;
+
+SELECT * FROM registrelation;
