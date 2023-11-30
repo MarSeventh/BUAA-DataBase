@@ -78,13 +78,14 @@ class AuthUserUserPermissions(models.Model):
 
 
 class Checkcombine(models.Model):
-    id = models.CharField(primary_key=True, max_length=25)
+    id = models.CharField(primary_key=True, max_length=25)  # The composite primary key (id, itemId) found, that is not supported. The first column is selected.
     itemid = models.ForeignKey('Checkitems', models.DO_NOTHING, db_column='itemId')  # Field name made lowercase.
     checkname = models.CharField(db_column='checkName', max_length=255)  # Field name made lowercase.
 
     class Meta:
         managed = False
         db_table = 'checkcombine'
+        unique_together = (('id', 'itemid'),)
 
 
 class Checkitems(models.Model):
@@ -126,16 +127,16 @@ class Diagnosis(models.Model):
 
 
 class Dispatcher(models.Model):
-    timeperiod = models.CharField(db_column='TimePeriod', primary_key=True, max_length=25)  # Field name made lowercase. The composite primary key (TimePeriod, ROOMID) found, that is not supported. The first column is selected.
+    timeperiod = models.CharField(db_column='TimePeriod', primary_key=True, max_length=25)  # Field name made lowercase. The composite primary key (TimePeriod, ROOMID, DATE) found, that is not supported. The first column is selected.
     roomid = models.ForeignKey('Room', models.DO_NOTHING, db_column='ROOMID')  # Field name made lowercase.
     doctorid = models.ForeignKey('Doctor', models.DO_NOTHING, db_column='doctorId', blank=True, null=True)  # Field name made lowercase.
     titleid = models.CharField(db_column='TitleId', max_length=25, blank=True, null=True)  # Field name made lowercase.
-    date = models.DateField(db_column='DATE')  # Field name made lowercase.
+    date = models.CharField(db_column='DATE', max_length=15)  # Field name made lowercase.
 
     class Meta:
         managed = False
         db_table = 'dispatcher'
-        unique_together = (('timeperiod', 'roomid'),)
+        unique_together = (('timeperiod', 'roomid', 'date'),)
 
 
 class DjangoAdminLog(models.Model):

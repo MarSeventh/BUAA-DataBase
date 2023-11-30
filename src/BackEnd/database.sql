@@ -6,7 +6,6 @@ DROP TABLE IF EXISTS `Patient`;
 DROP TABLE IF EXISTS `Doctor`;
 DROP TABLE IF EXISTS `Admin`;
 DROP TABLE IF EXISTS `Drug`;
-DROP TABLE IF EXISTS `Storage`;
 DROP TABLE IF EXISTS `Counter`;
 
 DROP TABLE IF EXISTS `RegistRelation`;
@@ -59,7 +58,6 @@ CREATE INDEX `index_id` ON `Doctor` (`id`)
 
 CREATE TABLE IF NOT EXISTS `Drug`(
     `id` VARCHAR(25) NOT NULL,
-    `name` VARCHAR(25) NOT NULL,
     `price` FLOAT NOT NULL,
     `Description` TEXT NOT NULL,
     `isBanned` BOOLEAN NOT NULL,
@@ -145,8 +143,8 @@ CREATE TABLE IF NOT EXISTS `Dispatcher` (
     `ROOMID` VARCHAR(25) NOT NULL,
     `doctorId` VARCHAR(25) ,
     `TitleId` VARCHAR(25),
-    `DATE` DATE NOT NULL,
-    PRIMARY KEY (`TimePeriod`, `ROOMID`),
+    `DATE` VARCHAR(15) NOT NULL,
+    PRIMARY KEY (`TimePeriod`, `ROOMID`, `DATE`),
     FOREIGN KEY (`doctorId`) REFERENCES `Doctor`(`id`),
     FOREIGN KEY (`ROOMID`) REFERENCES `Room`(`id`)
 );
@@ -332,3 +330,66 @@ INSERT INTO `ROOM` (`id`, `isOccupied`, `QueueLen`) VALUES
 ('102', true, 0),
 ('201', true, 0),
 ('202', true, 0);
+
+
+
+SELECT * FROM drug;
+
+CREATE TRIGGER `DELETE_DRUG` BEFORE DELETE ON `drug` FOR EACH ROW
+BEGIN
+    DELETE FROM `checkcombine` WHERE `id` = OLD.id;
+END
+
+CREATE TRIGGER `DELETE_PATIENT` BEFORE DELETE ON `patient` FOR EACH ROW
+BEGIN
+    IF `patient`.`isComMem` = 1 THEN
+        DELETE FROM `counter` WHERE `Pid` = OLD.id;
+    END IF;
+END
+
+
+SELECT id FROM USER WHERE `USERNAME` = '21373405' AND password = '123456';
+
+SELECT * FROM DOCTOR;
+
+INSERT INTO `Dispatcher` (`TimePeriod`,`ROOMID`,`doctorId`,`TitleId`,`DATE`) VALUES
+('morning', '101', '2', '1', 'Monday'),
+('afternoon', '101', '2', '1', 'Tuesday'),
+('morning', '101', '2', '1', 'Wednesday'),
+('afternoon', '101', '2', '1', 'Thursday'),
+('morning', '101', '2', '1', 'Friday'),
+('afternoon', '101', '2', '1', 'Saturday'),
+('morning', '101', '2', '1', 'Sunday'),
+('afternoon', '101', '3', '1', 'Monday'),
+('morning', '101', '3', '1', 'Tuesday'),
+('afternoon', '101', '3', '1', 'Wednesday'),
+('morning', '101', '3', '1', 'Thursday'),
+('afternoon', '101', '3', '1', 'Friday'),
+('morning', '101', '3', '1', 'Saturday'),
+('afternoon', '101', '3', '1', 'Sunday'),
+('morning', '201', '4', '2', 'Monday'),
+('afternoon', '201', '4', '2', 'Tuesday'),
+('morning', '201', '4', '2', 'Wednesday'),
+('afternoon', '201', '4', '2', 'Thursday'),
+('morning', '201', '4', '2', 'Friday'),
+('afternoon', '201', '4', '2', 'Saturday'),
+('morning', '201', '4', '2', 'Sunday'),
+('afternoon', '201', '5', '2', 'Monday'),
+('morning', '201', '5', '2', 'Tuesday'),
+('afternoon', '201', '5', '2', 'Wednesday'),
+('morning', '201', '5', '2', 'Thursday'),
+('afternoon', '201', '5', '2', 'Friday'),
+('morning', '201', '5', '2', 'Saturday'),
+('afternoon', '201', '5', '2', 'Sunday');
+
+
+SELECT * FROM COUNTER ;
+
+SELECT * FROM diagnosis;
+
+SELECT * FROM checkcombine;
+
+
+SELECT * FROM laboratorysheet;
+
+SELECT * FROM registrelation;
