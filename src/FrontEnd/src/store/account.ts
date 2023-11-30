@@ -34,12 +34,13 @@ export const useAccountStore = defineStore('account', {
   actions: {
     async login(username: string, password: string) {
       return http
-        .request<TokenResult, Response<TokenResult>>('/login', 'post_json', { username, password })
+        .request<TokenResult, Response<TokenResult>>('http://127.0.0.1:4523/m1/3616438-0-default/login', 'post_json', { username, password })
         .then(async (response) => {
+          console.log(response);
           if (response.code === 0) {
             this.logged = true;
             http.setAuthorization(`Bearer ${response.data.token}`, new Date(response.data.expires));
-            await useMenuStore().getMenuList();
+            //await useMenuStore().getMenuList();
             return response.data;
           } else {
             return Promise.reject(response);
