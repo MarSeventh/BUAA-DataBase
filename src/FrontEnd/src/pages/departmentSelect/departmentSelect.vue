@@ -17,9 +17,9 @@ const greeting = computed(
         <div class="banner w-full rounded-xl p-base items-baseline">
             <a-breadcrumb class="navi">
                 <a-breadcrumb-item class="text-text-inverse">Home</a-breadcrumb-item>
-                <a-breadcrumb-item>挂号预约</a-breadcrumb-item>
+                <a-breadcrumb-item>DepartmentSelect</a-breadcrumb-item>
             </a-breadcrumb>
-            <div class="mt-0.5 text-text-inverse text-xl font-semibold">DepartmentSelect</div>
+            <div class="mt-0.5 text-text-inverse text-xl font-semibold">挂号预约</div>
             <div
                 class="profile flex items-center justify-between p-base bg-container rounded-2xl absolute -bottom-16 left-6 shadow-lg">
                 <div class="info flex items-center">

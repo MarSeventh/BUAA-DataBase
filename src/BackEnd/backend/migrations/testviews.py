@@ -1,8 +1,10 @@
 from django.http import HttpResponse
 from rest_framework.authtoken.models import Token
+
 from django.utils import timezone
 
 from . import mysql as MySQLdb
+import jwt, datetime
 import json
 
 from django.http import JsonResponse
@@ -12,6 +14,7 @@ import openai
 
 import json
 from django.http import JsonResponse
+
 
 @csrf_exempt
 def showRequestJson(request):
@@ -30,25 +33,19 @@ def LogIn(request):
 
         db = MySQLdb.MyDatabase()
         success, code, user = db.Login(username=username, password=password)
-
-
-        token, created = Token.objects.get_or_create(user=user)
-        token_data = {
-            'token': token.key,
-            'expires_at': timezone.now() + token.settings.get("TOKEN_TIMEOUT")
+        exp = datetime.datetime.utcnow() + datetime.timedelta(days=1)
+        payload = {
+            'username': username,
+            'exp': exp,
         }
+        token = jwt.encode(payload, 'secret key', algorithm='HS256')
 
         if user != None:
-            reponse = JsonResponse({
-                'success': success,
-                'code': code,
-                'type': user.type,
-                'token_data': token_data
-            })
             request.session['username'] = username
             request.session['id'] = user.id
             request.session['type'] = user.type
-            return reponse
+            return JsonResponse({'code': 0, 'message': 'success', 'type': user.type,
+                                 'data': {'token': token, 'expires': exp.timestamp()}})
         else:
             return JsonResponse({
                 'success': success,
