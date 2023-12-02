@@ -13,7 +13,7 @@ var time = ref('')
 
 async function fetchDiagnosisInfo() {
     try {
-        const response = await axios.post('http://127.0.0.1:4523/m1/3616438-0-default/api/getDiagnosis/',{
+        const response = await axios.post('http://127.0.0.1:4523/m1/3616438-0-default/api/getDiagnosis',{
             id: id
         });
         doctor.value = response.data.doctor

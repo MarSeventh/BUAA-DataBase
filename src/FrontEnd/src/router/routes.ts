@@ -1,3 +1,5 @@
+import { Link } from 'ant-design-vue/lib/anchor';
+import { IframeBox } from 'stepin';
 import { RouteRecordRaw } from 'vue-router';
 
 const routes: RouteRecordRaw[] = [
