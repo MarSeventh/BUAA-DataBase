@@ -181,8 +181,8 @@ def showAllinCounter(request):
 def PrescribeMedication(request):
     # assert request.type == 'doctor'
     if request.method == 'POST':
-        # Did = request.session['id']
-        Did = '5'
+        Did = request.session['id']
+        # Did = '5'
         data = json.loads(request.body)
         Pid = data['Pid']
         print(Pid)
@@ -202,8 +202,8 @@ def PrescribeMedication(request):
 def PayAll(request):
     # assert request.type == 'patient'
     if request.method == 'GET':
-        # Pid = request.session['id']
-        Pid = '6'
+        Pid = request.session['id']
+        # Pid = '6'
         db = MySQLdb.MyDatabase()
         success, status = db.PayAll(Pid=Pid)
         return JsonResponse({'success' : success, 'code' : status})
@@ -227,7 +227,7 @@ def MedicalDiagnosisStatement(request):
     if request.method == 'POST':
         Did = request.session['id']
         data = json.loads(request.body)
-        Did = '5'
+        # Did = '5'
         Pid = data['Pid']
         Statement = data['Statement']
         db = MySQLdb.MyDatabase()
@@ -254,8 +254,8 @@ def getDiagnosisByPid(request):
 def getLaboratorySheetids(request):
     # assert request.type == 'patient'
     if request.method == 'GET':
-        # Pid = request.session['id']
-        Pid = '6'
+        Pid = request.session['id']
+        # Pid = '6'
         db = MySQLdb.MyDatabase()
         ans = db.showAllLaboratorySheetIds(Pid=Pid)
         return JsonResponse({'Info': ans})
@@ -266,7 +266,7 @@ def getLaboratorySheetids(request):
 def getLaboratorySheet(request):
     # assert request.type == 'patient'
     if request.method == 'POST':
-        # Pid = request.session['id']
+        Pid = request.session['id']
         data = json.loads(request.body)
         Sheetid = data['id']
         db = MySQLdb.MyDatabase()
@@ -280,8 +280,8 @@ def getLaboratorySheet(request):
 def conductLaboratorySheet(request):
     # assert request.type == 'doctor'
     if request.method == 'POST':
-        # Did = request.session['id']
-        Did = '5'
+        Did = request.session['id']
+        # Did = '5'
         data = json.loads(request.body)
         Pid = data['Pid']
         checkName = data['checkName']
@@ -305,8 +305,8 @@ def deletePatient(request):
 def checkThePosInQueueu(request):
     # assert request.type == 'patient'
     if request.method == 'GET':
-        # Pid = request.session['id']
-        Pid = '6'
+        Pid = request.session['id']
+        # Pid = '6'
         db = MySQLdb.MyDatabase()
         success, ans, id = db.getRegisterRelationInfo(Pid=Pid)
         if success:
@@ -338,8 +338,8 @@ def showCounterById(request) :
 def getDoctorDispatch(request):
     # assert request.type == 'doctor'
     if request.method == 'GET':
-        # Did = request.session['id']
-        Did = '5'
+        Did = request.session['id']
+        # Did = '5'
         db = MySQLdb.MyDatabase()
         res = db.getDoctorDispatcher(Did=Did)
         if len(res) != 0:
