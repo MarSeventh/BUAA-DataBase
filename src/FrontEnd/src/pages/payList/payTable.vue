@@ -27,10 +27,9 @@ const payItems = reactive<PayItem[]>([]);
 
 async function fetchPayList() {
     try {
-        const response = await axios.get('http://127.0.0.1:4523/m1/3616438-0-default/api/fetchPayList');
+        const response = await axios.get('http://127.0.0.1:8000/api/fetchPayList');
         payItems.length = 0;
-
-        response.data.params.forEach(item => {
+        response.data.Info.forEach(item => {
             payItems.push({ id: item.id, type: item.type, status: item.status, price: item.price });
         });
     } catch (error) {

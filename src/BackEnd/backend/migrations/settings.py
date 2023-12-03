@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 
+SESSION_SAVE_EVERY_REQUEST=True
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -24,7 +26,7 @@ SECRET_KEY = 'django-insecure-u=(gdo+v-@&n6=-1%v0$ef_bi89buv_pby^2b5rd3*%!$a$%42
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 # Application definition
 
@@ -37,11 +39,38 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'migrations',
     'rest_framework',
+    "corsheaders"
 ]
+
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_METHODS = (
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+)
+CORS_ALLOW_HEADERS = (
+    'XMLHttpRequest',
+    'X_FILENAME',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+    'Pragma',
+)
+
+SESSION_ENGINE='django.contrib.sessions.backends.cached_db'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -79,7 +108,7 @@ DATABASES = {
         'USER': '21373405',
         'PASSWORD': 'Aa490635',
         'HOST': '120.46.80.149',
-        'PORT': '3306',        
+        'PORT': '3306',
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
         },
@@ -138,4 +167,4 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_TOKEN_EXPIRY_TIME': timedelta(days=1)
 }
-    # 其他的DRF设置...
+# 其他的DRF设置...

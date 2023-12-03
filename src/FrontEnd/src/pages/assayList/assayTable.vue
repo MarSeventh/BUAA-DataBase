@@ -36,7 +36,7 @@ const showModal = ref(false);
 
 async function fetchAssayList() {
     try {
-        const response = await axios.get('http://127.0.0.1:4523/m1/3616438-0-default/api/getLaboratorySheetids');
+        const response = await axios.get('http://127.0.0.1:8000/api/getLaboratorySheetids');
         assays.length = 0; // 清空assays数组
 
         // 将获取到的部门数据放入assays数组中

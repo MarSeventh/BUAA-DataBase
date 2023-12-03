@@ -29,6 +29,10 @@
 import axios from 'axios';
 import { useRoute } from 'vue-router';
 import { useRouter } from 'vue-router';
+import { useAccountStore } from '@/store';
+
+const accountStore = useAccountStore();
+const userName = accountStore.account.username;
 
 const router = useRouter();
 const route = useRoute();
@@ -37,8 +41,9 @@ const price = route.query.price;
 
 async function successPay() {
     try {
-        const response = await axios.post('http://127.0.0.1:4523/m1/3616438-0-default/api/finishPay', {
+        const response = await axios.post('http://127.0.0.1:8000/api/finishPay/', {
             id: id,
+            userName: userName,
         });
         if (response.status === 200) {
             router.go(-1);

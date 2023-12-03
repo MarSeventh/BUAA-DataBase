@@ -31,7 +31,7 @@ const showModal = () => {
 };
 async function deleteAccount() {
   try {
-    const response = await axios.post('http://127.0.0.1:4523/m1/3616438-0-default/api/deleteAccount');
+    const response = await axios.post('http://127.0.0.1:8000/api/deleteAccount');
     if (response.status == 200) {
       logout().then(() => router.push('/login'));
     } else {

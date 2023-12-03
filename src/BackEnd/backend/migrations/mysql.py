@@ -21,6 +21,10 @@ class MyDatabase:
                                           cursorclass=cursorclass)
         self.cursor = self.connection.cursor()
 
+    def getUserById(self, id : str):
+        from .models import User
+        return User.objects.get(id=id)
+
     def close(self):
         self.connection.close()
 
@@ -95,11 +99,11 @@ class MyDatabase:
         return result
 
     def GetDepartmentList(self):
-        self.connect()
-        sql = "SELECT name FROM Titles"
-        self.cursor.execute(sql)
-        result = self.cursor.fetchall()
-        self.close()
+        from .models import Titles
+        result = []
+        l = Titles.objects.all()
+        for i in l:
+            result.append(i.name)
         return result
 
     def get_time_period(self):
@@ -125,7 +129,7 @@ class MyDatabase:
         self.connect()
         timePeriod = self.get_time_period()
         sql = "SELECT doctorId, ROOMid FROM Dispatcher WHERE TitleId = (SELECT id FROM Titles WHERE name = %s) AND TimePeriod = %s AND DATE = %s"
-        self.cursor.execute(sql, (name, timePeriod, self.getDate()))
+        self.cursor.execute(sql, (name, 'afternoon', self.getDate()))
         r = self.cursor.fetchall()
         l = []
         for i in r:
@@ -133,6 +137,7 @@ class MyDatabase:
             name = models.User.objects.get(id=doctor.id).username
             room = models.Room.objects.get(id=i['ROOMid'])
             l.append({'doctor': name, 'room': room.id, 'queueLen': room.queuelen})
+        print(l)
         self.close()
         return l
 
@@ -154,11 +159,11 @@ class MyDatabase:
         from .models import Dispatcher, Counter, Registrelation, Patient, Room
         r0 = Dispatcher.objects.filter(doctorid=doctorid, timeperiod=timePeriod, date=self.getDate()).values_list(
             'roomid', flat=True).first()
-        if len(r0) == 0:
+        if r0 == None:
             print('NO DOCTOR' + doctorid + 'IN ' + timePeriod)
-            return '-1', False, 404
+            return '-2', False, 404
         r = Counter.objects.filter(pid=patientid, did=doctorid, type='Registration', ispaid=False)
-        if len(r) == 0:
+        if r == None:
             iscommem = Patient.objects.get(id=patientid).iscommem
             price = 1 if iscommem else 10
             id = self.createNewCounter(pid=patientid, did=doctorid, type='Registration', price=price)
@@ -169,7 +174,7 @@ class MyDatabase:
             return id, True, 0
         else:
             print('ALREADY REGISTERED')
-            return '-1', False, 404
+            return '-2', False, 404
 
     def genCounterId(self):
         self.connect()
@@ -264,7 +269,7 @@ class MyDatabase:
         return l
 
     def getIdByUsername(self, name: str):
-        d = models.User.objects.filter(name=name)
+        d = models.User.objects.filter(username=name)
         if len(d) != 0:
             return d[0].id
         else:
@@ -459,8 +464,13 @@ class MyDatabase:
         return res
 
     def finishPay(self, id: str):
-        from models import Counter
+        from .models import Counter
+        print(id)
+        c = Counter.objects.filter(id=id)
+        if c == None:
+            return False
         Counter.objects.filter(id=id).update(ispaid=True)
+        return True
 
     def getDiagnosisList(self, Pid: str):
         from models import Diagnosis
