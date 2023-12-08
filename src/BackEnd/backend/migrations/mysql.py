@@ -29,7 +29,7 @@ class MyDatabase:
         self.connection.close()
 
     def queryidbyusername(self, username: str):
-        from models import User
+        from .models import User
         result = User.objects.filter(username=username)
         return result[0].id
 
@@ -39,7 +39,15 @@ class MyDatabase:
         if len(User.objects.filter(username=username, password=password)) == 0:
             return False, 404, None
         else:
-            return True, 0, User.objects.filter(username=username, password=password)[0]
+            from .models import Patient
+            u = User.objects.get(username=username)
+            print(u.id)
+            p = Patient.objects.get(id=u.id)
+            if p.active:
+                return True, 0, User.objects.filter(username=username, password=password)[0]
+            else:
+                return False, 404, None
+
 
     def SignUpByPatient(self, name: str, iscommem: bool, password: str, idcard: str):
         from .models import User, Patient
@@ -50,11 +58,19 @@ class MyDatabase:
         if len(idcard) != 18:
             print('身份证号不合法')
             return False, 404
-        id = str(int(User.objects.all().order_by('-id')[0].id) + 1)
-        iscommem = 1 if iscommem else 0
+        last_user = User.objects.all().order_by('-id').first()
+        ids = []
+        it = User.objects.all().iterator()
+        for i in it:
+            ids.append(int(i.id))
+        ids.sort()
+        if len(ids) == 0:
+            new_id = '1'
+        else:
+            new_id = str(ids[len(ids) - 1] + 1)
         from .models import User, Patient
-        User.objects.create(id=id, username=name, type='patient', password=password)
-        Patient.objects.create(id=id, iscommem=iscommem, idcard=idcard, active=1)
+        User.objects.create(id=new_id, username=name, type='patient', password=password)
+        Patient.objects.create(id=new_id, iscommem=iscommem, idcard=idcard, active=1)
         return True, 0
 
     def SoftDeletePatient(self, id: str):  # 软删除
@@ -142,7 +158,7 @@ class MyDatabase:
         return l
 
     def NextPatient(self, Did: str, RoomId: str):
-        from models import Room, Registrelation
+        from .models import Room, Registrelation
         assert Room.objects.get(id=RoomId) > 0
         r = self.getCurrentPatient(RoomId)
         Registrelation.objects.filter(id=r.id).update(isfinished=True)
@@ -264,7 +280,7 @@ class MyDatabase:
         models.Diagnosis.objects.filter(patientid=id)
         l = []
         for i in models.Diagnosis.objects.filter(patientid=id):
-            dname = self.getNameById(i.doctorid)
+            dname = self.getNameById(i.doctorid.id)
             l.append({'doctor': dname, 'time': i.time, 'diagnosis': i.diagnosis})
         return l
 
@@ -277,8 +293,9 @@ class MyDatabase:
 
     def getNameById(self, id: str):
         d = models.User.objects.filter(id=id)
+        print(id)
         if len(d) != 0:
-            return d[0].name
+            return d[0].username
         else:
             return None
 
@@ -357,7 +374,7 @@ class MyDatabase:
         l = Diagnosis.objects.filter(patientid=Pid).iterator()
         res = []
         for i in l:
-            res.append({'doctor': self.getNameById(i.doctorid), 'time': i.time, 'statement': i.diagnosis})
+            res.append({'doctor': self.getNameById(i.doctorid.id), 'time': i.time, 'statement': i.diagnosis})
         return res
 
     def conductAlaboratoryAnalysis(self, Pid: str, Did: str, checkItemIds : list, checkName: str):
@@ -390,22 +407,21 @@ class MyDatabase:
             return True, 0
 
     def getLaboratorySheet(self, id: str):
-        from .models import Laboratorysheet
-        l = Laboratorysheet.objects.filter(id=id).iterator()
+        print(id)
+        from .models import Laboratorysheet, Counter
+        l = Laboratorysheet.objects.filter(id=Counter.objects.get(id=id)).iterator()
+        print(l)
         if l == None:
             return False
         else:
             res = []
             for i in l:
+                print(i)
                 from .models import Checkitems
-                try:
-                    res.append({'id': id, 'name': i.checkname, 'result': i.result,
-                            'minresult': Checkitems.objects.get(id=i.itemid.id).minresult,
-                            'maxresult': Checkitems.objects.get(id=i.itemid.id).maxresult, 'outputtime': datetime.now() if i.outputtime == None else i.outputtime 
-                            , 'name' : Checkitems.objects.get(id=i.itemid.id).description})
-                except:
-                    print(i.itemid)
-                    return {}
+                res.append({'itemid': int(i.itemid.id), 'checkName': i.itemid.description, 'result': i.result if i.result != None else -1,
+                            'minresult': i.itemid.minresult,
+                            'maxresult': i.itemid.maxresult, 'outputtime': str(datetime.now()) if i.outputtime == None else self.formatedDate(str(i.outputtime))
+                            })
             print(res)
             return res
 
@@ -414,7 +430,13 @@ class MyDatabase:
         id = Counter.objects.filter(pid=Pid, type='Laboratory').iterator()
         res = []
         for i in id:
-            res.append({'id': i.id})
+            if i.price == 0:
+                continue
+            print(i)
+            l = Laboratorysheet.objects.filter(id=i)
+            if len(l) != 0:
+                x = l[0]
+                res.append({'id': x.id.id, 'checkName' : x.checkname, 'time' : self.formatedDate(str(x.begintime))})
         return res
 
     def getRegisterRelationInfo(self, Pid: str):
@@ -448,7 +470,7 @@ class MyDatabase:
         return res
 
     def getCheckItemsList(self):
-        from models import Checkitems
+        from .models import Checkitems
         r = Checkitems.objects.all().iterator()
         res = []
         for i in r:
@@ -456,7 +478,7 @@ class MyDatabase:
         return res
 
     def getCheckCombineList(self):
-        from models import Checkcombine
+        from .models import Checkcombine
         r = Checkcombine.objects.all().iterator()
         res = []
         for i in r:
@@ -473,35 +495,51 @@ class MyDatabase:
         return True
 
     def getDiagnosisList(self, Pid: str):
-        from models import Diagnosis
-        r = Diagnosis.objects.filter(patientid=Pid)
+        from .models import Diagnosis, Patient
+        r = Diagnosis.objects.filter(patientid=Patient.objects.get(id=Pid)).iterator()
         res = []
         for i in r:
-            res.append[{'id': i.id, 'time': i.time, 'doctor': self.getNameById(id=i.doctorid)}]
+            j = {'id': i.id, 'time': self.formatedDate(str(i.time)), 'doctor': self.getNameById(id=i.doctorid.id)}
+            res.append(j)
+        print(res)
+        return res
+
+    def formatedDate(self, Date):
+        datetime_obj = datetime.strptime(Date, "%Y-%m-%d %H:%M:%S%z")
+
+        # 将 datetime 对象格式化为指定格式的字符串
+        formatted_date = datetime_obj.strftime("%Y-%m-%d %H:%M:%S")
+        print(formatted_date)
+        return formatted_date
+
+    def getDiagnosisById(self, id : str):
+        from .models import Diagnosis
+        r = Diagnosis.objects.get(id=id)
+        res = {'doctor' : self.getNameById(r.doctorid.id), 'statement' : r.diagnosis, 'time' : r.time}
         return res
 
     def genUserId(self):
-        from models import User
+        from .models import User
         max_id = User.objects.all().aggregate(Max('id'))['id__max']
         return str(int(max_id) + 1)
 
     def getTidByName(self, name: str):
-        from models import Titles
+        from .models import Titles
         return Titles.objects.get(name=name)[0]
 
     def createNewDoctor(self, name: str, tittle: str, password: str):
-        from models import Doctor, User
+        from .models import Doctor, User
         id = self.genUserId()
         User.objects.create(id=id, username=name, password=password, type='Doctor')
         Doctor.objects.create(id=id, Tid=self.getTidByName(name=tittle), active=1)
 
     def queryDrugInfo(self, id: str):
-        from models import Drug
+        from .models import Drug
         r = Drug.objects.get(id=id)
         return r
 
     def getUserTypeById(self, id: str):
-        from models import User
+        from .models import User
         r = User.objects.get(id=id)
         return r['type']
 

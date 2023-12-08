@@ -22,7 +22,8 @@
       unless: Array<String>,
     });
   
-    const accountStore = useAccountStore();
+      const accountStore = useAccountStore();
+  accountStore.init();
     const route = useRoute();
   
     const emit = defineEmits<{

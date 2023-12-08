@@ -2,10 +2,10 @@
 import { reactive, ref } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
-import { number } from 'echarts';
+import { useAccountStore } from '@/store';
 
 const router = useRouter();
-
+const username = useAccountStore().account?.username;
 const columns = [
     {
         title: '序号',
@@ -27,7 +27,11 @@ const payItems = reactive<PayItem[]>([]);
 
 async function fetchPayList() {
     try {
-        const response = await axios.get('http://127.0.0.1:8000/api/fetchPayList');
+        const response = await axios.get('http://127.0.0.1:8000/api/fetchPayList', {
+            params: {
+                username: username,
+            },
+        });
         payItems.length = 0;
         response.data.Info.forEach(item => {
             payItems.push({ id: item.id, type: item.type, status: item.status, price: item.price });

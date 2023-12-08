@@ -2,6 +2,11 @@
 import axios from 'axios';
 import { reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { useAccountStore } from '@/store';
+
+const accountStore = useAccountStore();
+accountStore.init();
+const username = accountStore.account?.username;
 
 const router = useRouter();
 
@@ -36,7 +41,11 @@ const showModal = ref(false);
 
 async function fetchDiagnosisList() {
     try {
-        const response = await axios.get('http://127.0.0.1:8000/api/getDiagnosisList');
+        const response = await axios.get('http://127.0.0.1:8000/api/getDiagnosisList', {
+            params: {
+                username: username,
+            },
+        });
         diagnosiss.length = 0; // 清空diagnosiss数组
 
         // 将获取到的部门数据放入diagnosiss数组中
@@ -48,6 +57,7 @@ async function fetchDiagnosisList() {
     }
 
 }
+
 fetchDiagnosisList();
 
 

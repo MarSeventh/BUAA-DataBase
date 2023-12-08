@@ -6,7 +6,8 @@ import axios from 'axios';
 
 const router = useRouter();
 const { logout } = useAccountStore();
-const accountStore = useAccountStore();
+  const accountStore = useAccountStore();
+  accountStore.init();
 const role = accountStore.role;
 const username = accountStore.account?.username;
 
@@ -31,7 +32,9 @@ const showModal = () => {
 };
 async function deleteAccount() {
   try {
-    const response = await axios.post('http://127.0.0.1:8000/api/deleteAccount');
+    const response = await axios.post('http://127.0.0.1:8000/api/deleteAccount/',{
+      username: username,
+    });
     if (response.status == 200) {
       logout().then(() => router.push('/login'));
     } else {

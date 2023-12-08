@@ -31,7 +31,8 @@ import { useRoute } from 'vue-router';
 import { useRouter } from 'vue-router';
 import { useAccountStore } from '@/store';
 
-const accountStore = useAccountStore();
+  const accountStore = useAccountStore();
+  accountStore.init();
 const userName = accountStore.account.username;
 
 const router = useRouter();

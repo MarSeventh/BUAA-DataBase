@@ -2,9 +2,10 @@
 import axios from 'axios';
 import { reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { useAccountStore } from '@/store';
 
 const router = useRouter();
-
+const username = useAccountStore().account?.username;
 
 const columns = [
     {
@@ -36,7 +37,11 @@ const showModal = ref(false);
 
 async function fetchAssayList() {
     try {
-        const response = await axios.get('http://127.0.0.1:8000/api/getLaboratorySheetids');
+        const response = await axios.get('http://127.0.0.1:8000/api/getLaboratorySheetids',{
+            params: {
+                username: username,
+            },
+        });
         assays.length = 0; // 清空assays数组
 
         // 将获取到的部门数据放入assays数组中

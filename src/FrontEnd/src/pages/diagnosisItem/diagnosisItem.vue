@@ -8,7 +8,8 @@ const route = useRoute()
 
 var id = route.query.id
 
-const accountStore = useAccountStore();
+  const accountStore = useAccountStore();
+  accountStore.init();
 const accountName = computed(() => accountStore.account?.username);
 
 const currentTime = new Date().getHours();

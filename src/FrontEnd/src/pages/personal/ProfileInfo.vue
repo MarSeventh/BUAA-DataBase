@@ -2,7 +2,8 @@
 import { reactive, ref } from 'vue';
 import { useAccountStore } from '@/store/account';
 
-const accountStore = useAccountStore();
+  const accountStore = useAccountStore();
+  accountStore.init();
 const username = ref(accountStore.account?.username);
 const role = ref(accountStore.role);
 

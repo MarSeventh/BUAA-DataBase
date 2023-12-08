@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia';
 import http from './http';
 import { Response } from '@/types';
-import { useMenuStore } from './menu';
 import { useAuthStore } from '@/plugins';
 
 export interface Profile {
@@ -33,6 +32,17 @@ export const useAccountStore = defineStore('account', {
     };
   },
   actions: {
+    init() {
+      const storedData = localStorage.getItem('user');
+      if (storedData) {
+        const userData = JSON.parse(storedData);
+        const { account, permissions, role } = userData;
+        this.account = account;
+        this.permissions = permissions;
+        this.role = role;
+        this.logged = true; // 用户已经登录
+      }
+    },
     async login(username: string, password: string) {
       this.username = username;
       return http
@@ -53,13 +63,14 @@ export const useAccountStore = defineStore('account', {
     async signin(username: string, password: string, idcard: string) {
       // 发送注册请求
       return http
-        .request<Errorresult, Response<Errorresult>>('http://127.0.0.1:8000/api/signin', 'post_json', {
+        .request<Errorresult, Response<Errorresult>>('http://127.0.0.1:8000/api/signin/', 'post_json', {
           username,
           password,
           idcard,
         })
         .then(async (response) => {
-          if (response.code === 0) {
+          if (response.code === 200) {
+            console.log(response.data);
             return response.data;
           } else {
             return Promise.reject(response);
@@ -69,6 +80,7 @@ export const useAccountStore = defineStore('account', {
     async logout() {
       return new Promise<boolean>((resolve) => {
         localStorage.removeItem('stepin-menu');
+        localStorage.removeItem('user');
         http.removeAuthorization();
         this.logged = false;
         resolve(true);
@@ -85,6 +97,9 @@ export const useAccountStore = defineStore('account', {
           this.permissions = permissions;
           this.role = role;
           setAuthorities(permissions);
+
+          // 将用户信息保存在 localStorage 中
+          localStorage.setItem('user', JSON.stringify(response.data));
           return response.data;
         } else {
           return Promise.reject(response);

@@ -35,7 +35,8 @@ import { computed } from 'vue';
 import { use } from 'echarts';
 
 const { logout } = useAccountStore();
-const accountStore = useAccountStore();
+  const accountStore = useAccountStore();
+  accountStore.init();
 
 const showSetting = ref(false);
 const router = useRouter();

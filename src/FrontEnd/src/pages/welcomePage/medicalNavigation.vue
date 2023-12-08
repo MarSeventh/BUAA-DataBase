@@ -25,7 +25,7 @@ var typedAnswer = ref('');
 
 async function askQuestion() {
     try {
-        const response = await axios.post('http://127.0.0.1:8000/api/getSuggestion', {
+        const response = await axios.post('http://127.0.0.1:8000/api/getSuggestion/', {
             question: question,
         });
 
