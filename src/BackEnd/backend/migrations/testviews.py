@@ -18,9 +18,10 @@ from django.http import JsonResponse
 
 @csrf_exempt
 def showRequestJson(request):
-    received_data = json.loads(request.body)  # 解析请求体中的 JSON 数据
-    response_data = {'received_data': received_data, 'status': 'success'}  # 示例数据
-    return JsonResponse(response_data)
+    print(request.POST.get('username', None))
+    #received_data = json.loads(request.body)  # 解析请求体中的 JSON 数据
+    #response_data = {'received_data': received_data, 'status': 'success'}  # 示例数据
+    return HttpResponse("response_data")
 
 
 @csrf_exempt

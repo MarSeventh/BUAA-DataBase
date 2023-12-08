@@ -3,7 +3,8 @@ import diagnosisTable from './diagnosisTable.vue';
 import { useAccountStore } from '@/store';
 import { computed } from 'vue';
 
-const accountStore = useAccountStore();
+  const accountStore = useAccountStore();
+  accountStore.init();
 const accountName = computed(() => accountStore.account?.username);
 
 const currentTime = new Date().getHours();

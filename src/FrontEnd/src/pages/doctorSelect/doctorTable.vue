@@ -5,8 +5,10 @@ import { useRouter } from 'vue-router';
 import { useRoute } from 'vue-router';
 import { useAccountStore } from '@/store';
 
-const accountStore = useAccountStore();
+  const accountStore = useAccountStore();
+  accountStore.init();
 const router = useRouter();
+const userName = accountStore.account.username;
 
 const route = useRoute();
 const departmentName = route.query.name;
@@ -30,7 +32,7 @@ const columns = [
 type Doctor = {
     name?: string;
     roomid?: string;
-    quenelen?: string;
+    quenelen?: number;
     _edit?: boolean;
     _isNew?: boolean;
 };
@@ -43,14 +45,13 @@ const showModal = ref(false);
 
 async function fetchDoctorList() {
     try {
-        const response = await axios.post('http://127.0.0.1:4523/m1/3616438-0-default/api/doctorList', {
+        const response = await axios.post('http://127.0.0.1:8000/api/doctorList/', {
             department: departmentName,
         });
         doctors.length = 0; // 清空doctors数组
-
         // 将获取到的部门数据放入doctors数组中
         response.data.doctorList.forEach((item) => {
-            doctors.push({ name: item.name, roomid: item.roomid, quenelen: item.quenelen });
+            doctors.push({ name: item.name, roomid: item.roomid, quenelen: item.queuelen });
         });
     } catch (error) {
         console.error('Error fetching doctors:', error);
@@ -63,7 +64,7 @@ const price = accountStore.role === 'communityPatient' ? 1 : 10;
 
 /*async function addPay() {
     try {
-        const response = await axios.post('http://127.0.0.1:4523/m1/3616438-0-default/api/addPay', {
+        const response = await axios.post('http://127.0.0.1:8000/api/addPay', {
             name: '挂号费',
             number: price,
         });
@@ -76,8 +77,9 @@ const price = accountStore.role === 'communityPatient' ? 1 : 10;
 
 async function confirmDoctor(name: String) {
     try {
-        const response = await axios.post('http://127.0.0.1:4523/m1/3616438-0-default//api/confirmDoctor', {
+        const response = await axios.post('http://127.0.0.1:8000/api/confirmDoctor/', {
             name: name,
+            userName: userName,
         });
         return response.data.id;
     } catch (error) {
@@ -117,7 +119,8 @@ async function goin(record: Doctor) {
                 <div class="flex-col flex justify-evenly ml-2">
                     <span>{{ text }}人</span>
                 </div>
-                <a-progress v-if="record.quenelen >= 50" :strokeWidth="4" :percent="record.quenelen * 2" status="exception" />
+                <a-progress v-if="record.quenelen >= 50" :strokeWidth="4" :percent="record.quenelen * 2"
+                    status="exception" />
                 <a-progress v-else :strokeWidth="4" :percent="record.quenelen * 2" status="normal" />
             </template>
             <template v-else-if="column.dataIndex === 'roomid'">

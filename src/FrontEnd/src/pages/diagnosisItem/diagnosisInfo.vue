@@ -3,6 +3,7 @@ import { reactive, ref } from 'vue';
 import axios from 'axios';
 import { useRoute } from "vue-router";
 
+
 const route = useRoute()
 
 var id = route.query.id
@@ -12,16 +13,16 @@ var time = ref('')
 
 
 async function fetchDiagnosisInfo() {
-    try {
-        const response = await axios.post('http://127.0.0.1:4523/m1/3616438-0-default/api/getDiagnosis/',{
-            id: id
-        });
-        doctor.value = response.data.doctor
-        statement.value = response.data.statement
-        time.value = response.data.time
-    } catch (error) {
-        console.error('Error fetching diagnosiss:', error);
-    }
+  try {
+    const response = await axios.post('http://127.0.0.1:8000/api/getDiagnosis', {
+      id: id
+    });
+    doctor.value = response.data.info.doctor;
+    statement.value = response.data.info.statement;
+    time.value = response.data.info.time;
+  } catch (error) {
+    console.error('Error fetching diagnosiss:', error);
+  }
 
 }
 

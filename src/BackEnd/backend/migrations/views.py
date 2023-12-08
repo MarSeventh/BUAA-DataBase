@@ -6,10 +6,12 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import django.db.transaction as transaction
 import openai
+import jwt, datetime
 
-GPT_API_KEY = 'fk-t_zzbtzG8ofRfyWO1UqAoT2axNNDQdP9QVtT9a3lnBU'
 
-DEFAULT_AVATAR = 'https://imgse.com/i/pidqkX8'
+GPT_API_KEY = 'pk-this-is-a-real-free-pool-token-for-everyone'
+
+DEFAULT_AVATAR = 'https://imgse.com/i/pi21DHS'
 
 
 from rest_framework.authtoken.models import Token
@@ -18,32 +20,29 @@ from django.utils import timezone
 @csrf_exempt
 def LogIn(request):
     if request.method == 'POST':
-        print('Login')
-        data = json.loads(request.body)
-        username = data.get('username')
-        password = data.get('password')
+        username = request.POST.get('username',None)
+        password = request.POST.get('password', None)
 
         db = MySQLdb.MyDatabase()
         success, code, user = db.Login(username=username, password=password)
 
-
-        token, created = Token.objects.get_or_create(user=user)
-        token_data = {
-            'token': token.key,
-            'expires_at': timezone.now() + token.settings.get("TOKEN_TIMEOUT")
-        }
-
         if user != None:
-            reponse = JsonResponse({
-                'success': success,
-                'code': code,
-                'type': user.type,
-                'token_data': token_data
-            })
-            request['session']['username'] = username
-            request['session']['id'] = user.id
-            request['session']['type'] = user.type
-            return reponse
+            exp = datetime.datetime.utcnow() + datetime.timedelta(days=1)
+            timestamp_seconds = int(exp.timestamp())
+            timestamp_milliseconds = timestamp_seconds * 1000
+            payload = {
+                'username': username,
+                'role' : user.type,
+                'exp': timestamp_milliseconds,
+            }
+            token = jwt.encode(payload, 'secret key', algorithm='HS256')
+            request.session['username'] = username
+            request.session['id'] = user.id
+            request.session['type'] = user.type
+            request.session.save()
+            print(request.session['username'], request.session['id'], request.session['type'])
+            return JsonResponse({'code': 0, 'message': 'success', 'type': user.type,
+                                 'data': {'token': token, 'expires': timestamp_milliseconds}})
         else:
             return JsonResponse({
                 'success': success,
@@ -51,6 +50,7 @@ def LogIn(request):
             })
     else:
         return HttpResponse("Not a POST request")
+
     
 
 @csrf_exempt
@@ -65,7 +65,7 @@ def SignUpByPatient(request):
             db = MySQLdb.MyDatabase()
             success, status = db.SignUpByPatient(name=username, password=password, iscommem=False, idcard=idcard)
             print(success, status)
-            return JsonResponse({'success': success, 'code': status})
+            return JsonResponse({'code': status})
         except ValueError as e:
             return JsonResponse({'success': False, 'error': 'Invalid JSON data'})
     else:
@@ -91,10 +91,7 @@ def GetDepartmentList(request):
     if (request.method == 'GET'):
         db = MySQLdb.MyDatabase()
         info = db.GetDepartmentList()
-        l = []
-        for i in info:
-            l.append(i['name'])
-        return JsonResponse({'departments' : l})
+        return JsonResponse({'name' : info})
     else:
         return HttpResponse("Not a GET request")
 
@@ -102,25 +99,46 @@ def GetDepartmentList(request):
 def GetInfoListByDepartment(request):
     # assert request.type == 'patient'
     if (request.method == 'POST'):
-        data = json.loads(request.body)
-        department = data['Tittle']
+        department = request.POST.get('departmentName',None)
         db = MySQLdb.MyDatabase()
         info = db.GetInfoListByDepartment(department)
         l = []
         for i in info:
-            l.append({'doctor': i['doctor'], 'room': i['room'], 'queueLen': i['queueLen']})
+            l.append({'name': i['doctor'], 'room': i['room'], 'queuelen': i['queueLen']})
         L = list(l)
-        return JsonResponse({'info': L})
+        print(L)
+        return JsonResponse({'doctorList': L})
     else:
         return HttpResponse("Not a POST request")
 
-def PatientRegistration(request):
-    assert request.type == 'patient'
+@csrf_exempt
+def GetDoctorListByDepartment(request):
+    # assert request.type == 'patient'
     if (request.method == 'POST'):
         data = json.loads(request.body)
-        name = request.session['username']
-        id = request.session['id']
+        department = data['department']
+        print(department)
         db = MySQLdb.MyDatabase()
+        info = db.GetInfoListByDepartment(department)
+        l = []
+        print(info)
+        if len(info) == 0:
+            return HttpResponse('no doctor')
+        for i in info:
+            l.append({'name': i['doctor'], 'roomid': i['room'], 'queuelen': i['queueLen']})
+        print(l)
+        return JsonResponse({'doctorList': l})
+    else:
+        return HttpResponse("Not a POST request")
+@csrf_exempt
+def PatientRegistration(request):
+    # assert request.type == 'patient'
+    if (request.method == 'POST'):
+        data = json.loads(request.body)
+        print(request.body)
+        name = data['userName']
+        db = MySQLdb.MyDatabase()
+        id = db.getIdByUsername(name=name)
         doctorId = db.getIdByUsername(data['name'])
         Payid, success, status = db.PatientRegistration(patientid=id, doctorid=doctorId)
         return JsonResponse({'id' : Payid})
@@ -139,20 +157,31 @@ def testPatientRegistration(request):
     return JsonResponse({'id' : PayId})
     
 
+@csrf_exempt
 def finishPay(request):
-    assert request.type == 'patient'
+    # assert request.type == 'patient'
     if request.method == 'POST':
         data = json.loads(request.body)
         Payid = data['id']
         db = MySQLdb.MyDatabase()
-        db.finishPay(id=Payid)
+        if Payid != '-1':
+            r = db.finishPay(id=Payid)
+            if r:
+                return HttpResponse('Success')
+            else:
+                return HttpResponse('Failed')
+        else:
+            print('PayAll')
+            return PayAll(request=request)
+
 
 
 def showAllNeedtoPay(request):
-    assert request.type == 'patient'
+    # assert request.type == 'patient'
     if (request.method == 'GET'):
+        data = json.loads(request.body)
         db = MySQLdb.MyDatabase()
-        Pid = request.session['id']
+        Pid = data['Pid']
         # Pid = '6'
         ans = db.showAllNeedToPay(Pid=Pid)
         l = []
@@ -164,10 +193,11 @@ def showAllNeedtoPay(request):
         return HttpResponse("Not a POST request")
 
 def showAllinCounter(request):
-    assert request.type == 'patient'
+    # assert request.type == 'patient'
     if (request.method == 'GET'):
         db = MySQLdb.MyDatabase()
-        Pid = request.session['id']
+        username = request.GET.get('username', None)
+        Pid = db.getIdByUsername(name=username)
         # Pid = '6'
         ans = db.showAllinCounter(Pid=Pid)
         l = []
@@ -182,7 +212,9 @@ def PrescribeMedication(request):
     # assert request.type == 'doctor'
     if request.method == 'POST':
         # Did = request.session['id']
-        Did = '5'
+        data = json.loads(request.body)
+        Did = data['Did']
+        # Did = '5'
         data = json.loads(request.body)
         Pid = data['Pid']
         print(Pid)
@@ -201,10 +233,13 @@ def PrescribeMedication(request):
     
 def PayAll(request):
     # assert request.type == 'patient'
-    if request.method == 'GET':
-        # Pid = request.session['id']
-        Pid = '6'
+    if request.method == 'POST':
+        print("-------------------------------")
+        data = json.loads(request.body)
+        # Pid = '6'
         db = MySQLdb.MyDatabase()
+        Pid = db.getIdByUsername(name=data['userName'])
+        print(Pid)
         success, status = db.PayAll(Pid=Pid)
         return JsonResponse({'success' : success, 'code' : status})
     else:
@@ -223,11 +258,12 @@ def showAllDrugName(request):
         return HttpResponse("Not a POST request")
     
 def MedicalDiagnosisStatement(request):
-    assert request.type == 'doctor'
+    # assert request.type == 'doctor'
     if request.method == 'POST':
-        Did = request.session['id']
+        # Did = request.session['id']
         data = json.loads(request.body)
-        Did = '5'
+        # Did = '5'
+        Did = data['Did']
         Pid = data['Pid']
         Statement = data['Statement']
         db = MySQLdb.MyDatabase()
@@ -239,8 +275,10 @@ def MedicalDiagnosisStatement(request):
 def getDiagnosisByPid(request):
     # assert request.type == 'patient'
     if request.method == 'GET':
-        Pid = request.session['id']
+        # Pid = request.session['id']
         # Pid = '6'
+        data = json.loads(request.body)
+        Pid = data['Pid']
         db = MySQLdb.MyDatabase()
         ans = db.getDiagnosisByPid(Pid=Pid)
         l = []
@@ -255,10 +293,14 @@ def getLaboratorySheetids(request):
     # assert request.type == 'patient'
     if request.method == 'GET':
         # Pid = request.session['id']
-        Pid = '6'
+        # Pid = '6'
+        username = request.GET.get('username', None)
         db = MySQLdb.MyDatabase()
+        Pid = db.getIdByUsername(username)
+        print(Pid)
         ans = db.showAllLaboratorySheetIds(Pid=Pid)
-        return JsonResponse({'Info': ans})
+        print(ans)
+        return JsonResponse({'assayList': ans})
     else:
         return HttpResponse("Not a GET request")
 
@@ -271,7 +313,8 @@ def getLaboratorySheet(request):
         Sheetid = data['id']
         db = MySQLdb.MyDatabase()
         ans = db.getLaboratorySheet(id=Sheetid)
-        return JsonResponse({'Info': ans})
+        print(ans)
+        return JsonResponse({'assayItemList': ans})
     else:
         return HttpResponse("Not a GET request")
   
@@ -281,8 +324,9 @@ def conductLaboratorySheet(request):
     # assert request.type == 'doctor'
     if request.method == 'POST':
         # Did = request.session['id']
-        Did = '5'
+        # Did = '5'
         data = json.loads(request.body)
+        Did = data['Did']
         Pid = data['Pid']
         checkName = data['checkName']
         checkItemIds = data['checkItemIds']
@@ -291,12 +335,17 @@ def conductLaboratorySheet(request):
         return JsonResponse({'success' : success, 'code' : status})
     else:
         return HttpResponse("Not a POST request")
-    
+
+
+@csrf_exempt
 def deletePatient(request):
-    assert request.type == 'patient'
+    # assert request.type == 'patient'
     if request.method == 'POST':
-        Pid = request.session['id']
+        # Pid = request.session['id']
+        data = json.loads(request.body)
+        username = data['username']
         db = MySQLdb.MyDatabase()
+        Pid = db.getIdByUsername(name=username)
         db.SoftDeletePatient(id=Pid)
         return JsonResponse({"success" : True})
     else:
@@ -306,7 +355,9 @@ def checkThePosInQueueu(request):
     # assert request.type == 'patient'
     if request.method == 'GET':
         # Pid = request.session['id']
-        Pid = '6'
+        data = json.loads(request.body)
+        Pid = data['Pid']
+        # Pid = '6'
         db = MySQLdb.MyDatabase()
         success, ans, id = db.getRegisterRelationInfo(Pid=Pid)
         if success:
@@ -339,7 +390,9 @@ def getDoctorDispatch(request):
     # assert request.type == 'doctor'
     if request.method == 'GET':
         # Did = request.session['id']
-        Did = '5'
+        data = json.loads(request.body)
+        Did = data['Did']
+        # Did = '5'
         db = MySQLdb.MyDatabase()
         res = db.getDoctorDispatcher(Did=Did)
         if len(res) != 0:
@@ -379,10 +432,12 @@ def getCheckCombineList(request):
 
 def getDiagnosisList(request):
     if request.method == 'GET':
-        Pid = request.session['id']
+        # Pid = request.session['id']
+        username = request.GET.get('username', None)
         db = MySQLdb.MyDatabase()
+        Pid = db.getIdByUsername(name=username)
         r = db.getDiagnosisList(Pid=Pid)
-        return JsonResponse(r)
+        return JsonResponse({'diagnosisList' : r})
     else:
         return HttpResponse('NOT A GET REQUEST')
     
@@ -390,11 +445,13 @@ def getDiagnosisList(request):
 def answer(request):
     d = MySQLdb.MyDatabase()
     data = json.loads(request.body)
-    content = data['content']
+    content = data['question']
     departmentlist = d.GetDepartmentList()
-    sendText = "你好，我是一名病人，我的症状是" + content + "，请问我得了什么病？我应该选择从" + str(departmentlist) + "中的哪个科室就诊？"
+    sendText = "你好，我是一名病人，我的症状是" + content + "，请我应该选择从" + str(departmentlist) + "中的哪个科室就诊？在五十个字以内解决，假装你是一名医生"
     openai.api_key = GPT_API_KEY
-    openai.api_base = "https://ai.fakeopen.com/v1"
+    openai.api_base = "https://chat.sanyue.site/sanyueqi1011/v1"
+    
+    print(sendText)
 
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
@@ -415,24 +472,36 @@ def answer(request):
             #print(chunk_msg, end='', flush=True)
             #time.sleep(0.05)
 
-    return JsonResponse(result)
+    print(result.__class__)
+
+    return JsonResponse({"answer" : result})
 
 
-def account(id : str):
+def account(request):
+    # 获取 session 中的信息
+
+    # 打印 session 的键值对信息
+    username = request.GET.get('username', None)
     db = MySQLdb.MyDatabase()
-    username = db.getNameById(id=id)
-    j = {}
-    j['avavtar'] = DEFAULT_AVATAR
-    j['age'] = 18
-    j['gender'] = 0
-    j['username'] = username
+    account = {}
+    account['username'] = username
+    account['gender'] = 0
+    account['avatar'] = DEFAULT_AVATAR
+    account['age'] = 18
+    permissions = []
+    u = db.getUserById(db.getIdByUsername(name=username))
+    permissions.append(u.type)
+    role = u.type
+    j = {'account' : account, 'permission' : permissions, 'role' : role}
     return JsonResponse(j)
 
 def conductMedcine(request):
     assert request.type == 'doctor'
     if request.method == 'POST':
-        Did = request.session['id']
-        Pid = request.POST.get('Pid')
+        # Did = request.session['id']
+        data = json.loads(request.body)
+        Did = data['Did']
+        Pid = data['Pid']
         MedcineList = request.POST.get('MedcineList')
         AmountList = request.POST.get('AmountList')
         db = MySQLdb.MyDatabase()
@@ -444,7 +513,8 @@ def conductMedcine(request):
 
 def queryDrugInfo(request):
     if request.method == 'POST':
-        DrugId = request.get('id')
+        data = json.loads(request.body)
+        name = data['name']
         db = MySQLdb.MyDatabase()
         return JsonResponse(db.queryDrugInfo)
     
@@ -458,4 +528,12 @@ def deleteCounter(request):
     db = MySQLdb.MyDatabase()
     db.deleteAllCounter()
     return HttpResponse('Success')
+
+@csrf_exempt
+def getDiagnosis(request):
+    db = MySQLdb.MyDatabase()
+    data = json.loads(request.body)
+    id = data['id']
+    r = db.getDiagnosisById(id=id)
+    return JsonResponse({'info' : r})
 

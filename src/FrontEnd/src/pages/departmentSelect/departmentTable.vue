@@ -28,7 +28,7 @@ const showModal = ref(false);
 
 async function fetchDepartmentList() {
     try {
-        const response = await axios.get('http://127.0.0.1:4523/m1/3616438-0-default/api/departmentList'); 
+        const response = await axios.get('http://127.0.0.1:8000/api/departmentList'); 
         departments.length = 0; // 清空departments数组
 
         // 将获取到的部门数据放入departments数组中

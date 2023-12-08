@@ -53,7 +53,8 @@ const emit = defineEmits<{
     (e: 'failure', reason: string, fields: signinFormProps): void;
 }>();
 
-const accountStore = useAccountStore();
+  const accountStore = useAccountStore();
+  accountStore.init();
 function signin(params: signinFormProps) {
     loading.value = true;
     accountStore

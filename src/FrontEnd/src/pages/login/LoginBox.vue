@@ -47,7 +47,8 @@ const emit = defineEmits<{
   (e: 'failure', reason: string, fields: LoginFormProps): void;
 }>();
 
-const accountStore = useAccountStore();
+  const accountStore = useAccountStore();
+  accountStore.init();
 function login(params: LoginFormProps) {
   loading.value = true;
   accountStore
