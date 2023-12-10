@@ -382,7 +382,6 @@ INSERT INTO `Dispatcher` (`TimePeriod`,`ROOMID`,`doctorId`,`TitleId`,`DATE`) VAL
 ('morning', '201', '5', '2', 'Saturday'),
 ('afternoon', '201', '5', '2', 'Sunday');
 
-
 SELECT * FROM COUNTER ;
 
 SELECT * FROM diagnosis;
@@ -393,3 +392,15 @@ SELECT * FROM checkcombine;
 SELECT * FROM laboratorysheet;
 
 SELECT * FROM registrelation;
+
+SELECT * FROM counter;
+
+SELECT * FROM patient;
+
+SELECT * FROM `user`;
+
+SELECT * FROM `doctor`;
+
+SELECT * FROM laboratorysheet;
+
+SELECT * FROM counter;

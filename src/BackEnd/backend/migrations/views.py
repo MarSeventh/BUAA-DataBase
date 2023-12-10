@@ -249,11 +249,7 @@ def showAllDrugName(request):
     if request.method == 'GET':
         db = MySQLdb.MyDatabase()
         ans = db.showAllDrugName()
-        l = []
-        for i in ans:
-            jsonObj = {"name": i["name"]}
-            l.append(jsonObj)
-        return JsonResponse({'Info': l})
+        return JsonResponse({'nameList': ans})
     else:
         return HttpResponse("Not a POST request")
     

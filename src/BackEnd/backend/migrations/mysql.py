@@ -131,7 +131,7 @@ class MyDatabase:
         morning_end = datetime.strptime('13:00', '%H:%M').time()
 
         afternoon_start = datetime.strptime('14:00', '%H:%M').time()
-        afternoon_end = datetime.strptime('18:00', '%H:%M').time()
+        afternoon_end = datetime.strptime('22:00', '%H:%M').time()
 
         # 判断当前时间所属时间段
         if morning_start <= current_time <= morning_end:
@@ -145,7 +145,7 @@ class MyDatabase:
         self.connect()
         timePeriod = self.get_time_period()
         sql = "SELECT doctorId, ROOMid FROM Dispatcher WHERE TitleId = (SELECT id FROM Titles WHERE name = %s) AND TimePeriod = %s AND DATE = %s"
-        self.cursor.execute(sql, (name, 'afternoon', self.getDate()))
+        self.cursor.execute(sql, (name, self.get_time_period(), self.getDate()))
         r = self.cursor.fetchall()
         l = []
         for i in r:
@@ -159,10 +159,34 @@ class MyDatabase:
 
     def NextPatient(self, Did: str, RoomId: str):
         from .models import Room, Registrelation
-        assert Room.objects.get(id=RoomId) > 0
         r = self.getCurrentPatient(RoomId)
         Registrelation.objects.filter(id=r.id).update(isfinished=True)
         Room.objects.filter(id=RoomId).update(queuelen=Room.objects.get(id=RoomId).queuelen - 1)
+        
+    def finishPatiet(self, Did: str, Pid : str):
+        RoomId = self.getRoomIdByDid(Did=Did)
+        if RoomId == None:
+            return False
+        from .models import Room, Registrelation, Counter
+        c = Counter.objects.filter(pid=Pid, type='Registration').iterator()
+        r = None
+        for i in c:
+            if Registrelation.objects.get(id=i).isfinished == False:
+                r = i
+                break
+        if r == None:
+            return False
+        Registrelation.objects.filter(id=r).update(isfinished=True)
+        Room.objects.filter(id=RoomId).update(queuelen=Room.objects.get(id=RoomId).queuelen - 1)
+        return True
+    
+    def getRoomIdByDid(self, Did: str):
+        from .models import Dispatcher
+        r = Dispatcher.objects.filter(doctorid=Did, timeperiod=self.get_time_period(), date=self.getDate())
+        if len(r) == 0:
+            return None
+        else:
+            return r[0].roomid
 
     def getCurrentPatient(self, RoomId: str):
         from .models import Registrelation
@@ -276,14 +300,6 @@ class MyDatabase:
             res.append({'id': i.id, 'type': i.type, 'price': i.price})
         return res
 
-    def showAllDiagnosisByPid(self, id: str):
-        models.Diagnosis.objects.filter(patientid=id)
-        l = []
-        for i in models.Diagnosis.objects.filter(patientid=id):
-            dname = self.getNameById(i.doctorid.id)
-            l.append({'doctor': dname, 'time': i.time, 'diagnosis': i.diagnosis})
-        return l
-
     def getIdByUsername(self, name: str):
         d = models.User.objects.filter(username=name)
         if len(d) != 0:
@@ -340,7 +356,7 @@ class MyDatabase:
         l = Drug.objects.all().iterator()
         res = []
         for i in l:
-            res.append({'name': i.name})
+            res.append(i.name)
         return res
     
     def showAllDrug(self):
@@ -365,7 +381,11 @@ class MyDatabase:
         if len(Diagnosis.objects.all()) == 0:
             id = '1'
         else:
-            id = str(int(Diagnosis.objects.all().order_by('-id')[0].id) + 1)
+            self.connect()
+            sql = "SELECT MAX(CAST(id AS UNSIGNED)) AS max_id FROM DIAGNOSIS"
+            self.cursor.execute(sql)
+            id = self.cursor.fetchone()
+            self.close()
         Diagnosis.objects.create(id=id, doctorid=Doctor.objects.get(id=Did), patientid=Patient.objects.get(id=Pid), time=datetime.now(), diagnosis=Statement)
         return True, 0
 
@@ -393,14 +413,14 @@ class MyDatabase:
             return True, 0
         else:
             r = Checkcombine.objects.filter(checkname=checkName).iterator()
-            from .models import Laboratorysheet, Counter, Patient, Doctor
+            from .models import Laboratorysheet, Counter, Patient, Doctor, Checkitems
             id = str(int(Counter.objects.all().order_by('-id')[0].id) + 1)
             Counter.objects.create(id=id, pid=Patient.objects.get(id=Pid), did=Doctor.objects.get(id=Did), price=0, ispaid=0, type='Laboratory', date=datetime.now())
             for i in r:
                 from .models import Checkitems
                 try:
                     Laboratorysheet.objects.create(id=Counter.objects.get(id=id), itemid=i.itemid, begintime=datetime.now(), checkname=checkName, result=-1)
-                    Counter.objects.filter(id=id).update(price=Counter.objects.get(id=id).price + Checkitems.objects.get(id=i.itemid.id).price)
+                    Counter.objects.filter(id=id).update(price=Counter.objects.get(id=id).price + i.itemid.price)
                 except:
                     print(i.itemid)
                     return False, 404
