@@ -11,7 +11,7 @@ import jwt, datetime
 
 GPT_API_KEY = 'sess-G4RoUh550yS8FokrxF7hTY38u1pJNIX0WFBVM0G6'
 
-DEFAULT_AVATAR = 'https://imgse.com/i/pi21DHS'
+DEFAULT_AVATAR = 'https://cdn.jsdelivr.net/gh/MarSeventh/imgbed/posts/202312091100889.png'
 
 
 from rest_framework.authtoken.models import Token
@@ -467,7 +467,7 @@ def answer(request):
     data = json.loads(request.body)
     content = data['question']
     departmentlist = d.GetDepartmentList()
-    sendText = "你好，我是一名病人，我的症状是" + content + "，请我应该选择从" + str(departmentlist) + "中的哪个科室就诊？在五十个字以内解决，假装你是一名医生"
+    sendText = "你好，我是一名病人，我的症状是" + content + "，请我应该选择从" + str(departmentlist) + "中的哪个科室就诊？在三十到八十个字以内解决，假设你是医院的智能导医台（但回答中不要提及这一点）"
     openai.api_key = GPT_API_KEY
     openai.api_base = "https://api.openai.com/v1"
     
@@ -479,7 +479,7 @@ def answer(request):
             {'role': 'user', 'content': sendText}
         ],
         temperature=0.5,
-        max_tokens=20,
+        max_tokens=300,
         stream=True
     )
 
@@ -492,9 +492,11 @@ def answer(request):
             #print(chunk_msg, end='', flush=True)
             #time.sleep(0.05)
 
-    print(result.__class__)
+    print(result)
 
     return JsonResponse({"answer" : result})
+
+
 
 
 def account(request):
@@ -610,4 +612,12 @@ def deleteMedicine(request):
     data = json.loads(request.body)
     id = data['id']
     db.HardDeleteDrug(id=id)
+    return JsonResponse({'success' : True})
+
+@csrf_exempt
+def nextPatient(request):
+    db = MySQLdb.MyDatabase()
+    data = json.loads(request.body)
+    id = data['id']
+    db.NextPatient(id=id)
     return JsonResponse({'success' : True})

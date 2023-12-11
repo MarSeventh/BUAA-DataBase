@@ -68,5 +68,6 @@ urlpatterns = [
     path('api/sendDoctorList/', views.addDoctor),
     path('api/getMedicine/', views.GetAllMedicine),
     path('api/deleteMedicine/', views.deleteMedicine),
+    path('api/nextPatient/', views.nextPatient),
 
 ]

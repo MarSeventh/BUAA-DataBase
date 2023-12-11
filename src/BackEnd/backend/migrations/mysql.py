@@ -160,8 +160,9 @@ class MyDatabase:
         self.close()
         return l
 
-    def NextPatient(self, Did: str, RoomId: str):
-        from .models import Room, Registrelation
+    def NextPatient(self, Did: str):
+        from .models import Room, Registrelation, Dispatcher
+        RoomId = self.getRoomIdByDid(Did=Did)
         r = self.getCurrentRegistRelation(RoomId)
         Registrelation.objects.filter(id=r.id).update(isfinished=True)
         Room.objects.filter(id=RoomId).update(queuelen=Room.objects.get(id=RoomId).queuelen - 1)
