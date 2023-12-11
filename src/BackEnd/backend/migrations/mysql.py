@@ -82,9 +82,12 @@ class MyDatabase:
         else:
             return False
 
-    def HardDeleteDrug(self, name: str):
+    def HardDeleteDrug(self, id: str):
         from .models import Drug
-        Drug.objects.filter(name=name).delete()
+        self.connect()
+        sql = "DELETE FROM DRUG WHERE id = %s"
+        self.cursor.execute(sql, id)
+        self.connection.commit()
         return True
 
     def SoftDeleteDrug(self, name: str):
@@ -159,7 +162,7 @@ class MyDatabase:
 
     def NextPatient(self, Did: str, RoomId: str):
         from .models import Room, Registrelation
-        r = self.getCurrentPatient(RoomId)
+        r = self.getCurrentRegistRelation(RoomId)
         Registrelation.objects.filter(id=r.id).update(isfinished=True)
         Room.objects.filter(id=RoomId).update(queuelen=Room.objects.get(id=RoomId).queuelen - 1)
         
@@ -189,9 +192,24 @@ class MyDatabase:
             return r[0].roomid
 
     def getCurrentPatient(self, RoomId: str):
+        from .models import  User, Counter
+        self.connect()
+        sql = "SELECT *FROM RegistrelationWHERE RoomId = '输入值' AND isFinished = 0 ORDER BY CAST(id AS UNSIGNED)LIMIT 1;"
+        self.cursor.execute(sql, RoomId)
+        r = self.cursor.fetchone()
+        c = Counter.objects.filter(id=r['id'])
+        self.close()
+        p = User.objects.get(id=c[0].pid)
+        info = {'name' : p.username, 'id' : p.id}
+        return info
+    
+    def getCurrentRegistRelation(self, RoomId: str):
         from .models import Registrelation
-        max_id = Registrelation.objects.filter(roomid=RoomId, isFinished=False).aggregate(Max('id'))['id__max']
-        return Registrelation.objects.get(id=max_id)
+        r = Registrelation.objects.filter(roomid=RoomId, isfinished=False)
+        if len(r) == 0:
+            return None
+        else:
+            return r[0]
 
     @transaction.atomic
     def PatientRegistration(self, patientid: str, doctorid: str):
@@ -414,7 +432,7 @@ class MyDatabase:
         else:
             r = Checkcombine.objects.filter(checkname=checkName).iterator()
             from .models import Laboratorysheet, Counter, Patient, Doctor, Checkitems
-            id = str(int(Counter.objects.all().order_by('-id')[0].id) + 1)
+            id = self.genCounterId()
             Counter.objects.create(id=id, pid=Patient.objects.get(id=Pid), did=Doctor.objects.get(id=Did), price=0, ispaid=0, type='Laboratory', date=datetime.now())
             for i in r:
                 from .models import Checkitems
@@ -574,3 +592,65 @@ class MyDatabase:
     def deleteAllCounter(self):
         from .models import Counter
         Counter.objects.all().delete()
+        
+    def addDoctor(self, name: str, tittle: str, password: str):
+        from .models import Doctor, User
+        id = self.genUserId()
+        User.objects.create(id=id, username=name, password=password, type='Doctor')
+        Doctor.objects.create(id=id, Tid=self.getTidByName(name=tittle), active=1)
+        return True, 0
+    
+    def GetAllMedicine(self):
+        from .models import Drug
+        r = Drug.objects.all().iterator()
+        res = []
+        for i in r:
+            res.append({'id': i.id, 'name': i.name, 'price': i.price, 'storage': i.storage, 'description': i.description})
+        return res
+    
+    def searchMedicine(self, name: str):
+        from .models import Drug
+        r = Drug.objects.all.iterator()
+        res = []
+        for i in r:
+            if i.name.find(name) != -1:
+                res.append({'id': i.id, 'name': i.name, 'price': i.price})
+        return res
+    
+    def getDispathcOfDoc(self, Did : str):
+        from .models import Dispatcher, Doctor
+        Did = Doctor.objects.get(id=Did)
+        r = Dispatcher.objects.filter(doctorid=Did).iterator()
+        res = []
+        day = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+        period = ['morning', 'afternoon']
+        for i in day:
+            for j in period:
+                d = Dispatcher.objects.filter(doctorid=Did, date=i, timeperiod=j)
+                if len(d) != 0:
+                    res.append(d[0].roomid.id)
+        return res
+    
+    def getAnalysisList(self):
+        from .models import Checkcombine
+        r = Checkcombine.objects.all().iterator()
+        res = []
+        for i in r:
+            if res.find(i.checkname) == -1:
+                res.append(i.checkname)
+        return res
+    
+    def addCommemPatient(self, username : str, password : str):
+        from .models import User, Patient
+        id = self.genUserId()
+        User.objects.create(id=id, username=username, password=password, type='patient')
+        Patient.objects.create(id=id, iscommem=True, active=True)
+        return True, 0
+    
+    def getAllStorage(self):
+        from .models import Drug
+        r = Drug.objects.all().iterator()
+        res = []
+        for i in r:
+            res.append({'id': i.id, 'name': i.name, 'storage': i.storage})
+        return res

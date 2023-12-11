@@ -9,7 +9,7 @@ import openai
 import jwt, datetime
 
 
-GPT_API_KEY = 'pk-this-is-a-real-free-pool-token-for-everyone'
+GPT_API_KEY = 'sess-G4RoUh550yS8FokrxF7hTY38u1pJNIX0WFBVM0G6'
 
 DEFAULT_AVATAR = 'https://imgse.com/i/pi21DHS'
 
@@ -213,14 +213,14 @@ def PrescribeMedication(request):
     if request.method == 'POST':
         # Did = request.session['id']
         data = json.loads(request.body)
-        Did = data['Did']
+        db = MySQLdb.MyDatabase()
+        username = data['username']
+        Did = db.getIdByUsername(name=username)
         # Did = '5'
-        data = json.loads(request.body)
         Pid = data['Pid']
         print(Pid)
         MedcineList = data['MedcineList']
         AmountList = data['AmountList']
-        db = MySQLdb.MyDatabase()
         if MedcineList == None or AmountList == None:
             print('NOT LIST')
             return HttpResponse("NOT LIST")
@@ -231,6 +231,29 @@ def PrescribeMedication(request):
     else:
         return HttpResponse("Not a POST request")
     
+    
+def GetAllMedicine(request):
+    # assert request.type == 'patient'
+    if request.method == 'GET':
+        db = MySQLdb.MyDatabase()
+        ans = db.GetAllMedicine()
+        return JsonResponse({'info': ans})
+    else:
+        return HttpResponse("Not a POST request")
+    
+    
+@csrf_exempt
+def searchMedicine(request):
+    # assert request.type == 'patient'
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        name = data['name']
+        db = MySQLdb.MyDatabase()
+        ans = db.searchMedicine(name=name)
+        return JsonResponse({'info': ans})
+    else:
+        return HttpResponse("Not a POST request")
+
 def PayAll(request):
     # assert request.type == 'patient'
     if request.method == 'POST':
@@ -322,11 +345,12 @@ def conductLaboratorySheet(request):
         # Did = request.session['id']
         # Did = '5'
         data = json.loads(request.body)
-        Did = data['Did']
+        username= data['username']
+        db = MySQLdb.MyDatabase()
+        Did = db.getIdByUsername(name=username)
         Pid = data['Pid']
         checkName = data['checkName']
         checkItemIds = data['checkItemIds']
-        db = MySQLdb.MyDatabase()
         success, status = db.conductAlaboratoryAnalysis(checkName=checkName, checkItemIds=checkItemIds, Did=Did, Pid=Pid)
         return JsonResponse({'success' : success, 'code' : status})
     else:
@@ -445,7 +469,7 @@ def answer(request):
     departmentlist = d.GetDepartmentList()
     sendText = "你好，我是一名病人，我的症状是" + content + "，请我应该选择从" + str(departmentlist) + "中的哪个科室就诊？在五十个字以内解决，假装你是一名医生"
     openai.api_key = GPT_API_KEY
-    openai.api_base = "https://chat.sanyue.site/sanyueqi1011/v1"
+    openai.api_base = "https://api.openai.com/v1"
     
     print(sendText)
 
@@ -533,3 +557,57 @@ def getDiagnosis(request):
     r = db.getDiagnosisById(id=id)
     return JsonResponse({'info' : r})
 
+@csrf_exempt
+def getPatient(request):
+    db = MySQLdb.MyDatabase()
+    room = request.GET.get('room', None)
+    p = db.getCurrentPatient(RoomId=room)
+    return JsonResponse({'info' : p})
+
+@csrf_exempt
+def addDoctor(request):
+    db = MySQLdb.MyDatabase()
+    data = json.loads(request.body)
+    name = data['name']
+    tittle = data['tittle']
+    password = data['password']
+    db.addDoctor(name=name, tittle=tittle, password=password)
+    return JsonResponse({'success' : True})
+
+@csrf_exempt
+def getDispatch(request):
+    db = MySQLdb.MyDatabase()
+    data = json.loads(request.body)
+    username = data['username']
+    id = db.getIdByUsername(name=username)
+    r = db.getDispathcOfDoc(Did=id)
+    return JsonResponse({'info' : r})
+
+@csrf_exempt
+def getAnalysisList(request):
+    db = MySQLdb.MyDatabase()
+    r = db.getAnalysisList(Did=id)
+    return JsonResponse({'info' : r})
+
+@csrf_exempt
+def addPatient(request):
+    db = MySQLdb.MyDatabase()
+    data = json.loads(request.body)
+    name = data['name']
+    password = data['password']
+    s = db.addCommemPatient(username=name, password=password)
+    return JsonResponse({'success' : s})
+
+@csrf_exempt
+def getStorage(request):
+    db = MySQLdb.MyDatabase()
+    r = db.getAllStorage()
+    return JsonResponse({'info' : r})
+
+@csrf_exempt
+def deleteMedicine(request):
+    db = MySQLdb.MyDatabase()
+    data = json.loads(request.body)
+    id = data['id']
+    db.HardDeleteDrug(id=id)
+    return JsonResponse({'success' : True})

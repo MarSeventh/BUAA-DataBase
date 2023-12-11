@@ -29,7 +29,7 @@ urlpatterns = [
     path('api/registration/', views.PatientRegistration), # finished
     path('api/counterToPay/', views.showAllNeedtoPay), # finished
     path('api/fetchPayList/', views.showAllinCounter), # finished
-    path('api/prescribeMedication/', views.PrescribeMedication), # finished
+    path('api/sendMedicineList/', views.PrescribeMedication), # finished
     path('api/payAllCounter/', views.PayAll), # finished
     path('api/finishPay/', views.finishPay),
     path('api/showAllDrug/', views.showAllDrug), # finished
@@ -59,6 +59,14 @@ urlpatterns = [
     path('test/showRequestJson', testviews.showRequestJson), # finished
     path('test/login', testviews.LogIn), # finished
     path('test/Registration', views.testPatientRegistration), # finished
-    path('test/deleteCounter', views.deleteCounter) # finished
+    path('test/deleteCounter', views.deleteCounter), # finished
+    path('api/getPatient', views.getPatient), # finished
+    path('api/getAnalysisName', views.getAnalysisList), # finished
+    path('api/sendAnalysisList/', views.conductLaboratorySheet), # finished
+    path('api/sendCheckResults/', views.MedicalDiagnosisStatement),
+    path('api/getDoctorSchedule/', views.getDispatch),
+    path('api/sendDoctorList/', views.addDoctor),
+    path('api/getMedicine/', views.GetAllMedicine),
+    path('api/deleteMedicine/', views.deleteMedicine),
 
 ]
