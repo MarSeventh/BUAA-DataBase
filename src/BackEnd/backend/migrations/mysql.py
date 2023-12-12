@@ -163,9 +163,16 @@ class MyDatabase:
     def NextPatient(self, Did: str):
         from .models import Room, Registrelation, Dispatcher
         RoomId = self.getRoomIdByDid(Did=Did)
+        if RoomId == None:
+            print('NO DOCTOR' + Did + 'IN ' + self.get_time_period())
+            return False, 404
         r = self.getCurrentRegistRelation(RoomId)
+        if r == None:
+            print('NO PATIENT IN ROOM' + RoomId)
+            return False, 404
         Registrelation.objects.filter(id=r.id).update(isfinished=True)
         Room.objects.filter(id=RoomId).update(queuelen=Room.objects.get(id=RoomId).queuelen - 1)
+        return True, 0
         
     def finishPatiet(self, Did: str, Pid : str):
         RoomId = self.getRoomIdByDid(Did=Did)
@@ -559,12 +566,17 @@ class MyDatabase:
 
     def genUserId(self):
         from .models import User
-        max_id = User.objects.all().aggregate(Max('id'))['id__max']
+        self.connect()
+        sql = "SELECT MAX(CAST(id AS UNSIGNED)) AS max_id FROM USER"
+        self.cursor.execute(sql)
+        result = self.cursor.fetchone()
+        self.close()
+        max_id = result['max_id']
         return str(int(max_id) + 1)
 
     def getTidByName(self, name: str):
         from .models import Titles
-        return Titles.objects.get(name=name)[0]
+        return Titles.objects.get(name=name)
 
     def createNewDoctor(self, name: str, tittle: str, password: str):
         from .models import Doctor, User
@@ -598,7 +610,7 @@ class MyDatabase:
         from .models import Doctor, User
         id = self.genUserId()
         User.objects.create(id=id, username=name, password=password, type='Doctor')
-        Doctor.objects.create(id=id, Tid=self.getTidByName(name=tittle), active=1)
+        Doctor.objects.create(id=id, tid=self.getTidByName(name=tittle), active=1)
         return True, 0
     
     def GetAllMedicine(self):
@@ -630,6 +642,8 @@ class MyDatabase:
                 d = Dispatcher.objects.filter(doctorid=Did, date=i, timeperiod=j)
                 if len(d) != 0:
                     res.append(d[0].roomid.id)
+                else:
+                    res.append(-1)
         return res
     
     def getAnalysisList(self):

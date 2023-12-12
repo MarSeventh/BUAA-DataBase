@@ -573,8 +573,8 @@ def addDoctor(request):
     name = data['name']
     tittle = data['tittle']
     password = data['password']
-    db.addDoctor(name=name, tittle=tittle, password=password)
-    return JsonResponse({'success' : True})
+    l , _ = db.addDoctor(name=name, tittle=tittle, password=password)
+    return JsonResponse({'success' : l})
 
 @csrf_exempt
 def getDispatch(request):
@@ -619,8 +619,8 @@ def nextPatient(request):
     db = MySQLdb.MyDatabase()
     data = json.loads(request.body)
     id = data['id']
-    db.NextPatient(id=id)
-    return JsonResponse({'success' : True})
+    l = db.NextPatient(Did=id)
+    return JsonResponse({'success' : l})
 
 @csrf_exempt
 def getMedicineList(request):

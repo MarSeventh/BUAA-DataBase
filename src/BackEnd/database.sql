@@ -404,3 +404,13 @@ SELECT * FROM `doctor`;
 SELECT * FROM laboratorysheet;
 
 SELECT * FROM counter;
+
+INSERT INTO `Drug` (`id`, `name`, `price`, `Description`, `isBanned`, `Storage`) VALUES
+('41', '原石', 500, '打原神用的', false, 500);
+
+SELECT * FROM `drug`;
+
+
+SELECT * FROM `registrelation`;
+
+SELECT * FROM `User`;

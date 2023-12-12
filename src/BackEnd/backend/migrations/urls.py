@@ -63,12 +63,12 @@ urlpatterns = [
     path('api/getPatient', views.getPatient), # finished
     path('api/getAnalysisName', views.getAnalysisList), # finished
     path('api/sendAnalysisList/', views.conductLaboratorySheet), # finished
-    path('api/sendCheckResults/', views.MedicalDiagnosisStatement),
-    path('api/getDoctorSchedule/', views.getDispatch),
-    path('api/sendDoctorList/', views.addDoctor),
-    path('api/getMedicine/', views.GetAllMedicine),
-    path('api/deleteMedicine/', views.deleteMedicine),
+    path('api/sendCheckResults/', views.MedicalDiagnosisStatement), # finished
+    path('api/getDoctorSchedule/', views.getDispatch), # finished
+    path('api/sendDoctorList/', views.addDoctor), # finished
+    path('api/getMedicine/', views.GetAllMedicine), # finished
+    path('api/deleteMedicine/', views.deleteMedicine), # finished
     path('api/nextPatient/', views.nextPatient),
-    path('api/searchMedicineList/', views.searchMedicine),
+    path('api/searchMedicineList/', views.searchMedicine), # finished
 
 ]
