@@ -359,6 +359,27 @@ def conductLaboratorySheet(request):
         return HttpResponse("Not a POST request")
 
 
+@csrf_exempt 
+@transaction.atomic 
+def sendAnalysisList(request):
+    # assert request.type == 'doctor'
+    if request.method == 'POST':
+        # Did = request.session['id']
+        # Did = '5'
+        data = json.loads(request.body)
+        username= data['username']
+        db = MySQLdb.MyDatabase()
+        Did = db.getIdByUsername(name=username)
+        Pid = data['Pid']
+        AnalysisList = data['AnalysisList']
+        for i in AnalysisList:
+            checkName = i
+            checkItemIds = None
+            success, status = db.conductAlaboratoryAnalysis(checkName=checkName, checkItemIds=checkItemIds, Did=Did, Pid=Pid)
+        return JsonResponse({'success' : success, 'code' : status})
+    else:
+        return HttpResponse("Not a POST request")
+
 @csrf_exempt
 def deletePatient(request):
     # assert request.type == 'patient'
@@ -634,3 +655,14 @@ def getMedicineList(request):
     db = MySQLdb.MyDatabase()
     r = db.getAllMedicine()
     return JsonResponse({'medicineList' : r})
+
+@csrf_exempt
+def addMedicine(request):
+    data = json.loads(request.body)
+    Medicine = data['Medicine']
+    Amount = data['Amount']
+    Price = data['Price']
+    Description = data['Description']
+    db = MySQLdb.MyDatabase()
+    db.addMedicine(name=Medicine, amount=Amount, price=Price, description=Description)
+    return JsonResponse({'success' : True})

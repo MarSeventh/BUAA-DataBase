@@ -680,3 +680,14 @@ class MyDatabase:
         for i in r:
             res.append({'id': i.id, 'name': i.name, 'price': i.price, 'amount': i.storage})
         return res
+    
+    def addMedicine(self, name : str, price : float, amount : int, description : str):
+        from .models import Drug
+        self.connect()
+        sql = "SELECT MAX(CAST(id AS UNSIGNED)) AS max_id FROM DRUG"
+        self.cursor.execute(sql)
+        result = self.cursor.fetchone()
+        max_id = result['max_id']
+        id = str(int(max_id) + 1)
+        Drug.objects.create(id=id, name=name, price=price, storage=amount, description=description, isbanned=False)
+        return True, 0

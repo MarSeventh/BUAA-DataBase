@@ -8,7 +8,9 @@ dataforMed = {'MedcineList' : ['风油精 (瓶)', '云南白药气雾剂 (瓶)',
 
 d = {'room' : '201'}
 
-r = requests.post(URL_ROOT+'api/sendMedicineList/', json=dataforMed)
+d1 = {'Medicine' : '冰糖', 'Amount' : 100, 'Price' : 1, 'Description' : '用于治疗感冒'}
+
+r = requests.post(URL_ROOT+'api/addMedicine/', json=d1)
 pprint.pprint(r.json())
 
 
