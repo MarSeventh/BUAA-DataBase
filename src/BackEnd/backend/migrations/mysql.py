@@ -202,12 +202,16 @@ class MyDatabase:
     def getCurrentPatient(self, RoomId: str):
         from .models import  User, Counter
         self.connect()
-        sql = "SELECT *FROM RegistrelationWHERE RoomId = '输入值' AND isFinished = 0 ORDER BY CAST(id AS UNSIGNED)LIMIT 1;"
-        self.cursor.execute(sql, RoomId)
+        print(RoomId)
+        sql = "SELECT * FROM Registrelation WHERE `RoomId` = %s AND `isFinished` = 0 ORDER BY CAST(id AS UNSIGNED) LIMIT 1;"
+        self.cursor.execute(sql, (RoomId, ))
         r = self.cursor.fetchone()
+        if r == None:
+            return False
         c = Counter.objects.filter(id=r['id'])
         self.close()
-        p = User.objects.get(id=c[0].pid)
+        print(c[0].pid)
+        p = User.objects.get(id=c[0].pid.id)
         info = {'name' : p.username, 'id' : p.id}
         return info
     
@@ -648,12 +652,11 @@ class MyDatabase:
     
     def getAnalysisList(self):
         from .models import Checkcombine
-        r = Checkcombine.objects.all().iterator()
-        res = []
-        for i in r:
-            if res.find(i.checkname) == -1:
-                res.append(i.checkname)
-        return res
+        self.connect()
+        sql = "SELECT DISTINCT checkName FROM checkCombine;"
+        self.cursor.execute(sql)
+        result = self.cursor.fetchall()
+        return result
     
     def addCommemPatient(self, username : str, password : str):
         from .models import User, Patient

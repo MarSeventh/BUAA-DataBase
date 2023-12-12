@@ -350,7 +350,7 @@ def conductLaboratorySheet(request):
         Did = db.getIdByUsername(name=username)
         Pid = data['Pid']
         checkName = data['checkName']
-        checkItemIds = data['checkItemIds']
+        checkItemIds = data['checkItemIds'] if 'checkItemIds' in data else None
         success, status = db.conductAlaboratoryAnalysis(checkName=checkName, checkItemIds=checkItemIds, Did=Did, Pid=Pid)
         return JsonResponse({'success' : success, 'code' : status})
     else:
@@ -562,8 +562,13 @@ def getDiagnosis(request):
 @csrf_exempt
 def getPatient(request):
     db = MySQLdb.MyDatabase()
-    room = request.GET.get('room', None)
+    data = json.loads(request.body)
+    room = data['room']
+    print(room)
+    print('-------------------')
     p = db.getCurrentPatient(RoomId=room)
+    if p == False:
+        return JsonResponse({'name' : '无', 'id' : -1})
     return JsonResponse({'name' : p['name'], 'id' : p['id']})
 
 @csrf_exempt
@@ -588,7 +593,7 @@ def getDispatch(request):
 @csrf_exempt
 def getAnalysisList(request):
     db = MySQLdb.MyDatabase()
-    r = db.getAnalysisList(Did=id)
+    r = db.getAnalysisList()
     return JsonResponse({'info' : r})
 
 @csrf_exempt
