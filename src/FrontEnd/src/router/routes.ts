@@ -38,7 +38,7 @@ const routes: RouteRecordRaw[] = [
     meta: {
       icon: 'UsergroupAddOutlined',
       renderMenu: true,
-      permission: null,
+      permission: "patient",
       cacheable: true,
     },
     component: () => import('@/pages/departmentSelect')
@@ -61,6 +61,7 @@ const routes: RouteRecordRaw[] = [
       icon: 'AccountBookOutlined',
       renderMenu: true,
       cacheable: false,
+      permission: "patient",
     },
     component: () => import('@/pages/payList')
   },
@@ -71,6 +72,7 @@ const routes: RouteRecordRaw[] = [
       icon: 'BgColorsOutlined',
       renderMenu: true,
       cacheable: false,
+      permission: "patient",
     },
     component: () => import('@/pages/assayList')
   },
@@ -91,6 +93,7 @@ const routes: RouteRecordRaw[] = [
       icon: 'SnippetsOutlined',
       renderMenu: true,
       cacheable: false,
+      permission: "patient",
     },
     component: () => import('@/pages/diagnosisList')
   },
@@ -103,6 +106,83 @@ const routes: RouteRecordRaw[] = [
       cacheable: false,
     },
     component: () => import('@/pages/diagnosisItem')
+  },
+  {
+    path: '/medicineList',
+    name: '开药',
+    meta: {
+      icon: 'FileAddOutlined',
+      renderMenu: true,
+      cacheable: false,
+      permission: "doctor",
+    },
+    component: () => import('@/pages/doctor/medicineList/medicine.vue')
+  },
+  {
+    path: '/analysisList',
+    name: '检查项目',
+    meta: {
+      icon: 'FileDoneOutlined',
+      renderMenu: true,
+      cacheable: false,
+      permission: "doctor",
+    },
+    component: () => import('@/pages/doctor/analysisList/analysis.vue')
+  },
+  {
+    path: '/checkResult',
+    name: '诊断结果',
+    meta: {
+      icon: 'ForkOutlined',
+      renderMenu: true,
+      cacheable: false,
+      permission: "doctor",
+    },
+    component: () => import('@/pages/doctor/checkResult/checkResult.vue')
+  },
+  {
+    path: '/scheduleTable',
+    name: '排班日程',
+    meta: {
+      icon: 'FundProjectionScreenOutlined',
+      renderMenu: true,
+      cacheable: false,
+      permission: "doctor",
+    },
+    component: () => import('@/pages/doctor/scheduleTable/schedule.vue')
+  },
+  {
+    path: '/addDoctor',
+    name: '添加医生',
+    meta: {
+      icon: 'ContactsOutlined',
+      renderMenu: true,
+      cacheable: false,
+      permission: "admin",
+    },
+    component: () => import('@/pages/manager/addDoctor/addDoctor.vue')
+  },
+  {
+    path: '/addPatient',
+    name: '添加患者',
+    meta: {
+      icon: 'DeploymentUnitOutlined',
+      renderMenu: true,
+      cacheable: false,
+      permission: "admin",
+    },
+    component: () => import('@/pages/manager/addPatient/patient.vue')
+  },
+  {
+    path: '/searchMedicine',
+    name: '管理药品',
+    meta: {
+      icon: 'ExperimentOutlined',
+      renderMenu: true,
+      cacheable: false,
+      permission: "admin",
+    },
+    component: () => import('@/pages/manager/searchMedicine/searchMedicine.vue')
   },
   {
     path: '/personal',
@@ -149,7 +229,7 @@ const routes: RouteRecordRaw[] = [
           target: '_blank',
           cacheable: false,
         },
-        component: () => import('@/pages/Signin')
+        component: () => import('@/pages/signin')
       },
     ],
   },

@@ -7,8 +7,8 @@ import { useAccountStore } from '@/store';
 
   const accountStore = useAccountStore();
   accountStore.init();
-const router = useRouter();
 const userName = accountStore.account.username;
+const router = useRouter();
 
 const route = useRoute();
 const departmentName = route.query.name;

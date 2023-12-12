@@ -1,11 +1,12 @@
 import { defineStore } from 'pinia';
 import http from './http';
 import { Response } from '@/types';
+import { useMenuStore } from './menu';
 import { useAuthStore } from '@/plugins';
 
 export interface Profile {
   account: Account;
-  permissions: string[];
+  permission: string[];
   role: string;
 }
 export interface Account {
@@ -36,11 +37,13 @@ export const useAccountStore = defineStore('account', {
       const storedData = localStorage.getItem('user');
       if (storedData) {
         const userData = JSON.parse(storedData);
-        const { account, permissions, role } = userData;
+        const { account, permission, role } = userData;
         this.account = account;
-        this.permissions = permissions;
+        this.permissions = permission;
         this.role = role;
         this.logged = true; // 用户已经登录
+        const { setAuthorities } = useAuthStore();
+        setAuthorities(permission);
       }
     },
     async login(username: string, password: string) {
@@ -52,8 +55,8 @@ export const useAccountStore = defineStore('account', {
           if (response.code === 0) {
             this.logged = true;
             http.setAuthorization(`Bearer ${response.data.token}`, new Date(response.data.expires));
-            this.profile();
-            //await useMenuStore().getMenuList();
+            await this.profile();
+            await useMenuStore().getMenuList();
             return response.data;
           } else {
             return Promise.reject(response);
@@ -92,11 +95,11 @@ export const useAccountStore = defineStore('account', {
         if (response.code === 200) {
           console.log(response);
           const { setAuthorities } = useAuthStore();
-          const { account, permissions, role } = response.data;
+          const { account, permission, role } = response.data;
           this.account = account;
-          this.permissions = permissions;
+          this.permissions = permission;
           this.role = role;
-          setAuthorities(permissions);
+          setAuthorities(permission);
 
           // 将用户信息保存在 localStorage 中
           localStorage.setItem('user', JSON.stringify(response.data));

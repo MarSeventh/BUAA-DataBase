@@ -655,3 +655,11 @@ class MyDatabase:
         for i in r:
             res.append({'id': i.id, 'name': i.name, 'storage': i.storage})
         return res
+    
+    def getAllMedicine(self):
+        from .models import Drug
+        r = Drug.objects.all().iterator()
+        res = []
+        for i in r:
+            res.append({'id': i.id, 'name': i.name, 'price': i.price, 'amount': i.storage})
+        return res

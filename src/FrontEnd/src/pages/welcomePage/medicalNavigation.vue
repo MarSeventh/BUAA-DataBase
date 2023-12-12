@@ -1,7 +1,7 @@
 <template>
     <div class="container">
         <h2 style="color: white;margin: 30px">智能导医台</h2>
-        <a-textarea style="width: 50vh;opacity: 0.85;" v-model="question" type="textarea" :rows="4"
+        <a-textarea style="width: 50vh;opacity: 0.85;" v-model:value="question" type="textarea" :rows="4"
             placeholder="输入您感觉不舒服的地方"></a-textarea>
         <a-card style="margin-top: 15px;opacity: 0.85;" title="就诊建议" class="mt-4 profile-info rounded-xl shadow-lg"
             :bordered="false">
@@ -19,14 +19,15 @@
 import axios from 'axios';
 import { ref } from 'vue';
 
-var question = ''
-var answer = ''
+var question = ref('');
+var answer = '';
 var typedAnswer = ref('');
 
 async function askQuestion() {
     try {
+        console.log(question.value)
         const response = await axios.post('http://127.0.0.1:8000/api/getSuggestion/', {
-            question: question,
+            question: question.value,
         });
 
         answer = response.data.answer;

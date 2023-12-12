@@ -5,11 +5,11 @@
         class="login-form w-[400px] p-lg xl:w-[440px] xl:p-xl h-fit text-text">
         <a-divider>登录</a-divider>
         <a-form-item :required="true" name="username">
-          <a-input v-model:value="form.username" autocomplete="new-username" placeholder="请输入用户名或邮箱: admin"
+          <a-input v-model:value="form.username" autocomplete="new-username" placeholder="请输入用户名或用户编号"
             class="login-input h-[40px]" />
         </a-form-item>
         <a-form-item :required="true" name="password">
-          <a-input v-model:value="form.password" autocomplete="new-password" placeholder="请输入登录密码: 888888"
+          <a-input v-model:value="form.password" autocomplete="new-password" placeholder="请输入登录密码"
             class="login-input h-[40px]" type="password" />
         </a-form-item>
         <div id="fail" class="hidden" style="color: red;margin-bottom: 3px;">用户名或密码错误</div>

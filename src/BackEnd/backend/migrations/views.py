@@ -564,7 +564,7 @@ def getPatient(request):
     db = MySQLdb.MyDatabase()
     room = request.GET.get('room', None)
     p = db.getCurrentPatient(RoomId=room)
-    return JsonResponse({'info' : p})
+    return JsonResponse({'name' : p['name'], 'id' : p['id']})
 
 @csrf_exempt
 def addDoctor(request):
@@ -621,3 +621,9 @@ def nextPatient(request):
     id = data['id']
     db.NextPatient(id=id)
     return JsonResponse({'success' : True})
+
+@csrf_exempt
+def getMedicineList(request):
+    db = MySQLdb.MyDatabase()
+    r = db.getAllMedicine()
+    return JsonResponse({'medicineList' : r})

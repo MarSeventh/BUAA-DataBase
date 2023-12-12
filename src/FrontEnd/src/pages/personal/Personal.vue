@@ -10,6 +10,7 @@ accountStore.init();
 
 const name = ref(accountStore.account?.username);
 const role = ref(accountStore.role);
+const avatar = ref(accountStore.account?.avatar);
 </script>
 
 
@@ -24,7 +25,7 @@ const role = ref(accountStore.role);
       <div
         class="profile flex items-center justify-between p-base bg-container rounded-2xl absolute -bottom-16 left-6 shadow-lg">
         <div class="info flex items-center">
-          <img class="w-20 rounded-lg" src="@/assets/avatar/face-1.jpg" />
+          <img class="w-20 rounded-lg" :src="avatar" />
           <div class="flex flex-col justify-around ml-4">
             <span class="text-title text-xl font-bold">{{ name }}</span>
             <span class="text-subtext font-semibold">{{ role }}</span>
