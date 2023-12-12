@@ -7,6 +7,10 @@
   import { DeleteOutlined, EditFilled } from '@ant-design/icons-vue';
   import axios from 'axios';
 
+  const accountStore = useAccountStore();
+  accountStore.init();
+  const username = accountStore.account?.username;
+
   const columns = [
     { title: '检查项目', dataIndex: 'department' },
     { title: '日期', dataIndex: 'time' },
@@ -119,7 +123,10 @@
 
   async function fetchAnalysisName() {
     try {
-        const response = await axios.get('http://127.0.0.1:8000/api/getAnalysisName/');
+        const response = await axios.get('http://127.0.0.1:8000/api/getAnalysisName/', {
+          username
+          //TODO: username貌似不需要？
+        });
         analysisProject.length = 0;
 
         response.data.AnalysisName.forEach((item) => {
@@ -133,11 +140,10 @@
 
   async function sendAnalysisList() {
     try {
-        const response = await axios.post('http://127.0.0.1:8000/api/sendAnalysisList/');
-
-        analysisList.forEach((item) => {
-          response.data.AnalysisList.push( item.department );
-        })
+        const response = await axios.post('http://127.0.0.1:8000/api/sendAnalysisList/', {
+          analysisList: analysisList
+          //TODO: 需要加上病人信息和医生信息
+        });
     } catch (error) {
         console.error('Error sending analysis:', error);
     }

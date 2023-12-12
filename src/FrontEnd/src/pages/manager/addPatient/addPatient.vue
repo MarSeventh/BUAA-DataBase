@@ -12,7 +12,6 @@
       width: 200
     },
     { title: 'ID', dataIndex: 'email', width: 250 },
-    { title: '岗位', dataIndex: 'department', width: 300},
     { title: '密码', dataIndex: 'jobs' },
     { title: '操作', dataIndex: 'edit', width: 200 },
     { title: '', dataIndex: 'send', width: 200 },
@@ -21,7 +20,6 @@
   type Author = {
     name?: string;
     email?: string;
-    department?: string;
     jobs?: string;
     _edit?: boolean;
     _isNew?: boolean;
@@ -31,7 +29,6 @@
     {
       name: 'Li Zhi',
       email: '1126263215@qq.com',
-      department: 'Technical',
       jobs: 'developer',
     },
   ]);
@@ -49,7 +46,6 @@
     }
     author.name = undefined;
     author.email = undefined;
-    author.department = undefined;
     author.jobs = undefined;
     return author;
   };
@@ -97,14 +93,14 @@
       });
   }
 
-  async function addDoctor() {
+  async function addPatient() {
     try {
-        const response = await axios.post('http://127.0.0.1:8000/api/addDoctor/', {
+        const response = await axios.post('http://127.0.0.1:8000/api/addPatient/', {
           newDoctor: authors[0]
-          //TODO:将对象拆开按照参数传入，参数依次为username, password, tittle
+          //TODO: 将对象拆成参数以此为username, password
         });
     } catch (error) {
-        console.error('Error adding doctor:', error);
+        console.error('Error adding patient:', error);
     }
   }
 
@@ -136,9 +132,6 @@
       <a-form-item required label="ID" name="email">
         <a-input v-model:value="form.email" />
       </a-form-item>
-      <a-form-item required label="岗位" name="department">
-        <a-input v-model:value="form.department" />
-      </a-form-item>
       <a-form-item required label="密码" name="jobs">
         <a-input v-model:value="form.department" />
       </a-form-item>
@@ -149,7 +142,7 @@
   <a-table v-bind="$attrs" :columns="columns" :dataSource="authors" :pagination="false">
     <template #title>
       <div class="flex justify-between pr-4">
-        <h3>添加医生</h3>
+        <h3>添加患者</h3>
         <a-button type="primary" @click="addNew" :loading="formLoading">
           <template #icon>
             <PlusOutlined />
@@ -173,7 +166,7 @@
         </a-button>
       </template>
       <template v-else-if="column.dataIndex === 'send'">
-        <a-button :disabled="showModal" type="link" @click="addDoctor">
+        <a-button :disabled="showModal" type="link" @click="addPatient">
           <template #icon>
             <EditOutlined />
           </template>

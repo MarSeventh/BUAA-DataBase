@@ -69,6 +69,6 @@ urlpatterns = [
     path('api/getMedicine/', views.GetAllMedicine),
     path('api/deleteMedicine/', views.deleteMedicine),
     path('api/nextPatient/', views.nextPatient),
-    path('api/getMedicineList/', views.getMedicineList),
+    path('api/searchMedicineList/', views.searchMedicine),
 
 ]

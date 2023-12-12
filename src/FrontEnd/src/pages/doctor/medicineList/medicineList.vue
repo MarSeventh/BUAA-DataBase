@@ -4,6 +4,10 @@
   import { DeleteOutlined, EditFilled } from '@ant-design/icons-vue';
   import axios from 'axios';
 
+  const accountStore = useAccountStore();
+  accountStore.init();
+  const username = accountStore.account?.username;
+
   const columns = [
     { title: '药名', dataIndex: 'name', width: 300 },
     { title: 'ID', dataIndex: 'id', width: 300 },
@@ -18,12 +22,10 @@
   ];
 
   const columnPatient = [
-    {
-      title: '病人信息',
-      dataIndex: 'name',
-    },
+    { title: '病人信息', dataIndex: 'name' },
+    { title: '操作', dataIndex: 'edit', width: 50 },
   ];
-
+  
   type Medicine = {
     amount?: number;
     name?: string;
@@ -38,42 +40,15 @@
     id?: string;
   }
 
-  const patient = reactive<Patient[]>([
-    {
-      name: '我',
-      id: '12345',
-    }
-  ]);
+  const patient = reactive<Patient[]>([]);
 
-  const medicineGroup = reactive<Medicine[]>([
-    {
-      name: 'mengtuo',
-      id: '123',
-      amount: 0,
-      status: 1,
-    },
-  ]);
+  const medicineGroup = reactive<Medicine[]>([]);
 
-  const searchList = reactive<Medicine[]>([
-    {
-      name: 'yao',
-      id: '456',
-      amount: 100,
-      status: 1,
-    },
-  ]);
-
-  const newRecord = ref<Medicine>();
-
-  function addNew(record: Medicine) {
-    newRecord.value = record;
-    copyObject(form, record);
-    showModal.value = true;
-    form._isNew = true;
-  }
+  const searchList = reactive<Medicine[]>([]);
 
   const showModal = ref(false);
   const showModal2 = ref(false);
+  const showModal3 = ref(false);
 
   const newMedicine = (Medicine?: Medicine) => {
     if (!Medicine) {
@@ -96,25 +71,30 @@
 
   const form = reactive<Medicine>(newMedicine());
   const form2 = reactive<Medicine>(newMedicine());
+  const form3 = reactive<Patient>(newMedicine());
 
   function reset() {
     return newMedicine(form);
   }
-
   function reset2() {
     return newMedicine(form2);
+  }
+  function reset3() {
+    return newMedicine(form3);
   }
 
   function cancel() {
     showModal.value = false;
     reset();
   }
-
   function cancel2() {
     showModal2.value = false;
-    reset();
+    reset2();
   }
-
+  function cancel3() {
+    showModal3.value = false;
+    reset3();
+  }
 
   const formModel = ref<FormInstance>();
 
@@ -160,45 +140,69 @@
       });
   }
 
-  async function fetchPatient() {
-    try {
-        const response = await axios.get('http://127.0.0.1:8000/api/getPatient/');
-        patient.length = 0;
+  function submit3() {
+    formLoading.value = true;
+    formModel.value
+      ?.validateFields()
+      .then((res: Patient) => {
+        res.name = res?.name;
+        res.id = res?.id;
+        copyObject(editRecord.value, res);
+        showModal3.value = false;
+        reset3();
+      })
+      .catch((e) => {
+        console.error(e);
+      })
+      .finally(() => {
+        formLoading.value = false;
+      });
+  }
 
-        response.data.diagnosisList.forEach((item) => {
-          patient.push( { name: item.name, id: item.id } )
+  async function sendPatient() {
+    try {
+        const response = await axios.post('http://127.0.0.1:8000/api/sendPatient/', {
+          name: patient[0].name, id: patient[0].id
         });
     } catch (error) {
-        console.error('Error fetching patientpatient:', error);
+        console.error('Error fetching patient:', error);
     }
   }
-  fetchPatient();
+  async function sendDoctor() {
+    try {
+        const response = await axios.post('http://127.0.0.1:8000/api/sendDoctor/', {
+          username: username
+        });
+    } catch (error) {
+        console.error('Error sending doctor:', error);
+    }
+  }
+  sendDoctor()
 
   async function sendMedicineGroup() {
     try {
-        const response = await axios.post('http://127.0.0.1:8000/api/sendMedicineList/');
-
-        response.data.medicineGroup.forEach((item) => {
-            
-            item.push({  name: item.id, amount: item.doctor, time: item.time })
+        const response = await axios.post('http://127.0.0.1:8000/api/sendMedicineList/', {
+          medicineGroup: medicineGroup
+          //TODO: 这里需要加上病人信息和医生信息
         });
     } catch (error) {
         console.error('Error sending medicineList:', error);
     }
+    sendPatient();
   }
 
-  async function searchMedicineList(record: string) {
+  async function searchMedicineList(record: Medicine) {
     try {
         const response = await axios.get('http://127.0.0.1:8000/api/getMedicineList/',{
           params:{
-            id: record
+            name: record.name
           }
         });
         searchList.length = 0; // 清空数组
 
-        // 将获取到的部门数据放入数组中
+        // 将获取到的数据放入数组中
         response.data.medicineList.forEach((item) => {
-            searchList.push({ name: item.name, id: item.id, amount: item.amount });
+            searchList.push({ name: item.name, id: item.id, amount: 0});
         });
     } catch (error) {
         console.error('Error searching medicine list:', error);
@@ -220,11 +224,15 @@
     copyObject(form, record);
     showModal.value = true;
   }
-
   function edit2(record: Medicine) {
     editRecord.value = record;
     copyObject(form2, record);
     showModal2.value = true;
+  }
+  function edit3(record: Medicine) {
+    editRecord.value = record;
+    copyObject(form3, record);
+    showModal3.value = true;
   }
 
   type Status = 0 | 1;
@@ -247,6 +255,17 @@
   </a-modal>
 
   <!-- 病人信息 -->
+  <a-modal :title="'编辑药品'" v-model:visible="showModal3" @ok="submit3" @cancel="cancel3">
+    <a-form ref="formModel" :model="form3" :labelCol="{ span: 5 }" :wrapperCol="{ span: 16 }">
+      <a-form-item required label="姓名" name="name">
+        <a-input v-model:value="form3.name" />
+      </a-form-item>
+      <a-form-item required label="ID" name="id">
+        <a-input v-model:value="form3.id" />
+      </a-form-item>
+    </a-form>
+  </a-modal>
+
   <a-table v-bind="$attrs" :columns="columnPatient" :dataSource="patient" :pagination="false">
     <template #bodyCell="{ column, text, record }">
       <div class="flex items-stretch" v-if="column.dataIndex === 'name'">
@@ -255,6 +274,14 @@
           <span class="text-xs text-subtext">{{ record.id }}</span>
         </div>
       </div>
+      <template v-else-if="column.dataIndex === 'edit'">
+        <a-button :disabled="showModal3" type="link" @click="edit3(record)">
+          <template #icon>
+            <EditFilled />
+          </template>
+          编辑
+        </a-button>
+      </template>
       <div v-else class="text-subtext">
         {{ text }}
       </div>
@@ -324,7 +351,7 @@
   <a-table v-bind="$attrs" :columns="columns2" :dataSource="searchList" :pagination="false">
     <template #title="{record}">
       <div class="flex justify-between pr-4">
-        <h3>查找并添加药品</h3>
+        <h4>查找并添加药品</h4>
         <div class="global-search-wrapper" style="width: 300px">
           <a-auto-complete
             class="global-search"

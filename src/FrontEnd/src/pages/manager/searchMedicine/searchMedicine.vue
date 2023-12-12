@@ -3,7 +3,7 @@
   import { reactive, ref } from 'vue';
   import dayjs from 'dayjs';
   import { Dayjs } from 'dayjs';
-  import { EditFilled } from '@ant-design/icons-vue';
+  import { DeleteFilled, EditFilled, EditOutlined } from '@ant-design/icons-vue';
   import axios from 'axios';
 
   const columns = [
@@ -15,6 +15,7 @@
     { title: '药品ID', dataIndex: 'id', width: 350 },
     { title: '库存量', dataIndex: 'amount' },
     { title: '操作', dataIndex: 'edit', width: 200 },
+    { title: '删除', dataIndex: 'delete', width: 200 },
   ];
 
   type Medicine = {
@@ -104,22 +105,51 @@
     showModal.value = true;
   }
 
-  async function searchMedicineList(record: string) {
+  function clearList(){
+    medicineList.length = 0;
+  }
+
+  async function searchMedicineList(record: Medicine) {
     try {
         const response = await axios.get('http://127.0.0.1:8000/api/getMedicineList/',{
           params:{
-            id: record
+            name: record.name
           }
         });
         medicineList.length = 0; // 清空数组
 
-        // 将获取到的部门数据放入数组中
+        // 将获取到的数据放入数组中
         response.data.medicineList.forEach((item) => {
             medicineList.push({ name: item.name, id: item.id, amount: item.amount });
         });
     } catch (error) {
         console.error('Error fetching medicineList:', error);
     }
+  }
+  
+  async function sendMedicine() {
+    try {
+        const response = await axios.post('http://127.0.0.1:8000/api/sendMedicine/', {
+          medicine: medicineList[0]
+          //TODO:这个方法是干啥的？
+        });
+    } catch (error) {
+        console.error('Error sending medicine:', error);
+    }
+    clearList();
+  }
+
+  async function deleteMedicine() {
+    try {
+        const response = await axios.get('http://127.0.0.1:8000/api/deleteMedicine/', {
+          params:{
+            id: medicineList[0].id
+          }
+        });
+    } catch (error) {
+        console.error('Error deleting medicine:', error);
+    }
+    clearList();
   }
 
   const editRecord = ref<Medicine>();
@@ -194,6 +224,20 @@
             <EditFilled />
           </template>
           编辑
+        </a-button>
+        <a-button :disabled="showModal" type="link" @click="sendMedicine">
+          <template #icon>
+            <EditOutlined />
+          </template>
+          上传
+        </a-button>
+      </template>
+      <template v-else-if="column.dataIndex === 'delete'">
+        <a-button :disabled="showModal" type="link" @click="deleteMedicine">
+          <template #icon>
+            <DeleteFilled />
+          </template>
+          删除
         </a-button>
       </template>
       <div v-else class="text-subtext">

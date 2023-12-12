@@ -250,7 +250,7 @@ def searchMedicine(request):
         name = data['name']
         db = MySQLdb.MyDatabase()
         ans = db.searchMedicine(name=name)
-        return JsonResponse({'info': ans})
+        return JsonResponse({'medicineList': ans})
     else:
         return HttpResponse("Not a POST request")
 

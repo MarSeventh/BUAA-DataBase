@@ -611,7 +611,7 @@ class MyDatabase:
     
     def searchMedicine(self, name: str):
         from .models import Drug
-        r = Drug.objects.all.iterator()
+        r = Drug.objects.all().iterator()
         res = []
         for i in r:
             if i.name.find(name) != -1:
