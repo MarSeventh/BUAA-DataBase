@@ -11,16 +11,14 @@
       dataIndex: 'name',
       width: 200
     },
-    { title: 'ID', dataIndex: 'email', width: 250 },
     { title: '岗位', dataIndex: 'department', width: 300},
     { title: '密码', dataIndex: 'jobs' },
-    { title: '操作', dataIndex: 'edit', width: 200 },
-    { title: '', dataIndex: 'send', width: 200 },
+    { title: '操作', dataIndex: 'edit', width: 50 },
+    { title: '', dataIndex: 'send', width: 50 },
   ];
 
   type Author = {
     name?: string;
-    email?: string;
     department?: string;
     jobs?: string;
     _edit?: boolean;
@@ -30,7 +28,6 @@
   const authors = reactive<Author[]>([
     {
       name: 'Li Zhi',
-      email: '1126263215@qq.com',
       department: 'Technical',
       jobs: 'developer',
     },
@@ -48,7 +45,6 @@
       author = { _isNew: true };
     }
     author.name = undefined;
-    author.email = undefined;
     author.department = undefined;
     author.jobs = undefined;
     return author;
@@ -58,7 +54,10 @@
     if (!source) {
       return target;
     }
-    Object.keys(target).forEach((key) => (target[key] = source[key]));
+    target.name = source.name;
+    target.department = source.department;
+    target.jobs = source.jobs;
+    target._isNew = false;
   };
 
   const form = reactive<Author>(newAuthor());
@@ -100,8 +99,9 @@
   async function addDoctor() {
     try {
         const response = await axios.post('http://127.0.0.1:8000/api/addDoctor/', {
-          newDoctor: authors[0]
-          //TODO:将对象拆开按照参数传入，参数依次为username, password, tittle
+          username: authors[0].name,
+          password: authors[0].jobs,
+          tittle: authors[0].department,
         });
     } catch (error) {
         console.error('Error adding doctor:', error);
@@ -133,14 +133,11 @@
       <a-form-item label="姓名" required name="name">
         <a-input v-model:value="form.name" />
       </a-form-item>
-      <a-form-item required label="ID" name="email">
-        <a-input v-model:value="form.email" />
-      </a-form-item>
       <a-form-item required label="岗位" name="department">
         <a-input v-model:value="form.department" />
       </a-form-item>
       <a-form-item required label="密码" name="jobs">
-        <a-input v-model:value="form.department" />
+        <a-input v-model:value="form.jobs" />
       </a-form-item>
     </a-form>
   </a-modal>

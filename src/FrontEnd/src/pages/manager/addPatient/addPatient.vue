@@ -11,7 +11,6 @@
       dataIndex: 'name',
       width: 200
     },
-    { title: 'ID', dataIndex: 'email', width: 250 },
     { title: '密码', dataIndex: 'jobs' },
     { title: '操作', dataIndex: 'edit', width: 200 },
     { title: '', dataIndex: 'send', width: 200 },
@@ -19,7 +18,6 @@
 
   type Author = {
     name?: string;
-    email?: string;
     jobs?: string;
     _edit?: boolean;
     _isNew?: boolean;
@@ -28,7 +26,6 @@
   const authors = reactive<Author[]>([
     {
       name: 'Li Zhi',
-      email: '1126263215@qq.com',
       jobs: 'developer',
     },
   ]);
@@ -45,7 +42,6 @@
       author = { _isNew: true };
     }
     author.name = undefined;
-    author.email = undefined;
     author.jobs = undefined;
     return author;
   };
@@ -54,7 +50,9 @@
     if (!source) {
       return target;
     }
-    Object.keys(target).forEach((key) => (target[key] = source[key]));
+    target.name = source.name;
+    target.jobs = source.jobs;
+    target._isNew = false;
   };
 
   const form = reactive<Author>(newAuthor());
@@ -92,12 +90,12 @@
         formLoading.value = false;
       });
   }
-
+  
   async function addPatient() {
     try {
         const response = await axios.post('http://127.0.0.1:8000/api/addPatient/', {
-          newDoctor: authors[0]
-          //TODO: 将对象拆成参数以此为username, password
+          username: authors[0].name,
+          password: authors[0].jobs,
         });
     } catch (error) {
         console.error('Error adding patient:', error);
@@ -129,11 +127,8 @@
       <a-form-item label="姓名" required name="name">
         <a-input v-model:value="form.name" />
       </a-form-item>
-      <a-form-item required label="ID" name="email">
-        <a-input v-model:value="form.email" />
-      </a-form-item>
       <a-form-item required label="密码" name="jobs">
-        <a-input v-model:value="form.department" />
+        <a-input v-model:value="form.jobs" />
       </a-form-item>
     </a-form>
   </a-modal>

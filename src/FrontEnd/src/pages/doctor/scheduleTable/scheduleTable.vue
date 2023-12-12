@@ -1,7 +1,8 @@
 <script lang="ts" setup>
-  import { getBase64 } from '@/utils/file';
-  import { FormInstance } from 'ant-design-vue';
   import { reactive, ref } from 'vue';
+  import { useAccountStore } from '@/store';
+  import axios from 'axios';
+
 
   const accountStore = useAccountStore();
   accountStore.init();
@@ -18,13 +19,6 @@
     { title: '星期日', dataIndex: 'day7', width: 200 },
   ];
  
-  const columnPatient = [
-    {
-      title: '病人信息',
-      dataIndex: 'name',
-    },
-  ];
-
   type Author = {
     jobs?: string;
     day1?: string;
@@ -76,30 +70,33 @@
 
   const form = reactive<Author>(newAuthor());
 
-  async function fetchAnalysisName() {
+  async function fetchSchedule() {
     try {
-        const response = await axios.get('http://127.0.0.1:8000/api/getAnalysisName/', {
-          username
-          //TODO: 看hyx的貌似是username : username?
+        const response = await axios.get('http://127.0.0.1:8000/api/fetchSchedule/', {
+          params: {
+          username: username,
+        }
         });
-        authors[0].day1 = response.data[0];
-        authors[0].day2 = response.data[1];
-        authors[0].day3 = response.data[2];
-        authors[0].day4 = response.data[3];
-        authors[0].day5 = response.data[4];
-        authors[0].day6 = response.data[5];
-        authors[0].day7 = response.data[6];
-        authors[1].day1 = response.data[7];
-        authors[1].day2 = response.data[8];
-        authors[1].day3 = response.data[9];
-        authors[1].day4 = response.data[10];
-        authors[1].day5 = response.data[11];
-        authors[1].day6 = response.data[12];
-        authors[1].day7 = response.data[13];
+        authors[0].day1 = response.data.info[0];
+        authors[0].day2 = response.data.info[1];
+        authors[0].day3 = response.data.info[2];
+        authors[0].day4 = response.data.info[3];
+        authors[0].day5 = response.data.info[4];
+        authors[0].day6 = response.data.info[5];
+        authors[0].day7 = response.data.info[6];
+        authors[1].day1 = response.data.info[7];
+        authors[1].day2 = response.data.info[8];
+        authors[1].day3 = response.data.info[9];
+        authors[1].day4 = response.data.info[10];
+        authors[1].day5 = response.data.info[11];
+        authors[1].day6 = response.data.info[12];
+        authors[1].day7 = response.data.info[13];
+        console.log(response.data);
     } catch (error) {
-        console.error('Error fetching analysis name:', error);
+        console.error('Error fetching schedule:', error);
     }
   }
+  fetchSchedule();
   
   const editRecord = ref<Author>();
 

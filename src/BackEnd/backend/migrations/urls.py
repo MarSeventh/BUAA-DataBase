@@ -61,10 +61,10 @@ urlpatterns = [
     path('test/Registration', views.testPatientRegistration), # finished
     path('test/deleteCounter', views.deleteCounter), # finished
     path('api/getPatient', views.getPatient), # finished
-    path('api/getAnalysisName', views.getAnalysisList), # finished
+    path('api/getAnalysisName/', views.getAnalysisList), # finished
     path('api/sendAnalysisList/', views.sendAnalysisList), # finished
-    path('api/sendCheckResults/', views.MedicalDiagnosisStatement), # finished
-    path('api/getDoctorSchedule/', views.getDispatch), # finished
+    path('api/sendCheckResult/', views.MedicalDiagnosisStatement), # finished
+    path('api/fetchSchedule/', views.getDispatch), # finished
     path('api/sendDoctorList/', views.addDoctor), # finished
     path('api/getMedicine/', views.GetAllMedicine), # finished
     path('api/deleteMedicine/', views.deleteMedicine), # finished
@@ -72,5 +72,6 @@ urlpatterns = [
     path('api/searchMedicineList/', views.searchMedicine), # finished
     path('api/addPatient/', views.addPatient), # finished
     path('api/addMedicine/', views.addMedicine), # finished
+    path('api/addDoctor/', views.addDoctor), # finished
 
 ]

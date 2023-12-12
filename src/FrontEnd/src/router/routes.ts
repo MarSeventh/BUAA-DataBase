@@ -116,7 +116,7 @@ const routes: RouteRecordRaw[] = [
       cacheable: false,
       permission: "doctor",
     },
-    component: () => import('@/pages/doctor/medicineList/medicine.vue')
+    component: () => import('@/pages/doctor/medicineList/medicineList.vue')
   },
   {
     path: '/analysisList',
@@ -127,7 +127,7 @@ const routes: RouteRecordRaw[] = [
       cacheable: false,
       permission: "doctor",
     },
-    component: () => import('@/pages/doctor/analysisList/analysis.vue')
+    component: () => import('@/pages/doctor/analysisList/analysisList.vue')
   },
   {
     path: '/checkResult',
@@ -149,7 +149,7 @@ const routes: RouteRecordRaw[] = [
       cacheable: false,
       permission: "doctor",
     },
-    component: () => import('@/pages/doctor/scheduleTable/schedule.vue')
+    component: () => import('@/pages/doctor/scheduleTable/scheduleTable.vue')
   },
   {
     path: '/addDoctor',
@@ -171,7 +171,7 @@ const routes: RouteRecordRaw[] = [
       cacheable: false,
       permission: "admin",
     },
-    component: () => import('@/pages/manager/addPatient/patient.vue')
+    component: () => import('@/pages/manager/addPatient/addPatient.vue')
   },
   {
     path: '/searchMedicine',

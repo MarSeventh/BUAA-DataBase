@@ -215,11 +215,12 @@ def PrescribeMedication(request):
         data = json.loads(request.body)
         db = MySQLdb.MyDatabase()
         username = data['username']
+        print(data)
         Did = db.getIdByUsername(name=username)
         # Did = '5'
         Pid = data['Pid']
         print(Pid)
-        MedcineList = data['MedcineList']
+        MedcineList = data['MedicineList']
         AmountList = data['AmountList']
         if MedcineList == None or AmountList == None:
             print('NOT LIST')
@@ -245,14 +246,10 @@ def GetAllMedicine(request):
 @csrf_exempt
 def searchMedicine(request):
     # assert request.type == 'patient'
-    if request.method == 'POST':
-        data = json.loads(request.body)
-        name = data['name']
-        db = MySQLdb.MyDatabase()
-        ans = db.searchMedicine(name=name)
-        return JsonResponse({'medicineList': ans})
-    else:
-        return HttpResponse("Not a POST request")
+    name = request.GET.get('name', None)
+    db = MySQLdb.MyDatabase()
+    ans = db.searchMedicine(name=name)
+    return JsonResponse({'medicineList': ans})
 
 def PayAll(request):
     # assert request.type == 'patient'
@@ -287,7 +284,7 @@ def MedicalDiagnosisStatement(request):
         db = MySQLdb.MyDatabase()
         Did = db.getIdByUsername(name=name)
         Pid = data['Pid']
-        Statement = data['Statement']
+        Statement = data['Diagnosis']
         success, status = db.MedicalDiagnosisStatement(Did=Did, Pid=Pid, Statement=Statement)
         return JsonResponse({'success' : success, 'code' : status})
     else:
@@ -373,6 +370,7 @@ def sendAnalysisList(request):
         Pid = data['Pid']
         AnalysisList = data['AnalysisList']
         for i in AnalysisList:
+            print(i.__class__)
             checkName = i
             checkItemIds = None
             success, status = db.conductAlaboratoryAnalysis(checkName=checkName, checkItemIds=checkItemIds, Did=Did, Pid=Pid)
@@ -598,7 +596,7 @@ def getPatient(request):
 def addDoctor(request):
     db = MySQLdb.MyDatabase()
     data = json.loads(request.body)
-    name = data['name']
+    name = data['username']
     tittle = data['tittle']
     password = data['password']
     l , _ = db.addDoctor(name=name, tittle=tittle, password=password)
@@ -607,16 +605,19 @@ def addDoctor(request):
 @csrf_exempt
 def getDispatch(request):
     db = MySQLdb.MyDatabase()
-    data = json.loads(request.body)
-    username = data['username']
+    username = request.GET.get('username', None)
+    print(username)
     id = db.getIdByUsername(name=username)
+    print(id)
     r = db.getDispathcOfDoc(Did=id)
+    print(r)
     return JsonResponse({'info' : r})
 
 @csrf_exempt
 def getAnalysisList(request):
     db = MySQLdb.MyDatabase()
     r = db.getAnalysisList()
+    print(r)
     return JsonResponse({'info' : r})
 
 @csrf_exempt

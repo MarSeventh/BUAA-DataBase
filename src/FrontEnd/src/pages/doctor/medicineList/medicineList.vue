@@ -1,8 +1,9 @@
 <script lang="ts" setup>
   import { FormInstance } from 'ant-design-vue';
   import { reactive, ref } from 'vue';
-  import { DeleteOutlined, EditFilled } from '@ant-design/icons-vue';
+  import { DeleteFilled, DeleteOutlined, EditFilled, EditOutlined } from '@ant-design/icons-vue';
   import axios from 'axios';
+  import { useAccountStore } from '@/store';
 
   const accountStore = useAccountStore();
   accountStore.init();
@@ -12,13 +13,13 @@
     { title: '药名', dataIndex: 'name', width: 300 },
     { title: 'ID', dataIndex: 'id', width: 300 },
     { title: '用量', dataIndex: 'amount' },
-    { title: '操作', dataIndex: 'edit', width: 50 },
+    { title: '操作', dataIndex: 'edit', width: 100 },
   ];
 
   const columns2 = [
     { title: '药名', dataIndex: 'name', width: 300 },
     { title: 'ID', dataIndex: 'id' },
-    { title: '操作', dataIndex: 'edit', width: 50 },
+    { title: '操作', dataIndex: 'edit', width: 100 },
   ];
 
   const columnPatient = [
@@ -40,7 +41,12 @@
     id?: string;
   }
 
-  const patient = reactive<Patient[]>([]);
+  const patient = reactive<Patient[]>([
+    {
+      name: '',
+      id: '',
+    }
+  ]);
 
   const medicineGroup = reactive<Medicine[]>([]);
 
@@ -59,6 +65,14 @@
     Medicine.status = 0;
     return Medicine;
   };
+  const newPatient = (Patient?: Patient) => {
+    if (!Patient) {
+      Patient = {};
+    }
+    Patient.name = undefined;
+    Patient.id = undefined;
+    return Patient;
+  };
 
   const copyObject = (target: Medicine, source?: Medicine) => {
     if (!source) {
@@ -68,10 +82,17 @@
     target.amount = source.amount;
     target._isNew = false;
   };
+  const copyObject3 = (target: Patient, source?: Patient) => {
+    if (!source) {
+      return target;
+    }
+    target.name = source.name;
+    target.id = source.id;
+  };
 
   const form = reactive<Medicine>(newMedicine());
   const form2 = reactive<Medicine>(newMedicine());
-  const form3 = reactive<Patient>(newMedicine());
+  const form3 = reactive<Patient>(newPatient());
 
   function reset() {
     return newMedicine(form);
@@ -80,7 +101,7 @@
     return newMedicine(form2);
   }
   function reset3() {
-    return newMedicine(form3);
+    return newPatient(form3);
   }
 
   function cancel() {
@@ -128,6 +149,7 @@
     formModel.value
       ?.validateFields()
       .then((res: Medicine) => {
+        copyObject(editRecord.value, form2);
         medicineGroup.push(editRecord.value);
         showModal2.value = false;
         reset2();
@@ -147,7 +169,7 @@
       .then((res: Patient) => {
         res.name = res?.name;
         res.id = res?.id;
-        copyObject(editRecord.value, res);
+        copyObject3(editRecord3.value, res);
         showModal3.value = false;
         reset3();
       })
@@ -159,43 +181,44 @@
       });
   }
 
-  async function sendPatient() {
-    try {
-        const response = await axios.post('http://127.0.0.1:8000/api/sendPatient/', {
-          name: patient[0].name, id: patient[0].id
-        });
-    } catch (error) {
-        console.error('Error fetching patient:', error);
-    }
+  const medicineName = reactive<string[]>([]);
+  const medicineID = reactive<string[]>([]);
+  const medicineAmount = reactive<number[]>([]);
+  function copyArray(){
+    medicineGroup.forEach((item) => {
+      medicineName.push(item.name);
+      medicineID.push(item.id);
+      medicineAmount.push(item.amount);
+    })
+    console.log(medicineGroup);
   }
-  async function sendDoctor() {
-    try {
-        const response = await axios.post('http://127.0.0.1:8000/api/sendDoctor/', {
-          username: username
-        });
-    } catch (error) {
-        console.error('Error sending doctor:', error);
-    }
+  function clearArray(){
+    medicineName.length = 0;
+    medicineID.length = 0;
+    medicineAmount.length = 0;
   }
-  sendDoctor()
-
+  
   async function sendMedicineGroup() {
     try {
+        copyArray();
         const response = await axios.post('http://127.0.0.1:8000/api/sendMedicineList/', {
-          medicineGroup: medicineGroup
-          //TODO: 这里需要加上病人信息和医生信息
+          username: username,
+          Pid: patient[0].id,
+          MedicineList: medicineName,
+          IDList: medicineID,
+          AmountList: medicineAmount,
         });
+        clearArray();
     } catch (error) {
         console.error('Error sending medicineList:', error);
     }
-    sendPatient();
   }
 
-  async function searchMedicineList(record: Medicine) {
+  async function searchMedicineList(query) {
     try {
-        const response = await axios.get('http://127.0.0.1:8000/api/getMedicineList/',{
+        const response = await axios.get('http://127.0.0.1:8000/api/searchMedicineList/',{
           params:{
-            name: record.name
+            name: query,
           }
         });
         searchList.length = 0; // 清空数组
@@ -209,11 +232,17 @@
     }
   }
 
-  function delLine(){
-    medicineGroup.length = medicineGroup.length - 1;
+  function delLine(record: Medicine){
+    medicineGroup.forEach((item, index) => {
+      if (item.amount == record.amount) {
+        medicineGroup.splice(index, 1);
+        return;
+      }
+    })
   }
 
   const editRecord = ref<Medicine>();
+  const editRecord3 = ref<Patient>();
 
   /** 
    * 编辑
@@ -229,9 +258,9 @@
     copyObject(form2, record);
     showModal2.value = true;
   }
-  function edit3(record: Medicine) {
-    editRecord.value = record;
-    copyObject(form3, record);
+  function edit3(record: Patient) {
+    editRecord3.value = record;
+    copyObject3(form3, record);
     showModal3.value = true;
   }
 
@@ -243,19 +272,9 @@
   };
 </script>
 <template>
-  <a-modal :title="form._isNew ? '新增药品' : '编辑药品'" v-model:visible="showModal" @ok="submit" @cancel="cancel">
-    <a-form ref="formModel" :model="form" :labelCol="{ span: 5 }" :wrapperCol="{ span: 16 }">
-      <a-form-item required label="药名" name="name">
-        <a-input v-model:value="form.name" />
-      </a-form-item>
-      <a-form-item required label="用量" name="amount">
-        <a-input v-model:value="form.amount" />
-      </a-form-item>
-    </a-form>
-  </a-modal>
 
   <!-- 病人信息 -->
-  <a-modal :title="'编辑药品'" v-model:visible="showModal3" @ok="submit3" @cancel="cancel3">
+  <a-modal :title="'编辑'" v-model:visible="showModal3" @ok="submit3" @cancel="cancel3">
     <a-form ref="formModel" :model="form3" :labelCol="{ span: 5 }" :wrapperCol="{ span: 16 }">
       <a-form-item required label="姓名" name="name">
         <a-input v-model:value="form3.name" />
@@ -288,6 +307,17 @@
     </template>
   </a-table>  
 
+  <a-modal :title="form._isNew ? '新增药品' : '编辑药品'" v-model:visible="showModal" @ok="submit" @cancel="cancel">
+    <a-form ref="formModel" :model="form" :labelCol="{ span: 5 }" :wrapperCol="{ span: 16 }">
+      <a-form-item required label="药名" name="name">
+        <a-input v-model:value="form.name" />
+      </a-form-item>
+      <a-form-item required label="用量" name="amount">
+        <a-input v-model:value="form.amount" />
+      </a-form-item>
+    </a-form>
+  </a-modal>
+
   <!-- 成员表格 -->
   <a-table v-bind="$attrs" :columns="columns" :dataSource="medicineGroup" :pagination="false">
     <template #title>
@@ -302,7 +332,6 @@
       <div class="flex items-stretch" v-if="column.dataIndex === 'name'">
         <div class="flex-col flex justify-evenly ml-1">
           <span class="text-title font-bold">{{ text }}</span>
-          <span class="text-xs text-subtext">{{ record.email }}</span>
         </div>
       </div>
       <template v-else-if="column.dataIndex === 'status'">
@@ -322,7 +351,7 @@
           </template>
           编辑
         </a-button>
-        <a-button :disabled="showModal" type="link" @click="delLine">
+        <a-button :disabled="showModal" type="link" @click="delLine(record)">
           <template #icon>
             <DeleteOutlined />
           </template>
@@ -349,19 +378,16 @@
 
   <!-- 成员表格 -->
   <a-table v-bind="$attrs" :columns="columns2" :dataSource="searchList" :pagination="false">
-    <template #title="{record}">
+    <template #title="{}">
       <div class="flex justify-between pr-4">
-        <h4>查找并添加药品</h4>
+        <h3>查找并添加药品</h3>
         <div class="global-search-wrapper" style="width: 300px">
           <a-auto-complete
             class="global-search"
             style="width: 100%"
             option-label-prop="title"
           >
-            <a-input-search placeholder="输入要查找的药品id" enterButton>
-              <a-button :disabled="showModal2" type="link" @click="searchMedicineList(record);">
-                <PlusOutlined />
-              </a-button>
+            <a-input-search placeholder="输入要查找的药品id" @search="searchMedicineList" enterButton>  
             </a-input-search>
           </a-auto-complete>
         </div>

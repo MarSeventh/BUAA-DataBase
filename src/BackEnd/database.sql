@@ -416,3 +416,5 @@ SELECT * FROM `drug`;
 SELECT * FROM `registrelation`;
 
 SELECT * FROM `User`;
+
+SELECT * FROM `LaboratorySheet`;

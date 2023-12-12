@@ -42,11 +42,15 @@ class MyDatabase:
             from .models import Patient
             u = User.objects.get(username=username)
             print(u.id)
-            p = Patient.objects.get(id=u.id)
-            if p.active:
-                return True, 0, User.objects.filter(username=username, password=password)[0]
+            if u.type == 'Patient':
+                p = Patient.objects.get(id=u.id)
+                if p.active:
+                    return True, 0, User.objects.filter(username=username, password=password)[0]
+                else:
+                    return False, 404, None
             else:
-                return False, 404, None
+                return True, 0, User.objects.filter(username=username, password=password)[0]
+                
 
 
     def SignUpByPatient(self, name: str, iscommem: bool, password: str, idcard: str):
@@ -376,8 +380,8 @@ class MyDatabase:
         for i in range(len(idList)):
             Medicinepurchase.objects.create(id=Counter.objects.get(id=id), drugid=Drug.objects.get(id=idList[i]), amount=amount[i])
             Counter.objects.filter(id=id).update(
-                price=Counter.objects.get(id=id).price + amount[i] * Drug.objects.get(id=idList[i]).price)
-            Drug.objects.filter(id=idList[i]).update(storage=Drug.objects.get(id=idList[i]).storage - amount[i])
+                price=Counter.objects.get(id=id).price + int(amount[i]) * Drug.objects.get(id=idList[i]).price)
+            Drug.objects.filter(id=idList[i]).update(storage=Drug.objects.get(id=idList[i]).storage - int(amount[i]))
         return True, 0
 
 
@@ -415,6 +419,7 @@ class MyDatabase:
             sql = "SELECT MAX(CAST(id AS UNSIGNED)) AS max_id FROM DIAGNOSIS"
             self.cursor.execute(sql)
             id = self.cursor.fetchone()
+            id = str(int(id['max_id']) + 1)
             self.close()
         Diagnosis.objects.create(id=id, doctorid=Doctor.objects.get(id=Did), patientid=Patient.objects.get(id=Pid), time=datetime.now(), diagnosis=Statement)
         return True, 0
@@ -443,6 +448,9 @@ class MyDatabase:
             return True, 0
         else:
             r = Checkcombine.objects.filter(checkname=checkName).iterator()
+            l = Checkcombine.objects.filter(checkname=checkName)
+            if len(l) == 0:
+                return False, 404
             from .models import Laboratorysheet, Counter, Patient, Doctor, Checkitems
             id = self.genCounterId()
             Counter.objects.create(id=id, pid=Patient.objects.get(id=Pid), did=Doctor.objects.get(id=Did), price=0, ispaid=0, type='Laboratory', date=datetime.now())
@@ -480,6 +488,7 @@ class MyDatabase:
         id = Counter.objects.filter(pid=Pid, type='Laboratory').iterator()
         res = []
         for i in id:
+            print(i.id)
             if i.price == 0:
                 continue
             print(i)
@@ -641,13 +650,14 @@ class MyDatabase:
         res = []
         day = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
         period = ['morning', 'afternoon']
-        for i in day:
-            for j in period:
-                d = Dispatcher.objects.filter(doctorid=Did, date=i, timeperiod=j)
+        for i in period:
+            for j in day:
+                d = Dispatcher.objects.filter(doctorid=Did, date=j, timeperiod=i)
                 if len(d) != 0:
-                    res.append(d[0].roomid.id)
+                    res.append(d[0].roomid.id + '诊室')
                 else:
-                    res.append(-1)
+                    res.append('休息')
+        print(res)
         return res
     
     def getAnalysisList(self):

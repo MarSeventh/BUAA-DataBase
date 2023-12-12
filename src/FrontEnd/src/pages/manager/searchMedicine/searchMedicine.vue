@@ -1,8 +1,6 @@
 <script lang="ts" setup>
   import { FormInstance } from 'ant-design-vue';
   import { reactive, ref } from 'vue';
-  import dayjs from 'dayjs';
-  import { Dayjs } from 'dayjs';
   import { DeleteFilled, EditFilled, EditOutlined } from '@ant-design/icons-vue';
   import axios from 'axios';
 
@@ -10,20 +8,22 @@
     {
       title: '药品名',
       dataIndex: 'name',
-      width: 350
+      width: 200
     },
-    { title: '药品ID', dataIndex: 'id', width: 350 },
-    { title: '库存量', dataIndex: 'amount' },
-    { title: '操作', dataIndex: 'edit', width: 200 },
-    { title: '删除', dataIndex: 'delete', width: 200 },
+    { title: '药品ID', dataIndex: 'id', width: 100 },
+    { title: '价格', dataIndex: 'price', width: 100 },
+    { title: '库存量', dataIndex: 'amount', width: 100 },
+    { title: '作用描述', dataIndex: 'description' },
+    { title: '操作', dataIndex: 'edit', width: 100 },
   ];
 
   type Medicine = {
     name?: string;
     id?: string;
     amount?: number;
+    price?: number;
+    description?: string;
     status?: number;
-    time?: Dayjs;
     _edit?: boolean;
     _isNew?: boolean;
   };
@@ -32,9 +32,10 @@
     {
       name: '感冒药',
       id: '1',
+      price: 100,
       amount: 100,
+      description: '治疗感冒',
       status: 1,
-      time: dayjs(),
     },
   ]);
 
@@ -50,10 +51,11 @@
       author = { _isNew: true };
     }
     author.name = undefined;
-    author.id = undefined;
+    author.id = '未生成';
     author.amount = undefined;
+    author.price = undefined;
+    author.description = undefined;
     author.status = 0;
-    author.time = dayjs();
     return author;
   };
 
@@ -61,7 +63,11 @@
     if (!source) {
       return target;
     }
-    Object.keys(target).forEach((key) => (target[key] = source[key]));
+    target.name = source.name;
+    target.amount = source.amount;
+    target.price = source.price;
+    target.description = source.description;
+    target._isNew = false;
   };
 
   const form = reactive<Medicine>(newMedicine());
@@ -101,19 +107,20 @@
       });
   }
 
-  function display(record: Medicine){
-    showModal.value = true;
+  function delLine(record: Medicine){
+    medicineList.forEach((item, index) => {
+      if (item.amount == record.amount) {
+        medicineList.splice(index, 1);
+        return;
+      }
+    })
   }
 
-  function clearList(){
-    medicineList.length = 0;
-  }
-
-  async function searchMedicineList(record: Medicine) {
+  async function searchMedicineList(record: string) {
     try {
         const response = await axios.get('http://127.0.0.1:8000/api/getMedicineList/',{
           params:{
-            name: record.name
+            name: record,
           }
         });
         medicineList.length = 0; // 清空数组
@@ -127,29 +134,30 @@
     }
   }
   
-  async function sendMedicine() {
+  async function addMedicine(record: Medicine) {
     try {
-        const response = await axios.post('http://127.0.0.1:8000/api/sendMedicine/', {
-          medicine: medicineList[0]
-          //TODO:这个方法是干啥的？
+        const response = await axios.post('http://127.0.0.1:8000/api/addMedicine/', {
+          Medicine: record.name,
+          Amount: record.amount,
+          Price: record.price,
+          Description: record.description,
         });
     } catch (error) {
-        console.error('Error sending medicine:', error);
+        console.error('Error adding medicine:', error);
     }
-    clearList();
   }
 
-  async function deleteMedicine() {
+  async function deleteMedicine(record: Medicine) {
     try {
         const response = await axios.get('http://127.0.0.1:8000/api/deleteMedicine/', {
           params:{
-            id: medicineList[0].id
+            id: record.id,
           }
         });
+        delLine(record);
     } catch (error) {
         console.error('Error deleting medicine:', error);
     }
-    clearList();
   }
 
   const editRecord = ref<Medicine>();
@@ -177,11 +185,14 @@
       <a-form-item label="药品名" required name="name">
         <a-input v-model:value="form.name" />
       </a-form-item>
-      <a-form-item required label="药品ID" name="email">
-        <a-input v-model:value="form.id" />
+      <a-form-item required label="价格" name="price">
+        <a-input v-model:value="form.price" />
       </a-form-item>
-      <a-form-item required label="库存" name="department">
+      <a-form-item required label="库存" name="amount">
         <a-input v-model:value="form.amount" />
+      </a-form-item>
+      <a-form-item required label="作用描述" name="description">
+        <a-input v-model:value="form.description" />
       </a-form-item>
     </a-form>
   </a-modal>
@@ -197,10 +208,7 @@
             style="width: 100%"
             option-label-prop="title"
           >
-            <a-input-search placeholder="输入要查找的药品id" enterButton>
-              <a-button :disabled="showModal" type="link" @click="searchMedicineList(record);">
-                <PlusOutlined />
-              </a-button>
+          <a-input-search placeholder="输入要查找的药品id" @search="searchMedicineList" enterButton>  
             </a-input-search>
           </a-auto-complete>
         </div>
@@ -221,19 +229,17 @@
       <template v-else-if="column.dataIndex === 'edit'">
         <a-button :disabled="showModal" type="link" @click="edit(record)">
           <template #icon>
-            <EditFilled />
+            <EditOutlined />
           </template>
           编辑
         </a-button>
-        <a-button :disabled="showModal" type="link" @click="sendMedicine">
+        <a-button :disabled="showModal" type="link" @click="addMedicine(record)">
           <template #icon>
             <EditOutlined />
           </template>
           上传
         </a-button>
-      </template>
-      <template v-else-if="column.dataIndex === 'delete'">
-        <a-button :disabled="showModal" type="link" @click="deleteMedicine">
+        <a-button :disabled="showModal" type="link" @click="deleteMedicine(record)">
           <template #icon>
             <DeleteFilled />
           </template>
