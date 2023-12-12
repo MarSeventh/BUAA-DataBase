@@ -276,16 +276,18 @@ def showAllDrugName(request):
     else:
         return HttpResponse("Not a POST request")
     
+@csrf_exempt
 def MedicalDiagnosisStatement(request):
     # assert request.type == 'doctor'
     if request.method == 'POST':
         # Did = request.session['id']
         data = json.loads(request.body)
         # Did = '5'
-        Did = data['Did']
+        name = data['username']
+        db = MySQLdb.MyDatabase()
+        Did = db.getIdByUsername(name=name)
         Pid = data['Pid']
         Statement = data['Statement']
-        db = MySQLdb.MyDatabase()
         success, status = db.MedicalDiagnosisStatement(Did=Did, Pid=Pid, Statement=Statement)
         return JsonResponse({'success' : success, 'code' : status})
     else:
@@ -600,7 +602,7 @@ def getAnalysisList(request):
 def addPatient(request):
     db = MySQLdb.MyDatabase()
     data = json.loads(request.body)
-    name = data['name']
+    name = data['username']
     password = data['password']
     s = db.addCommemPatient(username=name, password=password)
     return JsonResponse({'success' : s})

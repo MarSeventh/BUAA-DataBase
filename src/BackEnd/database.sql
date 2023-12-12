@@ -405,6 +405,8 @@ SELECT * FROM laboratorysheet;
 
 SELECT * FROM counter;
 
+SELECT * FROM medicinepurchase;
+
 INSERT INTO `Drug` (`id`, `name`, `price`, `Description`, `isBanned`, `Storage`) VALUES
 ('41', '原石', 500, '打原神用的', false, 500);
 
