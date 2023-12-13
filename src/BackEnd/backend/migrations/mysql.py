@@ -733,3 +733,9 @@ class MyDatabase:
         for i in r:
             res.append({'id': i.id, 'name': User.objects.get(id=i.id).username, 'iscommem': '社区用户' if i.iscommem else '非社区用户'})
         return res
+    
+    def getDoctorById(self, id : str):
+        from .models import Doctor, User
+        r = Doctor.objects.get(id=id)
+        res = {'id': r.id, 'name': User.objects.get(id=r.id).username, 'department': r.tid.name, 'jobtitle' : r.jobtitle}
+        return res

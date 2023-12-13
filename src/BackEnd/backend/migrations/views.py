@@ -537,6 +537,10 @@ def account(request):
         account['avatar'] = u.avatar
     except:
         account['avatar'] = DEFAULT_AVATAR
+    if u.type == 'doctor':
+        account['jobtitle'] = db.getDoctorById(id=u.id)['jobtitle']
+    else:
+        account['jobtitle'] = ''
     db.updateAvatar(id=u.id, avatar=account['avatar'])
     role = u.type
     j = {'account' : account, 'permission' : permissions, 'role' : role}
@@ -681,6 +685,10 @@ def updateAvatar(request):
     db = MySQLdb.MyDatabase()
     db.updateAvatar(id=db.getIdByUsername(name=username), avatar=avatar)
     return JsonResponse({'success' : True})
+
+@csrf_exempt
+def uploadAvatar(request):
+    pass
 
 @csrf_exempt
 def getAllDoctors(request):
