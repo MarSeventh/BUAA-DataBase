@@ -704,9 +704,9 @@ class MyDatabase:
         Drug.objects.create(id=id, name=name, price=price, storage=amount, description=description, isbanned=False)
         return True, 0
     
-    def updateAvator(self, id : str, avator : str):
+    def updateAvatar(self, id : str, avatar : str):
         from .models import User
-        User.objects.filter(id=id).update(avator=avator)
+        User.objects.filter(id=id).update(avatar=avatar)
         return True, 0
     
     def getAllDoctors(self):

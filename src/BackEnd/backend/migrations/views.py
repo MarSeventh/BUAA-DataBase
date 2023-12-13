@@ -533,8 +533,11 @@ def account(request):
     permissions = []
     u = db.getUserById(db.getIdByUsername(name=username))
     permissions.append(u.type)
-    account['avatar'] = u.avatar if u.avatar != None else DEFAULT_AVATAR
-    db.updateAvator(id=u.id, avatar=account['avatar'])
+    try:
+        account['avatar'] = u.avatar
+    except:
+        account['avatar'] = DEFAULT_AVATAR
+    db.updateAvatar(id=u.id, avatar=account['avatar'])
     role = u.type
     j = {'account' : account, 'permission' : permissions, 'role' : role}
     return JsonResponse(j)
@@ -675,7 +678,7 @@ def updateAvatar(request):
     username = data['username']
     avatar = data['avatar']
     db = MySQLdb.MyDatabase()
-    db.updateAvator(id=db.getIdByUsername(name=username), avatar=avatar)
+    db.updateAvatar(id=db.getIdByUsername(name=username), avatar=avatar)
     return JsonResponse({'success' : True})
 
 @csrf_exempt
