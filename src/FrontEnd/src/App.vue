@@ -18,11 +18,10 @@
       </stepin-view>
     </ThemeProvider>
   </a-config-provider>
-  <login-modal :unless="['/login', '/signin']" />
 </template>
 
 <script lang="ts" setup>
-import { reactive, ref } from 'vue';
+import { reactive, ref, watchEffect } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAccountStore, useMenuStore, useSettingStore, storeToRefs } from '@/store';
 import avatar from '@/assets/avatar.png';
@@ -35,8 +34,8 @@ import { computed } from 'vue';
 import { use } from 'echarts';
 
 const { logout } = useAccountStore();
-  const accountStore = useAccountStore();
-  accountStore.init();
+const accountStore = useAccountStore();
+accountStore.init();
 
 const showSetting = ref(false);
 const router = useRouter();
@@ -47,8 +46,8 @@ const { navigation, useTabs, theme, contentClass } = storeToRefs(useSettingStore
 const themeConfig = computed(() => themeList.find((item) => item.key === theme.value)?.config ?? {});
 
 const user = reactive({
-  name: accountStore.account.username,
-  avatar: accountStore.account.avatar,
+  name: '',
+  avatar: '',
   menuList: [
     { title: '个人中心', key: 'personal', icon: 'UserOutlined', onClick: () => router.push('/personal') },
     { type: 'divider' },
@@ -59,6 +58,10 @@ const user = reactive({
       onClick: () => logout().then(() => router.push('/login')),
     },
   ],
+});
+watchEffect(() => {
+  user.name = accountStore.account.username;
+  user.avatar = accountStore.account.avatar;
 });
 
 function getPopupContainer() {

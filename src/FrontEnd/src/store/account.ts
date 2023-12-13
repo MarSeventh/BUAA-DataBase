@@ -14,6 +14,7 @@ export interface Account {
   avatar: string;
   gender: number;
   age: number;
+  jobtitle?: string;
 }
 
 export type TokenResult = {

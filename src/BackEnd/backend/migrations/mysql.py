@@ -716,6 +716,7 @@ class MyDatabase:
     def updateAvatar(self, id : str, avatar : str):
         from .models import User
         User.objects.filter(id=id).update(avatar=avatar)
+        print(avatar)
         return True, 0
     
     def getAllDoctors(self):
@@ -728,7 +729,7 @@ class MyDatabase:
     
     def getAllPatients(self):
         from .models import Patient, User
-        r = Patient.objects.all().iterator()
+        r = Patient.objects.filter(active=True).iterator()
         res = []
         for i in r:
             res.append({'id': i.id, 'name': User.objects.get(id=i.id).username, 'iscommem': '社区用户' if i.iscommem else '非社区用户'})

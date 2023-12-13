@@ -2,11 +2,11 @@
 import { reactive, ref } from 'vue';
 import { useAccountStore } from '@/store/account';
 
-  const accountStore = useAccountStore();
-  accountStore.init();
+const accountStore = useAccountStore();
+accountStore.init();
 const username = ref(accountStore.account?.username);
 const role = ref(accountStore.role);
-
+const jobtitle = ref(accountStore.account?.jobtitle);
 
 </script>
 <template>
@@ -20,8 +20,11 @@ const role = ref(accountStore.role);
       <a-descriptions-item label="用户名">
         {{ username }}
       </a-descriptions-item>
-      <a-descriptions-item label="角色">
+      <a-descriptions-item label="用户类型">
         {{ role }}
+      </a-descriptions-item>
+      <a-descriptions-item v-if="role === 'doctor'" label="职称">
+        {{ jobtitle }}
       </a-descriptions-item>
     </a-descriptions>
   </a-card>

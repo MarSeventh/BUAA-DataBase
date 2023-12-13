@@ -2,14 +2,47 @@
 import { useAccountStore } from '@/store/account';
 import { useRouter } from 'vue-router';
 import { ref } from 'vue';
+import { message } from 'ant-design-vue';
 import axios from 'axios';
+
+
+const showAvatarModal = ref(false);
+
+const handleAvatarOk = () => {
+  showAvatarModal.value = false;
+};
 
 const router = useRouter();
 const { logout } = useAccountStore();
-  const accountStore = useAccountStore();
-  accountStore.init();
+const accountStore = useAccountStore();
+accountStore.init();
 const role = accountStore.role;
 const username = accountStore.account?.username;
+const avatar = ref(accountStore.account?.avatar);
+
+const avatarUpload = async ({ file }) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('username', username!);
+  try {
+    const response = await axios.post('http://127.0.0.1:8000/api/uploadAvatar/', formData);
+    if (response.status === 200) {
+      avatar.value = response.data.url;
+      accountStore.account!.avatar = response.data.url;
+      const user = localStorage.getItem('user');
+      const userData = JSON.parse(user);
+      userData.account.avatar = response.data.url;
+      const updatedUser = JSON.stringify(userData);
+      localStorage.setItem('user', updatedUser);
+      message.success('Upload successfully');
+      location.reload();
+    } else {
+      message.error('Upload failed');
+    }
+  } catch (error) {
+    message.error('Upload failed');
+  }
+};
 
 function checkInput(input: string) {
   if (input === '我是' + username + '，我确定要注销账号') {
@@ -32,7 +65,7 @@ const showModal = () => {
 };
 async function deleteAccount() {
   try {
-    const response = await axios.post('http://127.0.0.1:8000/api/deleteAccount/',{
+    const response = await axios.post('http://127.0.0.1:8000/api/deleteAccount/', {
       username: username,
     });
     if (response.status == 200) {
@@ -65,6 +98,15 @@ const handleOk = (e: MouseEvent) => {
     <div id="fail" class="hidden" style="color: red;margin-bottom: 3px;">输入错误，请重新输入！</div>
   </a-modal>
   <a-card :bordered="false" title="账号设置" class="shadow-lg platform-setting rounded-xl">
+    <div>
+      <span style="font-weight: bold; font-size: 1.2em;">修改头像： </span>
+      <a-button type="primary" @click="showAvatarModal = true">确认</a-button>
+      <a-modal title="上传头像" :visible="showAvatarModal" @ok="handleAvatarOk" @cancel="showAvatarModal = false">
+        <a-upload name="avatar" :customRequest="avatarUpload">
+          <a-button type="primary">上传</a-button>
+        </a-upload>
+      </a-modal>
+    </div>
     <a-divider />
     <div>
       <span style="font-weight: bold; font-size: 1.2em;">退出登录： </span>

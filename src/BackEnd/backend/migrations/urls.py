@@ -77,5 +77,6 @@ urlpatterns = [
     path('api/getAllDoctors/', views.getAllDoctors), # finished
     path('api/getAllPatients/', views.getAllPatients), # finished
     path('api/getMedicineList/', views.getMedicineList), # finished
+    path('api/uploadAvatar/', views.uploadAvatar),
 
 ]
