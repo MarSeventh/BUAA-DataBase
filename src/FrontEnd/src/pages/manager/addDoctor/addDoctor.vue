@@ -1,6 +1,6 @@
 <script lang="ts" setup>
   import { getBase64 } from '@/utils/file';
-  import { FormInstance } from 'ant-design-vue';
+  import { FormInstance , message} from 'ant-design-vue';
   import { reactive, ref } from 'vue';
   import { EditFilled, EditOutlined } from '@ant-design/icons-vue';
   import axios from 'axios';
@@ -26,11 +26,6 @@
   };
 
   const authors = reactive<Author[]>([
-    {
-      name: 'Li Zhi',
-      department: 'Technical',
-      jobs: 'developer',
-    },
   ]);
 
   function addNew() {
@@ -103,9 +98,11 @@
           password: authors[0].jobs,
           tittle: authors[0].department,
         });
+        message.success('上传成功')
     } catch (error) {
-        console.error('Error adding doctor:', error);
-    }
+    message.error('上传失败')
+    console.error('Error sending Diagnosis:', error);
+  }
   }
 
   const editRecord = ref<Author>();

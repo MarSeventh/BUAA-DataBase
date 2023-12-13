@@ -704,14 +704,19 @@ class MyDatabase:
     
     def addMedicine(self, name : str, price : float, amount : int, description : str):
         from .models import Drug
-        self.connect()
-        sql = "SELECT MAX(CAST(id AS UNSIGNED)) AS max_id FROM DRUG"
-        self.cursor.execute(sql)
-        result = self.cursor.fetchone()
-        max_id = result['max_id']
-        id = str(int(max_id) + 1)
-        Drug.objects.create(id=id, name=name, price=price, storage=amount, description=description, isbanned=False)
-        return True, 0
+        d = Drug.objects.get(name=name)
+        if d is None:
+            self.connect()
+            sql = "SELECT MAX(CAST(id AS UNSIGNED)) AS max_id FROM DRUG"
+            self.cursor.execute(sql)
+            result = self.cursor.fetchone()
+            max_id = result['max_id']
+            id = str(int(max_id) + 1)
+            Drug.objects.create(id=id, name=name, price=price, storage=amount, description=description, isbanned=False)
+            return True, 0
+        else:
+            Drug.objects.filter(name=name).update(storage=Drug.objects.get(name=name).storage+float(amount))
+            return True, 0
     
     def updateAvatar(self, id : str, avatar : str):
         from .models import User
@@ -732,7 +737,16 @@ class MyDatabase:
         r = Patient.objects.filter(active=True).iterator()
         res = []
         for i in r:
-            res.append({'id': i.id, 'name': User.objects.get(id=i.id).username, 'iscommem': '社区用户' if i.iscommem else '非社区用户'})
+            res.append({'id': i.id, 'name': User.objects.get(id=i.id).username, 'iscommem': '社区用户' if i.iscommem else '非社区用户', 'sum' : self.getCounterSumOfPatient(i.id)})
+        res.sort(key=lambda x: x['sum'], reverse=True)
+        return res
+    
+    def getCounterSumOfPatient(self, Pid : str):
+        from .models import Counter
+        r = Counter.objects.filter(pid=Pid).iterator()
+        res = 0
+        for i in r:
+            res += i.price
         return res
     
     def getDoctorById(self, id : str):

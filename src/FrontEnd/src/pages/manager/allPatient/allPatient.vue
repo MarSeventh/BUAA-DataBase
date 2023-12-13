@@ -10,12 +10,14 @@
     },
     { title: 'ID', dataIndex: 'id', width: 200 },
     { title: '是否为社区成员', dataIndex: 'jobs' },
+    { title: '总流水（元）', dataIndex : 'sum'},
   ];
 
   type Author = {
     name?: string;
     id?: number;
     jobs?: string;
+    sum?: number;
     _edit?: boolean;
     _isNew?: boolean;
   };
@@ -27,7 +29,7 @@
     try {
         const response = await axios.get('http://127.0.0.1:8000/api/getAllPatients/');
         response.data.patientList.forEach((item) => {
-            authors.push({ name: item.name, id: item.id, jobs: item.iscommem });
+            authors.push({ name: item.name, id: item.id, jobs: item.iscommem , sum: item.sum});
         });
     } catch (error) {
         console.error('Error getting all patients:', error);

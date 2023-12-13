@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-  import { FormInstance } from 'ant-design-vue';
+  import { FormInstance , message} from 'ant-design-vue';
   import { reactive, ref } from 'vue';
   import { DeleteFilled, EditFilled, EditOutlined } from '@ant-design/icons-vue';
   import axios from 'axios';
@@ -29,14 +29,6 @@
   };
 
   const medicineList = reactive<Medicine[]>([
-    {
-      name: '感冒药',
-      id: '1',
-      price: 100,
-      amount: 100,
-      description: '治疗感冒',
-      status: 1,
-    },
   ]);
 
   function addNew() {
@@ -142,8 +134,10 @@
           Price: record.price,
           Description: record.description,
         });
+        message.success('上传成功')
     } catch (error) {
-        console.error('Error adding medicine:', error);
+      message.error('上传失败')
+      console.error('Error sending Diagnosis:', error);
     }
   }
 
@@ -155,8 +149,10 @@
           }
         });
         delLine(record);
-    } catch (error) {
-        console.error('Error deleting medicine:', error);
+        message.success('删除成功')
+      }catch (error) {
+      message.error('删除失败')
+      console.error('Error sending Diagnosis:', error);
     }
   }
 
