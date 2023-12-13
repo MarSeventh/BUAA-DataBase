@@ -159,7 +159,7 @@ class MyDatabase:
             doctor = models.Doctor.objects.get(id=i['doctorId'])
             name = models.User.objects.get(id=doctor.id).username
             room = models.Room.objects.get(id=i['ROOMid'])
-            l.append({'doctor': name, 'room': room.id, 'queueLen': room.queuelen})
+            l.append({'doctor': name, 'room': room.id, 'queueLen': room.queuelen, 'jobtitle' : doctor.jobtitle})
         print(l)
         self.close()
         return l
@@ -701,3 +701,24 @@ class MyDatabase:
         id = str(int(max_id) + 1)
         Drug.objects.create(id=id, name=name, price=price, storage=amount, description=description, isbanned=False)
         return True, 0
+    
+    def updateAvator(self, id : str, avator : str):
+        from .models import User
+        User.objects.filter(id=id).update(avator=avator)
+        return True, 0
+    
+    def getAllDoctors(self):
+        from .models import Doctor, User
+        r = Doctor.objects.all().iterator()
+        res = []
+        for i in r:
+            res.append({'id': i.id, 'name': User.objects.get(id=i.id).username, 'department': i.tid.name, 'jobtitle' : i.jobtitle})
+        return res
+    
+    def getAllPatients(self):
+        from .models import Patient, User
+        r = Patient.objects.all().iterator()
+        res = []
+        for i in r:
+            res.append({'id': i.id, 'name': User.objects.get(id=i.id).username, 'iscommem': i.iscommem})
+        return res

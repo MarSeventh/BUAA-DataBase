@@ -104,7 +104,7 @@ def GetInfoListByDepartment(request):
         info = db.GetInfoListByDepartment(department)
         l = []
         for i in info:
-            l.append({'name': i['doctor'], 'room': i['room'], 'queuelen': i['queueLen']})
+            l.append({'name': i['doctor'], 'jobtitle' : i['jobtitle'],'room': i['room'], 'queuelen': i['queueLen']})
         L = list(l)
         print(L)
         return JsonResponse({'doctorList': L})
@@ -125,7 +125,7 @@ def GetDoctorListByDepartment(request):
         if len(info) == 0:
             return HttpResponse('no doctor')
         for i in info:
-            l.append({'name': i['doctor'], 'roomid': i['room'], 'queuelen': i['queueLen']})
+            l.append({'name': i['doctor'], 'roomid': i['room'], 'jobtitle' : i['jobtitle'],'queuelen': i['queueLen']})
         print(l)
         return JsonResponse({'doctorList': l})
     else:
@@ -529,11 +529,12 @@ def account(request):
     account = {}
     account['username'] = username
     account['gender'] = 0
-    account['avatar'] = DEFAULT_AVATAR
     account['age'] = 18
     permissions = []
     u = db.getUserById(db.getIdByUsername(name=username))
     permissions.append(u.type)
+    account['avatar'] = u.avatar if u.avatar != None else DEFAULT_AVATAR
+    db.updateAvator(id=u.id, avatar=account['avatar'])
     role = u.type
     j = {'account' : account, 'permission' : permissions, 'role' : role}
     return JsonResponse(j)
@@ -667,3 +668,24 @@ def addMedicine(request):
     db = MySQLdb.MyDatabase()
     db.addMedicine(name=Medicine, amount=Amount, price=Price, description=Description)
     return JsonResponse({'success' : True})
+
+@csrf_exempt
+def updateAvatar(request):
+    data = json.loads(request.body)
+    username = data['username']
+    avatar = data['avatar']
+    db = MySQLdb.MyDatabase()
+    db.updateAvator(id=db.getIdByUsername(name=username), avatar=avatar)
+    return JsonResponse({'success' : True})
+
+@csrf_exempt
+def getAllDoctors(request):
+    db = MySQLdb.MyDatabase()
+    r = db.getAllDoctors()
+    return JsonResponse({'doctorList' : r})
+
+@csrf_exempt
+def getAllPatients(request):
+    db = MySQLdb.MyDatabase()
+    r = db.getAllPatients()
+    return JsonResponse({'patientList' : r})

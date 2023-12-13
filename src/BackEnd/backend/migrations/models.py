@@ -187,6 +187,7 @@ class DjangoSession(models.Model):
 class Doctor(models.Model):
     id = models.CharField(primary_key=True, max_length=25)
     tid = models.ForeignKey('Titles', models.DO_NOTHING, db_column='Tid')  # Field name made lowercase.
+    jobtitle = models.CharField(db_column='JobTitle', max_length=25)  # Field name made lowercase.
     active = models.IntegerField()
 
     class Meta:
@@ -277,6 +278,7 @@ class User(models.Model):
     username = models.CharField(db_column='USERNAME', max_length=25)  # Field name made lowercase.
     password = models.CharField(max_length=25)
     type = models.CharField(max_length=25)
+    avatar = models.CharField(db_column='AVATAR', max_length=50, blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
