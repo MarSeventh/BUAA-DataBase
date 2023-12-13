@@ -10,7 +10,9 @@ d = {'room' : '201'}
 
 d1 = {'Medicine' : '冰糖', 'Amount' : 100, 'Price' : 1, 'Description' : '用于治疗感冒'}
 
-r = requests.post(URL_ROOT+'api/addMedicine/', json=d1)
+d0 = {'username' : '21373405', 'password' : '1234567890'}
+
+r = requests.post(URL_ROOT+'api/changePassword/', json=d0)
 pprint.pprint(r.json())
 
 

@@ -7,6 +7,25 @@ import axios from 'axios';
 
 
 const showAvatarModal = ref(false);
+const showPasswordModal = ref(false);
+const password = ref('');
+
+const handlePasswordOk = async () => {
+  showPasswordModal.value = false;
+  try {
+    const response = await axios.post('http://127.0.0.1:8000/api/changePassword/', {
+      username: username,
+      password: password.value,
+    });
+    if (response.status === 200) {
+      message.success('修改成功');
+    } else {
+      message.error('修改失败');
+    }
+  } catch (error) {
+    message.error('修改失败');
+  }
+};
 
 const handleAvatarOk = () => {
   showAvatarModal.value = false;
@@ -98,7 +117,7 @@ const handleOk = (e: MouseEvent) => {
     <div id="fail" class="hidden" style="color: red;margin-bottom: 3px;">输入错误，请重新输入！</div>
   </a-modal>
   <a-card :bordered="false" title="账号设置" class="shadow-lg platform-setting rounded-xl">
-    <div>
+    <div class="block">
       <span style="font-weight: bold; font-size: 1.2em;">修改头像： </span>
       <a-button type="primary" @click="showAvatarModal = true">确认</a-button>
       <a-modal title="上传头像" :visible="showAvatarModal" @ok="handleAvatarOk" @cancel="showAvatarModal = false">
@@ -107,19 +126,32 @@ const handleOk = (e: MouseEvent) => {
         </a-upload>
       </a-modal>
     </div>
-    <a-divider />
-    <div>
+    <div class="block">
+      <span style="font-weight: bold; font-size: 1.2em;">修改密码： </span>
+      <a-button type="primary" @click="showPasswordModal = true">确认</a-button>
+      <a-modal title="修改密码" :visible="showPasswordModal" @ok="handlePasswordOk" @cancel="showPasswordModal = false">
+        <a-form>
+          <a-form-item label="输入新密码">
+            <a-input v-model:value="password" />
+          </a-form-item>
+        </a-form>
+      </a-modal>
+    </div>
+    <div class="block">
       <span style="font-weight: bold; font-size: 1.2em;">退出登录： </span>
       <a-button type="primary" @click="handleLogout">确认</a-button>
     </div>
-    <a-divider />
-    <div>
+    <div class="block">
       <span style="font-weight: bold; font-size: 1.2em;color: red;">注销账号： </span>
       <a-button type="primary" class="hover:bg-red-400" @click="showModal">确认</a-button>
     </div>
   </a-card>
 </template>
 <style lang="less" scoped>
+.block {
+  margin-bottom: 20px;
+}
+
 .platform-setting {
   :deep(.ant-card-head) {
     @apply border-none;
