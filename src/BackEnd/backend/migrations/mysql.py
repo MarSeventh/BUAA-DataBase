@@ -6,6 +6,8 @@ from django.db import transaction
 from . import models
 from django.db.models import Max
 
+DEFAULT_AVATAR = 'https://cdn.jsdelivr.net/gh/MarSeventh/imgbed/posts/202312091100889.png'
+
 ERROR_CODE = 404
 
 
@@ -73,7 +75,7 @@ class MyDatabase:
         else:
             new_id = str(ids[len(ids) - 1] + 1)
         from .models import User, Patient
-        User.objects.create(id=new_id, username=name, type='patient', password=password)
+        User.objects.create(id=new_id, username=name, type='patient', password=password, avatar=DEFAULT_AVATAR)
         Patient.objects.create(id=new_id, iscommem=iscommem, idcard=idcard, active=1)
         return True, 0
 
@@ -594,7 +596,7 @@ class MyDatabase:
     def createNewDoctor(self, name: str, tittle: str, password: str):
         from .models import Doctor, User
         id = self.genUserId()
-        User.objects.create(id=id, username=name, password=password, type='Doctor')
+        User.objects.create(id=id, username=name, password=password, type='Doctor', avatar=DEFAULT_AVATAR)
         Doctor.objects.create(id=id, Tid=self.getTidByName(name=tittle), active=1)
 
     def queryDrugInfo(self, id: str):
@@ -622,8 +624,8 @@ class MyDatabase:
     def addDoctor(self, name: str, tittle: str, password: str):
         from .models import Doctor, User
         id = self.genUserId()
-        User.objects.create(id=id, username=name, password=password, type='Doctor')
-        Doctor.objects.create(id=id, tid=self.getTidByName(name=tittle), active=1)
+        User.objects.create(id=id, username=name, password=password, type='Doctor', avatar=DEFAULT_AVATAR)
+        Doctor.objects.create(id=id, tid=self.getTidByName(name=tittle), active=1, jobtitle='主治医师')
         return True, 0
     
     def GetAllMedicine(self):
@@ -671,7 +673,7 @@ class MyDatabase:
     def addCommemPatient(self, username : str, password : str):
         from .models import User, Patient
         id = self.genUserId()
-        User.objects.create(id=id, username=username, password=password, type='patient')
+        User.objects.create(id=id, username=username, password=password, type='patient', avatar=DEFAULT_AVATAR)
         Patient.objects.create(id=id, iscommem=True, active=True)
         return True, 0
     
