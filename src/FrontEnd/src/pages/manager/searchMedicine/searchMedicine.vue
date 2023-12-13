@@ -127,7 +127,7 @@
 
         // 将获取到的数据放入数组中
         response.data.medicineList.forEach((item) => {
-            medicineList.push({ name: item.name, id: item.id, amount: item.amount });
+            medicineList.push({ name: item.name, id: item.id, amount: item.amount, description:item.description, price:item.price });
         });
     } catch (error) {
         console.error('Error fetching medicineList:', error);

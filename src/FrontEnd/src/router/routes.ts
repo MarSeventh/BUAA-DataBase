@@ -185,6 +185,28 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/pages/manager/searchMedicine/searchMedicine.vue')
   },
   {
+    path: '/allDoctor',
+    name: '查看所有医生',
+    meta: {
+      icon: 'ContactsOutlined',
+      renderMenu: true,
+      cacheable: false,
+      permission: "admin",
+    },
+    component: () => import('@/pages/manager/allDoctor/allDoctor.vue')
+  },
+  {
+    path: '/allPatient',
+    name: '查看所有患者',
+    meta: {
+      icon: 'DeploymentUnitOutlined',
+      renderMenu: true,
+      cacheable: false,
+      permission: "admin",
+    },
+    component: () => import('@/pages/manager/allPatient/allPatient.vue')
+  },
+  {
     path: '/personal',
     name: '个人中心',
     meta: {

@@ -642,8 +642,7 @@ def getStorage(request):
 @csrf_exempt
 def deleteMedicine(request):
     db = MySQLdb.MyDatabase()
-    data = json.loads(request.body)
-    id = data['id']
+    id = request.GET.get('id', None)
     db.HardDeleteDrug(id=id)
     return JsonResponse({'success' : True})
 
@@ -658,7 +657,9 @@ def nextPatient(request):
 @csrf_exempt
 def getMedicineList(request):
     db = MySQLdb.MyDatabase()
-    r = db.getAllMedicine()
+    name = request.GET.get('name', None)
+    r = db.getMedicineList(name=name)
+    print(r)
     return JsonResponse({'medicineList' : r})
 
 @csrf_exempt

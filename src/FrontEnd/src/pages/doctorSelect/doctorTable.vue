@@ -23,6 +23,10 @@ const columns = [
         dataIndex: 'roomid',
     },
     {
+        title: '医生职称',
+        dataIndex: 'jobtitle',
+    },
+    {
         title: '排队人数',
         dataIndex: 'quenelen',
     },
@@ -33,6 +37,7 @@ type Doctor = {
     name?: string;
     roomid?: string;
     quenelen?: number;
+    jobtitle?: string;
     _edit?: boolean;
     _isNew?: boolean;
 };
@@ -51,7 +56,7 @@ async function fetchDoctorList() {
         doctors.length = 0; // 清空doctors数组
         // 将获取到的部门数据放入doctors数组中
         response.data.doctorList.forEach((item) => {
-            doctors.push({ name: item.name, roomid: item.roomid, quenelen: item.queuelen });
+            doctors.push({ name: item.name, roomid: item.roomid, quenelen: item.queuelen ,jobtitle: item.jobtitle});
         });
     } catch (error) {
         console.error('Error fetching doctors:', error);

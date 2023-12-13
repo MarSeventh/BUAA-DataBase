@@ -139,7 +139,7 @@ class MyDatabase:
         morning_start = datetime.strptime('08:00', '%H:%M').time()
         morning_end = datetime.strptime('13:00', '%H:%M').time()
 
-        afternoon_start = datetime.strptime('14:00', '%H:%M').time()
+        afternoon_start = datetime.strptime('13:10', '%H:%M').time()
         afternoon_end = datetime.strptime('22:00', '%H:%M').time()
 
         # 判断当前时间所属时间段
@@ -641,8 +641,17 @@ class MyDatabase:
         r = Drug.objects.all().iterator()
         res = []
         for i in r:
-            if i.name.find(name) != -1:
-                res.append({'id': i.id, 'name': i.name, 'price': i.price})
+            if i.name.find(name) != -1 or i.description.find(name) != -1:
+                res.append({'id': i.id, 'name': i.name, 'price': i.price, 'description' : i.description})
+        return res
+    
+    def getMedicineList(self, name : str):
+        from .models import Drug
+        r = Drug.objects.all().iterator()
+        res = []
+        for i in r:
+            if i.name.find(name) != -1 or i.description.find(name) != -1:
+                res.append({'id': i.id, 'name': i.name, 'price': i.price, 'amount' : i.storage, 'description' : i.description})
         return res
     
     def getDispathcOfDoc(self, Did : str):
@@ -656,9 +665,9 @@ class MyDatabase:
             for j in day:
                 d = Dispatcher.objects.filter(doctorid=Did, date=j, timeperiod=i)
                 if len(d) != 0:
-                    res.append(d[0].roomid.id + '诊室')
+                    res.append(d[0].roomid.id + '诊室😷')
                 else:
-                    res.append('休息')
+                    res.append('休息💤')
         print(res)
         return res
     
@@ -722,5 +731,5 @@ class MyDatabase:
         r = Patient.objects.all().iterator()
         res = []
         for i in r:
-            res.append({'id': i.id, 'name': User.objects.get(id=i.id).username, 'iscommem': i.iscommem})
+            res.append({'id': i.id, 'name': User.objects.get(id=i.id).username, 'iscommem': '社区用户' if i.iscommem else '非社区用户'})
         return res

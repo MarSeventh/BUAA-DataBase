@@ -226,7 +226,8 @@
   <a-modal :title="form._isNew ? '新增诊断结果' : '编辑诊断结果'" v-model:visible="showModal" @ok="submit" @cancel="cancel">
     <a-form ref="formModel" :model="form" :labelCol="{ span: 5 }" :wrapperCol="{ span: 16 }">
       <a-form-item label="诊断结果" required name="department">
-        <a-input v-model:value="form.department" />
+        <a-textarea style="width: 50vh;opacity: 0.85;" v-model:value="form.department" type="textarea" :rows="4"
+            placeholder="输入患者的诊断结果"></a-textarea>
       </a-form-item>
     </a-form>
   </a-modal>
