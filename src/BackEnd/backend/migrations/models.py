@@ -276,7 +276,7 @@ class Titles(models.Model):
 class User(models.Model):
     id = models.CharField(primary_key=True, max_length=25)
     username = models.CharField(db_column='USERNAME', max_length=25)  # Field name made lowercase.
-    password = models.CharField(max_length=25)
+    password = models.CharField(max_length=50)
     type = models.CharField(max_length=25)
     avatar = models.CharField(db_column='AVATAR', max_length=150, blank=True, null=True)  # Field name made lowercase.
 
