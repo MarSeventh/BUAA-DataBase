@@ -26,20 +26,16 @@ class uploader:
         base_url = 'https://imgbed.sanyue.site/api/v1'
         upload_url = f'{base_url}/upload'
 
-        headers = {'Authorization': f'Bearer {self.token}', 'Accept': 'application/json',
-                   'Content-Type': 'multipart/form-data; charset=utf-8; boundary=+ Math.random().toString().substr(2))'}
+        headers = {'Authorization': f'Bearer {self.token}', 'Accept': 'application/json'}
         files = {'file': open(file_path, 'rb')}
         response = requests.post(upload_url, headers=headers, files=files)
 
         if response.status_code == 200:
-            print("------------------")
-            print(response.content)
-            print("------------------")
             result = response.json()
             if result['status']:
                 print(f"File uploaded successfully. Key: {result['data']['key']}")
-                print(f"Access URL: {result['links']['url']}")
-                return result['url']
+                print(f"Access URL: {result['data']['links']['url']}")
+                return result['data']['links']['url']
             else:
                 print(f"Upload failed. Error message: {result['message']}")
         else:

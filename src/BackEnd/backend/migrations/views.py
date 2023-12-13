@@ -7,6 +7,7 @@ from django.views.decorators.csrf import csrf_exempt
 import django.db.transaction as transaction
 import openai
 import jwt, datetime
+from .upload import uploader
 
 GPT_API_KEY = 'sess-G4RoUh550yS8FokrxF7hTY38u1pJNIX0WFBVM0G6'
 
@@ -725,8 +726,9 @@ def updateAvatar(request):
     return JsonResponse({'success': True})
 
 
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
+
+u = uploader()
+u.__int__()
 
 
 @csrf_exempt
@@ -746,9 +748,7 @@ def uploadAvatar(request):
             file.write(file_data)
 
         # Use your uploader class to upload the image
-        from .upload import uploader
-        u = uploader()
-        u.__int__()
+
         url = u.upload_image(file_path)
 
         # Update the avatar URL in the database
@@ -756,7 +756,7 @@ def uploadAvatar(request):
         id = db.getIdByUsername(name=username)
         db.updateAvatar(id=id, avatar=url)
 
-        return JsonResponse({'avatar': url})
+        return JsonResponse({'url': url})
 
     return JsonResponse({'status': False, 'message': 'Invalid request method'})
 
