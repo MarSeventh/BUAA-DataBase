@@ -773,3 +773,11 @@ def getAllPatients(request):
     db = MySQLdb.MyDatabase()
     r = db.getAllPatients()
     return JsonResponse({'patientList': r})
+
+@csrf_exempt
+def changePassword(request):
+    db = MySQLdb.MyDatabase()
+    data = json.loads(request.body)
+    username = data['username']
+    db.changePassword(id=db.getIdByUsername(name=username), password=data['password'])
+    return JsonResponse({'success': True})

@@ -754,3 +754,8 @@ class MyDatabase:
         r = Doctor.objects.get(id=id)
         res = {'id': r.id, 'name': User.objects.get(id=r.id).username, 'department': r.tid.name, 'jobtitle' : r.jobtitle}
         return res
+    
+    def changePassword(self, id : str, password : str):
+        from .models import User
+        User.objects.filter(id=id).update(password=password)
+        return True, 0
