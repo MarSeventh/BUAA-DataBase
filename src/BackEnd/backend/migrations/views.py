@@ -64,7 +64,10 @@ def SignUpByPatient(request):
             db = MySQLdb.MyDatabase()
             success, status = db.SignUpByPatient(name=username, password=password, iscommem=False, idcard=idcard)
             print(success, status)
-            return JsonResponse({'code': status})
+            if success:
+                return JsonResponse({'code': status})
+            else:
+                return JsonResponse({'code': status})
         except ValueError as e:
             return JsonResponse({'success': False, 'error': 'Invalid JSON data'})
     else:
@@ -682,6 +685,7 @@ def getStorage(request):
 def deleteMedicine(request):
     db = MySQLdb.MyDatabase()
     id = request.GET.get('id', None)
+    print(id)
     db.HardDeleteDrug(id=id)
     return JsonResponse({'success': True})
 

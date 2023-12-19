@@ -91,6 +91,7 @@ class MyDatabase:
     def HardDeleteDrug(self, id: str):
         from .models import Drug
         self.connect()
+        print(id)
         sql = "DELETE FROM DRUG WHERE id = %s"
         self.cursor.execute(sql, id)
         self.connection.commit()
@@ -239,7 +240,7 @@ class MyDatabase:
             print('NO DOCTOR' + doctorid + 'IN ' + timePeriod)
             return '-2', False, 404
         r = Counter.objects.filter(pid=patientid, did=doctorid, type='Registration', ispaid=False)
-        if r == None:
+        if len(r) == 0:
             iscommem = Patient.objects.get(id=patientid).iscommem
             price = 1 if iscommem else 10
             id = self.createNewCounter(pid=patientid, did=doctorid, type='Registration', price=price)
@@ -249,6 +250,9 @@ class MyDatabase:
             Room.objects.filter(id=room).update(queuelen=Room.objects.get(id=room).queuelen + 1)
             return id, True, 0
         else:
+            print('pid = '+ i.pid + 'did = ' + i.did)
+            for i in r :
+                print(i.id)
             print('ALREADY REGISTERED')
             return '-2', False, 404
 
@@ -704,14 +708,15 @@ class MyDatabase:
     
     def addMedicine(self, name : str, price : float, amount : int, description : str):
         from .models import Drug
-        d = Drug.objects.get(name=name)
-        if d is None:
+        d = Drug.objects.filter(name=name)
+        if len(d) == 0:
             self.connect()
             sql = "SELECT MAX(CAST(id AS UNSIGNED)) AS max_id FROM DRUG"
             self.cursor.execute(sql)
             result = self.cursor.fetchone()
             max_id = result['max_id']
             id = str(int(max_id) + 1)
+            print(id)
             Drug.objects.create(id=id, name=name, price=price, storage=amount, description=description, isbanned=False)
             return True, 0
         else:

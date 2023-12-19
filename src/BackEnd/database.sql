@@ -420,3 +420,5 @@ SELECT * FROM `registrelation`;
 SELECT * FROM `User`;
 
 SELECT * FROM `LaboratorySheet`;
+
+SELECT * FROM `checkitems`;
