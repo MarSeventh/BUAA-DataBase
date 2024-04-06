@@ -7,8 +7,9 @@ class uploader:
     token = ''
 
     def __int__(self):
-        email = '2601666034@qq.com'
-        password = 'zjy815419zjy'
+        # 使用自己的图床服务
+        email = 'xxxxxxx'
+        password = 'xxxxxx'
         base_url = 'https://imgbed.sanyue.site/api/v1'
         token_url = f'{base_url}/tokens'
 
