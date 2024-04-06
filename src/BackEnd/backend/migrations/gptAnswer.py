@@ -9,7 +9,7 @@ from django.contrib.auth import authenticate, login
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import django.db.transaction as transaction
-GPT_API_KEY = 'fk-t_zzbtzG8ofRfyWO1UqAoT2axNNDQdP9QVtT9a3lnBU'
+GPT_API_KEY = 'your-api-key'
 
 def answer(request):
     import mysql as DB
@@ -19,7 +19,7 @@ def answer(request):
     departmentlist = d.GetDepartmentList()
     sendText = "你好，我是一名病人，我的症状是" + content + "，请问我得了什么病？我应该选择从" + departmentlist + "中的哪个科室就诊？"
     openai.api_key = GPT_API_KEY
-    openai.api_base = "https://ai.fakeopen.com/v1"
+    openai.api_base = "https://api.openai.com/v1"
 
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
