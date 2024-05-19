@@ -1,6 +1,6 @@
 # BUAA-DB
 for BUAA-2023-DataBase
-
+2023秋数据库课程设计——校医院智慧管理系统
 ## git 规范
 
 ```bash
